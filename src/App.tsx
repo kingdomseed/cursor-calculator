@@ -11,6 +11,7 @@ import { ModelConfigList } from './components/ModelConfigList';
 import { BestPlanCard } from './components/BestPlanCard';
 import { PlanComparison } from './components/PlanComparison';
 import { WelcomeModal } from './components/WelcomeModal';
+import { CalculatorIcon, GitHubIcon } from './components/Icons';
 
 const PRICING = pricingData as PricingData;
 const API_MODELS = PRICING.models.filter((m) => m.pool === 'api');
@@ -82,9 +83,7 @@ function App() {
       <header className="bg-white border-b border-[#e0e0d8]">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-3">
           <div className="w-8 h-8 bg-[#14120b] rounded-lg flex items-center justify-center">
-            <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-            </svg>
+            <CalculatorIcon className="w-5 h-5 text-white" />
           </div>
           <span className="font-bold">Cursor Cost Calculator</span>
         </div>
@@ -173,7 +172,7 @@ function App() {
             Source: cursor.com/docs/models-and-pricing · Last updated {PRICING.meta.retrieved_at}
           </p>
           <p className="text-xs text-[#14120b]/40 text-center">
-            <a href="https://github.com/kingdomseed/cursor-calculator" className="underline hover:text-[#14120b]/60">GitHub</a>
+            <a href="https://github.com/kingdomseed/cursor-calculator" className="inline-flex items-center gap-1 underline hover:text-[#14120b]/60"><GitHubIcon className="w-3.5 h-3.5 inline" />GitHub</a>
             {' · '}
             <a href="https://jasonholtdigital.com" className="underline hover:text-[#14120b]/60">Jason Holt Digital</a>
           </p>

@@ -1,6 +1,7 @@
 import type { Model, ModelConfig, PlanResult, Mode } from '../lib/types';
 import { formatNumber, formatCurrency, formatRate } from '../lib/calculations';
 import { PROVIDER_COLORS } from '../lib/constants';
+import { CircleCheckIcon } from './Icons';
 
 interface Props {
   result: PlanResult;
@@ -13,9 +14,7 @@ export function BestPlanCard({ result, mode, models, configs }: Props) {
   return (
     <div className="bg-[#14120b] text-white rounded-2xl p-6 sm:p-8">
       <div className="flex items-center gap-2 mb-4">
-        <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-        </svg>
+        <CircleCheckIcon className="w-5 h-5 text-green-400" />
         <span className="text-sm font-medium text-white/70 uppercase tracking-wide">Your Best Option</span>
       </div>
 

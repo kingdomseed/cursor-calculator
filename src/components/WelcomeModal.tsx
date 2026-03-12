@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { HandWaveIcon } from './Icons';
 
 const STORAGE_KEY = 'cursor-calc-welcome-dismissed';
 
@@ -21,7 +22,10 @@ export function WelcomeModal() {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
       <div className="bg-white rounded-2xl max-w-md w-full p-6 sm:p-8 shadow-xl">
-        <h2 className="text-xl font-bold mb-3">Welcome to Cursor Cost Calculator</h2>
+        <div className="flex items-center gap-2 mb-3">
+          <HandWaveIcon className="w-6 h-6 text-[#14120b]" />
+          <h2 className="text-xl font-bold">Welcome to Cursor Cost Calculator</h2>
+        </div>
         <p className="text-sm text-[#14120b]/70 mb-4">
           This tool helps you estimate what your Cursor usage costs based on the models and settings you use. Pick a budget or token count, choose your models, and see which plan fits.
         </p>
