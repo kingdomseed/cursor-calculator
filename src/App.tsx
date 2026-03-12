@@ -1,4 +1,5 @@
 import { useMemo, useState, useCallback } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import pricingData from './data/cursor-pricing.json';
 import type { Mode, Model, ModelConfig, PricingData } from './lib/types';
 import { computeRecommendation } from './lib/calculations';
@@ -168,6 +169,7 @@ function App() {
           </p>
         </div>
       </main>
+      <Analytics />
     </div>
   );
 }

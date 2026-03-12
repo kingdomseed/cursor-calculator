@@ -27,31 +27,28 @@ export function BestPlanCard({ result, mode, models, configs }: Props) {
         </div>
       </div>
 
-      <div className="space-y-2 border-t border-white/20 pt-4 text-sm">
-        <div className="flex justify-between">
-          <span className="text-white/60">Base subscription</span>
-          <span>${result.subscription}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-white/60">API pool included</span>
-          <span className={result.unusedPool > 0 ? "text-green-400" : ""}>
-            ${result.apiPool}{result.unusedPool > 0 && " ✓"}
-          </span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-white/60">Your estimated API usage</span>
-          <span>{formatCurrency(result.apiUsage)}</span>
-        </div>
-        {result.overage > 0 && (
+      <div className="space-y-3 border-t border-white/20 pt-4 text-sm">
+        {/* Subscription with pool as subordinate detail */}
+        <div>
           <div className="flex justify-between">
-            <span className="text-white/60">Overage</span>
+            <span className="text-white/60">Plan subscription</span>
+            <span>${result.subscription}/mo</span>
+          </div>
+          <p className="text-xs text-white/40 mt-0.5">
+            includes ${result.apiPool} API pool
+          </p>
+        </div>
+
+        {/* What happens with usage vs pool */}
+        {result.overage > 0 ? (
+          <div className="flex justify-between">
+            <span className="text-white/60">Additional API usage</span>
             <span className="text-amber-400">+{formatCurrency(result.overage)}</span>
           </div>
-        )}
-        {result.unusedPool > 0 && (
+        ) : (
           <div className="flex justify-between">
-            <span className="text-white/60">Unused pool</span>
-            <span className="text-green-400">{formatCurrency(result.unusedPool)}</span>
+            <span className="text-white/60">API usage covered by pool</span>
+            <span className="text-green-400">{formatCurrency(result.apiUsage)}</span>
           </div>
         )}
       </div>

@@ -42,8 +42,8 @@ export function PlanComparison({ results, mode, models }: Props) {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#e0e0d8]">
-              <Row label="Subscription" values={results.map(r => `$${r.subscription}`)} results={results} mode={mode} />
-              <Row label="API pool" values={results.map(r => `$${r.apiPool}`)} results={results} mode={mode} />
+              <Row label="Subscription" values={results.map(r => `$${r.subscription}/mo`)} results={results} mode={mode} />
+              <Row label="↳ includes pool" values={results.map(r => `$${r.apiPool}`)} results={results} mode={mode} subdued />
               <Row label="Your API usage" values={results.map(r => formatCurrency(r.apiUsage))} results={results} mode={mode} />
               <Row label="Overage" values={results.map(r => r.overage > 0 ? formatCurrency(r.overage) : '—')} results={results} mode={mode} />
               <Row label="Total cost" values={results.map(r => formatCurrency(r.totalCost))} results={results} mode={mode} bold />
@@ -79,16 +79,16 @@ export function PlanComparison({ results, mode, models }: Props) {
   );
 }
 
-function Row({ label, values, results, mode, bold }: {
-  label: string; values: string[]; results: PlanResult[]; mode: Mode; bold?: boolean;
+function Row({ label, values, results, mode, bold, subdued }: {
+  label: string; values: string[]; results: PlanResult[]; mode: Mode; bold?: boolean; subdued?: boolean;
 }) {
   return (
     <tr>
-      <td className={`px-4 py-2 ${bold ? 'font-bold' : ''}`}>{label}</td>
+      <td className={`px-4 py-2 ${bold ? 'font-bold' : ''} ${subdued ? 'text-[#14120b]/40 text-xs' : ''}`}>{label}</td>
       {values.map((v, i) => {
         const dimmed = mode === 'budget' && !results[i].affordable;
         return (
-          <td key={i} className={`px-4 py-2 text-right ${bold ? 'font-bold' : ''} ${dimmed ? 'text-[#14120b]/30' : ''}`}>
+          <td key={i} className={`px-4 py-2 text-right ${bold ? 'font-bold' : ''} ${dimmed ? 'text-[#14120b]/30' : ''} ${subdued ? 'text-[#14120b]/40 text-xs' : ''}`}>
             {v}
           </td>
         );

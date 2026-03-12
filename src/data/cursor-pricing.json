@@ -114,6 +114,20 @@
       }
     },
     {
+      "id": "claude-opus-4-6-max",
+      "name": "Claude 4.6 Opus Max",
+      "provider": "anthropic",
+      "pool": "api",
+      "context": { "default": 1000000, "max": null },
+      "rates": { "input": 10.00, "cache_write": 12.50, "cache_read": 1.00, "output": 50.00 },
+      "variants": {
+        "thinking": true
+      },
+      "auto_checks": {
+        "max_mode": true
+      }
+    },
+    {
       "id": "claude-sonnet-4-6",
       "name": "Claude 4.6 Sonnet",
       "provider": "anthropic",
@@ -341,9 +355,27 @@
         "max_mode": {
           "cursor_upcharge": 0.20
         },
+        "fast": {
+          "model_id": "gpt-5.4-fast",
+          "rates": { "input": 5.00, "cache_write": null, "cache_read": 0.50, "output": 30.00 }
+        },
         "thinking": true
       },
       "auto_checks": { "max_mode": true }
+    },
+    {
+      "id": "gpt-5.4-max",
+      "name": "GPT-5.4 Max",
+      "provider": "openai",
+      "pool": "api",
+      "context": { "default": 1000000, "max": null },
+      "rates": { "input": 5.00, "cache_write": null, "cache_read": 0.50, "output": 22.50 },
+      "variants": {
+        "thinking": true
+      },
+      "auto_checks": {
+        "max_mode": true
+      }
     },
     {
       "id": "grok-code-fast-1",
