@@ -226,6 +226,31 @@ describe('computeRecommendation - tiebreaking', () => {
   });
 });
 
+describe('computeRecommendation - token mode tiebreaking', () => {
+  it('prefers plan with more API pool headroom on token mode tie', () => {
+    // Plans where (subscription - api_pool) is identical, so any usage
+    // exceeding both pools produces the same total cost.
+    const tiePlans: PricingData['plans'] = {
+      pro:      { name: 'Pro',      monthly_cost: 20, api_pool: 10, description: '' },
+      pro_plus: { name: 'Pro Plus', monthly_cost: 30, api_pool: 20, description: '' },
+      ultra:    { name: 'Ultra',    monthly_cost: 200, api_pool: 400, description: '' },
+    };
+    const models = [opusModel];
+    const configs: ModelConfig[] = [{
+      modelId: 'claude-4-6-opus', weight: 100,
+      maxMode: false, fast: false, thinking: false,
+      caching: false, cacheHitRate: 0,
+    }];
+    // 5M tokens at Opus base rates (3:1 ratio):
+    // usage = 3.75M * $5/M + 1.25M * $25/M = $18.75 + $31.25 = $50
+    // Pro: $20 + ($50 - $10) = $60
+    // Pro Plus: $30 + ($50 - $20) = $60
+    // Tie → Pro Plus wins (higher api_pool headroom)
+    const result = computeRecommendation('tokens', 0, 5_000_000, models, configs, tiePlans, 3);
+    expect(result.best.plan).toBe('pro_plus');
+  });
+});
+
 describe('computeRecommendation - token mode', () => {
   it('recommends cheapest plan that covers the usage', () => {
     const models = [opusModel];
