@@ -10,7 +10,7 @@ interface Props {
   models: Model[];
 }
 
-export function PlanComparison({ results, mode, budget, models }: Props) {
+export function PlanComparison({ results, mode, models }: Props) {
   const [isOpen, setIsOpen] = useState(false);
 
   const modelIds = results[0]?.perModel.map(pm => pm.modelId) ?? [];

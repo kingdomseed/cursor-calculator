@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { computeEffectiveRates, computeRecommendation, dollarsToTokens, tokensToDollars } from '../calculations';
 import { formatNumber, formatCurrency, formatRate } from '../calculations';
-import type { Model, ModelConfig, PricingData, PlanKey } from '../types';
+import type { Model, ModelConfig, PricingData } from '../types';
 
 // Test fixture: Claude 4.6 Opus
 const opusModel: Model = {
