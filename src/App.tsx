@@ -11,7 +11,7 @@ import { ModelConfigList } from './components/ModelConfigList';
 import { BestPlanCard } from './components/BestPlanCard';
 import { PlanComparison } from './components/PlanComparison';
 import { WelcomeModal } from './components/WelcomeModal';
-import { CalculatorIcon, GitHubIcon } from './components/Icons';
+import { CalculatorIcon, GitHubIcon, JHDIcon } from './components/Icons';
 
 const PRICING = pricingData as PricingData;
 const API_MODELS = PRICING.models.filter((m) => m.pool === 'api');
@@ -174,7 +174,7 @@ function App() {
           <p className="text-xs text-[#14120b]/40 text-center">
             <a href="https://github.com/kingdomseed/cursor-calculator" className="inline-flex items-center gap-1 underline hover:text-[#14120b]/60"><GitHubIcon className="w-3.5 h-3.5 inline" />GitHub</a>
             {' · '}
-            <a href="https://jasonholtdigital.com" className="underline hover:text-[#14120b]/60">Jason Holt Digital</a>
+            <a href="https://jasonholtdigital.com" className="inline-flex items-center gap-1 underline hover:text-[#14120b]/60"><JHDIcon className="w-3.5 h-3.5 inline" />Jason Holt Digital</a>
           </p>
         </div>
       </main>

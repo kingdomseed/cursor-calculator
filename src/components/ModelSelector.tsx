@@ -41,6 +41,23 @@ export function ModelSelector({ options, selected, onChange, placeholder }: Prop
         <>
           <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
           <div className="absolute z-20 top-full left-0 right-0 mt-2 bg-white border border-[#e0e0d8] rounded-xl shadow-lg max-h-72 overflow-auto">
+            {selectedModels.length > 0 && (
+              <div className="p-2">
+                <p className="text-xs font-medium text-[#14120b]/40 px-3 py-1 uppercase tracking-wide">Selected</p>
+                {selectedModels.map((model) => (
+                  <button
+                    key={model.id}
+                    onClick={() => onChange(selected.filter((id) => id !== model.id))}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-red-50 rounded-lg text-left"
+                  >
+                    <span className={`w-2 h-2 rounded-full ${PROVIDER_COLORS[model.provider] || "bg-gray-400"}`} />
+                    <span className="font-medium">{model.name}</span>
+                    <span className="ml-auto text-red-500 text-sm">Remove</span>
+                  </button>
+                ))}
+              </div>
+            )}
+            {selectedModels.length > 0 && unselectedModels.length > 0 && <div className="border-t border-[#e0e0d8]" />}
             {unselectedModels.length > 0 && (
               <div className="p-2">
                 {unselectedModels.map((model) => (
@@ -54,23 +71,6 @@ export function ModelSelector({ options, selected, onChange, placeholder }: Prop
                       <span className="font-medium">{model.name}</span>
                       <span className="text-xs text-[#14120b]/40 ml-2">${model.rates.input}/${model.rates.output} per M</span>
                     </div>
-                  </button>
-                ))}
-              </div>
-            )}
-            {selectedModels.length > 0 && unselectedModels.length > 0 && <div className="border-t border-[#e0e0d8]" />}
-            {selectedModels.length > 0 && (
-              <div className="p-2">
-                <p className="text-xs font-medium text-[#14120b]/40 px-3 py-1 uppercase tracking-wide">Selected</p>
-                {selectedModels.map((model) => (
-                  <button
-                    key={model.id}
-                    onClick={() => onChange(selected.filter((id) => id !== model.id))}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-red-50 rounded-lg text-left"
-                  >
-                    <span className={`w-2 h-2 rounded-full ${PROVIDER_COLORS[model.provider] || "bg-gray-400"}`} />
-                    <span className="font-medium">{model.name}</span>
-                    <span className="ml-auto text-red-500 text-sm">Remove</span>
                   </button>
                 ))}
               </div>
