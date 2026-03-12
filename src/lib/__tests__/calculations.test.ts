@@ -86,3 +86,65 @@ describe('computeEffectiveRates', () => {
     expect(rates.output).toBe(30);
   });
 });
+
+// Test fixture: GPT-5.4 (no cache_write)
+const gpt54Model: Model = {
+  id: 'gpt-5-4',
+  name: 'GPT-5.4',
+  provider: 'openai',
+  pool: 'api',
+  context: { default: 272000, max: 1000000 },
+  rates: { input: 2.5, cache_write: null, cache_read: 0.25, output: 15 },
+  variants: {
+    max_mode: {
+      cursor_upcharge: 0.20,
+      long_context_input_multiplier: 2.0,
+      long_context_output_multiplier: 1.5,
+    },
+    thinking: true,
+  },
+  auto_checks: { max_mode: true },
+};
+
+describe('computeEffectiveRates - non-Anthropic caching', () => {
+  it('uses simple blend for cache_read-only models', () => {
+    const config: ModelConfig = {
+      modelId: 'gpt-5-4', weight: 100,
+      maxMode: false, fast: false, thinking: false,
+      caching: true, cacheHitRate: 50,
+    };
+    const rates = computeEffectiveRates(gpt54Model, config);
+    // 0.5 * 0.25 + 0.5 * 2.5 = 0.125 + 1.25 = 1.375
+    expect(rates.input).toBeCloseTo(1.375, 3);
+    expect(rates.output).toBe(15);
+  });
+
+  it('GPT-5.4 Max Mode has different output multiplier', () => {
+    const config: ModelConfig = {
+      modelId: 'gpt-5-4', weight: 100,
+      maxMode: true, fast: false, thinking: false,
+      caching: false, cacheHitRate: 0,
+    };
+    const rates = computeEffectiveRates(gpt54Model, config);
+    // input: 2.5 * 1.2 * 2.0 = 6.0
+    expect(rates.input).toBe(6);
+    // output: 15 * 1.2 * 1.5 = 27.0
+    expect(rates.output).toBe(27);
+  });
+
+  it('model with no variants returns base rates regardless of config', () => {
+    const bareModel: Model = {
+      id: 'kimi-k2-5', name: 'Kimi K2.5', provider: 'moonshot', pool: 'api',
+      context: { default: 131072, max: null },
+      rates: { input: 0.6, cache_write: null, cache_read: 0.1, output: 3 },
+    };
+    const config: ModelConfig = {
+      modelId: 'kimi-k2-5', weight: 100,
+      maxMode: true, fast: true, thinking: true,
+      caching: false, cacheHitRate: 0,
+    };
+    const rates = computeEffectiveRates(bareModel, config);
+    expect(rates.input).toBe(0.6);
+    expect(rates.output).toBe(3);
+  });
+});
