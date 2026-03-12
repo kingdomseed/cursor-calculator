@@ -1,0 +1,40 @@
+import { useState, useEffect } from 'react';
+
+const STORAGE_KEY = 'cursor-calc-welcome-dismissed';
+
+export function WelcomeModal() {
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    if (!localStorage.getItem(STORAGE_KEY)) {
+      setShow(true);
+    }
+  }, []);
+
+  function dismiss() {
+    localStorage.setItem(STORAGE_KEY, '1');
+    setShow(false);
+  }
+
+  if (!show) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+      <div className="bg-white rounded-2xl max-w-md w-full p-6 sm:p-8 shadow-xl">
+        <h2 className="text-xl font-bold mb-3">Welcome to Cursor Cost Calculator</h2>
+        <p className="text-sm text-[#14120b]/70 mb-4">
+          This tool helps you estimate what your Cursor usage costs based on the models and settings you use. Pick a budget or token count, choose your models, and see which plan fits.
+        </p>
+        <p className="text-xs text-[#14120b]/50 mb-6">
+          All rates come from Cursor's public docs, but this is an estimate — not a guarantee. Pricing can change at any time, and actual costs depend on your usage patterns. This tool is not affiliated with Cursor and is not responsible for any financial decisions.
+        </p>
+        <button
+          onClick={dismiss}
+          className="w-full bg-[#14120b] text-white rounded-xl py-3 text-sm font-semibold hover:bg-[#14120b]/90 transition-colors cursor-pointer"
+        >
+          Got it
+        </button>
+      </div>
+    </div>
+  );
+}

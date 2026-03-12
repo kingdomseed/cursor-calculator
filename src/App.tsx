@@ -10,6 +10,7 @@ import { ModelSelector } from './components/ModelSelector';
 import { ModelConfigList } from './components/ModelConfigList';
 import { BestPlanCard } from './components/BestPlanCard';
 import { PlanComparison } from './components/PlanComparison';
+import { WelcomeModal } from './components/WelcomeModal';
 
 const PRICING = pricingData as PricingData;
 const API_MODELS = PRICING.models.filter((m) => m.pool === 'api');
@@ -77,6 +78,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#f7f7f4] text-[#14120b]">
+      <WelcomeModal />
       <header className="bg-white border-b border-[#e0e0d8]">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-3">
           <div className="w-8 h-8 bg-[#14120b] rounded-lg flex items-center justify-center">
@@ -164,8 +166,16 @@ function App() {
           <p>
             <strong>Max Mode:</strong> Adds 20% Cursor upcharge. For extended context (1M), use the dedicated Max/1M model variants which have long-context pricing built into their rates.
           </p>
+          <p className="text-xs text-[#14120b]/40">
+            <strong className="text-[#14120b]/50">Disclaimer:</strong> All figures are estimates based on publicly available pricing data. Actual costs depend on your specific usage patterns, and rates may change without notice. This tool is not affiliated with Cursor. Use at your own discretion — we are not responsible for financial decisions made based on these calculations.
+          </p>
           <p className="text-xs text-[#14120b]/40 text-center">
             Source: cursor.com/docs/models-and-pricing · Last updated {PRICING.meta.retrieved_at}
+          </p>
+          <p className="text-xs text-[#14120b]/40 text-center">
+            <a href="https://github.com/kingdomseed/cursor-calculator" className="underline hover:text-[#14120b]/60">GitHub</a>
+            {' · '}
+            <a href="https://jasonholtdigital.com" className="underline hover:text-[#14120b]/60">Jason Holt Digital</a>
           </p>
         </div>
       </main>
