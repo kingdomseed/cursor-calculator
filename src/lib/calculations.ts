@@ -121,7 +121,9 @@ function computeBudgetPlanResult(
   key: PlanKey, plan: Plan, budget: number, models: Model[],
   configs: ModelConfig[], ratio: number, affordable: boolean,
 ): PlanResult {
-  const apiBudget = affordable ? plan.api_pool + (budget - plan.monthly_cost) : 0;
+  // Even if the plan isn't affordable, show what you'd get at its subscription cost
+  // so the comparison table is useful. The greyed-out styling signals it's over budget.
+  const apiBudget = plan.api_pool + Math.max(0, budget - plan.monthly_cost);
 
   const validConfigs = configs.filter(c => models.some(m => m.id === c.modelId));
   const perModel = validConfigs.map(config => {
