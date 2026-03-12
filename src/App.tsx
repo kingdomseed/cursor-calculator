@@ -161,7 +161,7 @@ function App() {
             The API pool is used for all other models. Once exhausted, you pay overage at the same rates.
           </p>
           <p>
-            <strong>Max Mode:</strong> Extends context to maximum supported. Adds 20% Cursor upcharge plus provider long-context rates.
+            <strong>Max Mode:</strong> Adds 20% Cursor upcharge. For extended context (1M), use the dedicated Max/1M model variants which have long-context pricing built into their rates.
           </p>
           <p className="text-xs text-[#14120b]/40 text-center">
             Source: cursor.com/docs/models-and-pricing · Last updated {PRICING.meta.retrieved_at}
