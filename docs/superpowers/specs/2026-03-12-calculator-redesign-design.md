@@ -50,7 +50,7 @@ Each model gains `context`, structured `variants`, and loses the flat `max_mode_
     "max_mode": {
       "cursor_upcharge": 0.20,
       "long_context_input_multiplier": 2.0,
-      "long_context_output_multiplier": 1.0
+      "long_context_output_multiplier": 2.0
     },
     "fast": {
       "model_id": "claude-4-6-opus-fast",
