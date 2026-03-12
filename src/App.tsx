@@ -159,7 +159,9 @@ function App() {
         {/* Footer */}
         <div className="mt-12 pt-8 border-t border-[#e0e0d8] text-sm text-[#14120b]/60 space-y-4">
           <p>
-            <strong>How plans work:</strong> Auto and Composer are usage-based (not token-based) and included in every subscription — they don't draw from the API pool.
+            <strong>How plans work:</strong> Every plan includes{' '}
+            <a href="https://cursor.com/docs/models-and-pricing#usage-pools" className="underline hover:text-[#14120b]" target="_blank" rel="noopener noreferrer">two usage pools</a>.
+            Auto and Composer are usage-based and included in every subscription — they don't draw from the API pool.
             The API pool covers all other models. Once exhausted, you pay overage at the same per-token rates.
           </p>
           <p>
@@ -169,7 +171,7 @@ function App() {
             <strong className="text-[#14120b]/50">Disclaimer:</strong> All figures are estimates based on publicly available pricing data. Actual costs depend on your specific usage patterns, and rates may change without notice. This tool is not affiliated with Cursor. Use at your own discretion — we are not responsible for financial decisions made based on these calculations.
           </p>
           <p className="text-xs text-[#14120b]/40 text-center">
-            Source: cursor.com/docs/models-and-pricing · Last updated {PRICING.meta.retrieved_at}
+            Source: <a href="https://cursor.com/docs/models-and-pricing" className="underline hover:text-[#14120b]/60" target="_blank" rel="noopener noreferrer">cursor.com/docs/models-and-pricing</a> · Last updated {PRICING.meta.retrieved_at}
           </p>
           <p className="text-xs text-[#14120b]/40 text-center">
             <a href="https://github.com/kingdomseed/cursor-calculator" className="inline-flex items-center gap-1 underline hover:text-[#14120b]/60"><GitHubIcon className="w-3.5 h-3.5 inline" />GitHub</a>
