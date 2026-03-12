@@ -59,6 +59,19 @@ export function BestPlanCard({ result, mode, models, configs }: Props) {
           {mode === 'budget' ? 'What you get' : 'Your usage breakdown'}
         </p>
         <div className="space-y-3">
+          {/* Auto + Composer — included in every plan */}
+          {['Auto', 'Composer 1.5'].map(name => (
+            <div key={name} className="flex items-start justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#14120b] ring-1 ring-white/20" />
+                <span className="font-medium text-sm">{name}</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-white/60">Included</span>
+              </div>
+              <span className="font-semibold text-white/50">Usage based</span>
+            </div>
+          ))}
+
+          {/* Selected API models */}
           {result.perModel.map((pm) => {
             const model = models.find(m => m.id === pm.modelId);
             const config = configs.find(c => c.modelId === pm.modelId);

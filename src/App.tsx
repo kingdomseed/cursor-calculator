@@ -158,8 +158,8 @@ function App() {
         {/* Footer */}
         <div className="mt-12 pt-8 border-t border-[#e0e0d8] text-sm text-[#14120b]/60 space-y-4">
           <p>
-            <strong>How plans work:</strong> All plans include unlimited Auto and Composer 1.5 through a separate pool.
-            The API pool is used for all other models. Once exhausted, you pay overage at the same rates.
+            <strong>How plans work:</strong> Auto and Composer are usage-based (not token-based) and included in every subscription — they don't draw from the API pool.
+            The API pool covers all other models. Once exhausted, you pay overage at the same per-token rates.
           </p>
           <p>
             <strong>Max Mode:</strong> Adds 20% Cursor upcharge. For extended context (1M), use the dedicated Max/1M model variants which have long-context pricing built into their rates.
