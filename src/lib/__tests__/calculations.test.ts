@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { computeEffectiveRates, computeRecommendation, dollarsToTokens, tokensToDollars } from '../calculations';
+import { formatNumber, formatCurrency, formatRate } from '../calculations';
 import type { Model, ModelConfig, PricingData, PlanKey } from '../types';
 
 // Test fixture: Claude 4.6 Opus
@@ -269,6 +270,24 @@ describe('dollarsToTokens / tokensToDollars', () => {
     const tokens = dollarsToTokens(20, rates, 3);
     const cost = tokensToDollars(tokens.total, rates, 3);
     expect(cost).toBeCloseTo(20, 1);
+  });
+});
+
+describe('formatters', () => {
+  it('formatNumber handles M/k/raw', () => {
+    expect(formatNumber(1_500_000)).toBe('1.50M');
+    expect(formatNumber(45_000)).toBe('45.0k');
+    expect(formatNumber(999)).toBe('999');
+  });
+
+  it('formatCurrency uses two decimals for precise amounts', () => {
+    expect(formatCurrency(52.34)).toBe('$52.34');
+    expect(formatCurrency(0)).toBe('$0.00');
+  });
+
+  it('formatRate shows per-M pricing', () => {
+    expect(formatRate(5)).toBe('$5.00');
+    expect(formatRate(0.5)).toBe('$0.50');
   });
 });
 
