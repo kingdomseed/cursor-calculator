@@ -374,7 +374,8 @@
           "long_context_output_multiplier": 1.5
         },
         "thinking": true
-      }
+      },
+      "auto_checks": { "max_mode": true }
     },
     {
       "id": "grok-code-fast-1",

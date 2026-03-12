@@ -150,7 +150,7 @@ function App() {
             <div className="mt-8">
               <BestPlanCard result={recommendation.best} mode={mode} models={selectedModels} configs={modelConfigs} />
             </div>
-            <PlanComparison results={recommendation.all} mode={mode} budget={budget} models={selectedModels} />
+            <PlanComparison results={recommendation.all} mode={mode} models={selectedModels} />
           </>
         )}
 

@@ -129,7 +129,8 @@ function computeBudgetPlanResult(
 ): PlanResult {
   const apiBudget = affordable ? plan.api_pool + (budget - plan.monthly_cost) : 0;
 
-  const perModel = configs.map(config => {
+  const validConfigs = configs.filter(c => models.some(m => m.id === c.modelId));
+  const perModel = validConfigs.map(config => {
     const model = models.find(m => m.id === config.modelId)!;
     const effectiveRates = computeEffectiveRates(model, config);
     const modelDollars = apiBudget * (config.weight / 100);
@@ -152,7 +153,8 @@ function computeTokenPlanResult(
   key: PlanKey, plan: Plan, totalTokens: number, models: Model[],
   configs: ModelConfig[], ratio: number,
 ): PlanResult {
-  const perModel = configs.map(config => {
+  const validConfigs = configs.filter(c => models.some(m => m.id === c.modelId));
+  const perModel = validConfigs.map(config => {
     const model = models.find(m => m.id === config.modelId)!;
     const effectiveRates = computeEffectiveRates(model, config);
     const modelTokens = Math.floor(totalTokens * (config.weight / 100));

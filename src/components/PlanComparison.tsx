@@ -6,7 +6,6 @@ import { PROVIDER_COLORS } from '../lib/constants';
 interface Props {
   results: PlanResult[];
   mode: Mode;
-  budget: number;
   models: Model[];
 }
 

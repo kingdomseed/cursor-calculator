@@ -15,7 +15,7 @@ const opusModel: Model = {
     max_mode: {
       cursor_upcharge: 0.20,
       long_context_input_multiplier: 2.0,
-      long_context_output_multiplier: 1.0,
+      long_context_output_multiplier: 2.0,
     },
     fast: {
       model_id: 'claude-4-6-opus-fast',
@@ -46,8 +46,8 @@ describe('computeEffectiveRates', () => {
     const rates = computeEffectiveRates(opusModel, { ...baseConfig, maxMode: true });
     // input: 5 * 1.20 * 2.0 = 12
     expect(rates.input).toBe(12);
-    // output: 25 * 1.20 * 1.0 = 30
-    expect(rates.output).toBe(30);
+    // output: 25 * 1.20 * 2.0 = 60
+    expect(rates.output).toBe(60);
   });
 
   it('applies Fast mode: replaces rates entirely', () => {
@@ -83,8 +83,25 @@ describe('computeEffectiveRates', () => {
     // effective = (0.5*15 + 0.5*1.2*3 + 0.5*12*3) / 3
     // = (7.5 + 1.8 + 18) / 3 = 27.3 / 3 = 9.1
     expect(rates.input).toBeCloseTo(9.1, 3);
-    // output: 25 * 1.2 * 1.0 = 30
-    expect(rates.output).toBe(30);
+    // output: 25 * 1.2 * 2.0 = 60
+    expect(rates.output).toBe(60);
+  });
+});
+
+describe('computeEffectiveRates - Fast + Caching', () => {
+  it('applies caching with fast variant rates on Anthropic model', () => {
+    const config: ModelConfig = {
+      modelId: 'claude-4-6-opus', weight: 100,
+      maxMode: false, fast: true, thinking: false,
+      caching: true, cacheHitRate: 50,
+    };
+    const rates = computeEffectiveRates(opusModel, config);
+    // Fast rates: input=30, cache_write=37.5, cache_read=3
+    // RE_READS=3, cachedRatio=0.5
+    // effective = (0.5*37.5 + 0.5*3*3 + 0.5*30*3) / 3
+    // = (18.75 + 4.5 + 45) / 3 = 68.25 / 3 = 22.75
+    expect(rates.input).toBeCloseTo(22.75, 3);
+    expect(rates.output).toBe(150);
   });
 });
 
@@ -223,6 +240,20 @@ describe('computeRecommendation - tiebreaking', () => {
     }];
     const result = computeRecommendation('budget', 30, 0, models, configs, tiePlans2, 3);
     expect(result.best.plan).toBe('pro_plus');
+  });
+});
+
+describe('computeRecommendation - edge cases', () => {
+  it('handles zero-weight configs without crashing', () => {
+    const models = [opusModel];
+    const configs: ModelConfig[] = [{
+      modelId: 'claude-4-6-opus', weight: 0,
+      maxMode: false, fast: false, thinking: false,
+      caching: false, cacheHitRate: 0,
+    }];
+    const result = computeRecommendation('budget', 60, 0, models, configs, testPlans, 3);
+    expect(result.best).toBeDefined();
+    expect(result.best.perModel[0].tokens.total).toBe(0);
   });
 });
 
