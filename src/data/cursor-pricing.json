@@ -1,0 +1,224 @@
+{
+  "meta": {
+    "version": "2026-03-11",
+    "source_url": "https://cursor.com/docs/models-and-pricing",
+    "retrieved_at": "2026-03-11",
+    "default_currency": "USD",
+    "note": "Auto and Composer 1.5 draw from separate Auto+Composer pool, not API pool"
+  },
+  "plans": {
+    "pro": {
+      "name": "Pro",
+      "monthly_cost": 20,
+      "api_pool": 20,
+      "auto_composer_included": true,
+      "description": "Best for daily tab users and limited agent users"
+    },
+    "pro_plus": {
+      "name": "Pro Plus", 
+      "monthly_cost": 60,
+      "api_pool": 70,
+      "auto_composer_included": true,
+      "description": "Best for daily agent users ($60-100 total usage)"
+    },
+    "ultra": {
+      "name": "Ultra",
+      "monthly_cost": 200,
+      "api_pool": 400,
+      "auto_composer_included": true,
+      "description": "Best for power users with multiple agents/automation"
+    }
+  },
+  "models": [
+    {
+      "id": "claude-4-6-opus",
+      "name": "Claude 4.6 Opus",
+      "provider": "anthropic",
+      "rates": {
+        "input": 5.00,
+        "cache_write": 6.25,
+        "cache_read": 0.50,
+        "output": 25.00
+      },
+      "pool": "api",
+      "max_mode_available": true
+    },
+    {
+      "id": "claude-4-6-sonnet",
+      "name": "Claude 4.6 Sonnet",
+      "provider": "anthropic",
+      "rates": {
+        "input": 3.00,
+        "cache_write": 3.75,
+        "cache_read": 0.30,
+        "output": 15.00
+      },
+      "pool": "api",
+      "max_mode_available": true
+    },
+    {
+      "id": "claude-4-6-opus-fast",
+      "name": "Claude 4.6 Opus (Fast)",
+      "provider": "anthropic",
+      "rates": {
+        "input": 30.00,
+        "cache_write": 37.50,
+        "cache_read": 3.00,
+        "output": 150.00
+      },
+      "pool": "api",
+      "max_mode_available": false
+    },
+    {
+      "id": "claude-4-5-opus",
+      "name": "Claude 4.5 Opus",
+      "provider": "anthropic",
+      "rates": {
+        "input": 5.00,
+        "cache_write": 6.25,
+        "cache_read": 0.50,
+        "output": 25.00
+      },
+      "pool": "api",
+      "max_mode_available": true
+    },
+    {
+      "id": "claude-4-5-sonnet",
+      "name": "Claude 4.5 Sonnet",
+      "provider": "anthropic",
+      "rates": {
+        "input": 3.00,
+        "cache_write": 3.75,
+        "cache_read": 0.30,
+        "output": 15.00
+      },
+      "pool": "api",
+      "max_mode_available": true
+    },
+    {
+      "id": "claude-4-5-haiku",
+      "name": "Claude 4.5 Haiku",
+      "provider": "anthropic",
+      "rates": {
+        "input": 1.00,
+        "cache_write": 1.25,
+        "cache_read": 0.10,
+        "output": 5.00
+      },
+      "pool": "api",
+      "max_mode_available": true
+    },
+    {
+      "id": "gpt-5-4",
+      "name": "GPT-5.4",
+      "provider": "openai",
+      "rates": {
+        "input": 2.50,
+        "cache_write": null,
+        "cache_read": 0.25,
+        "output": 15.00
+      },
+      "pool": "api",
+      "max_mode_available": true
+    },
+    {
+      "id": "gpt-5-3-codex",
+      "name": "GPT-5.3 Codex",
+      "provider": "openai",
+      "rates": {
+        "input": 1.75,
+        "cache_write": null,
+        "cache_read": 0.175,
+        "output": 14.00
+      },
+      "pool": "api",
+      "max_mode_available": true
+    },
+    {
+      "id": "gemini-3-1-pro",
+      "name": "Gemini 3.1 Pro",
+      "provider": "google",
+      "rates": {
+        "input": 2.00,
+        "cache_write": null,
+        "cache_read": 0.20,
+        "output": 12.00
+      },
+      "pool": "api",
+      "max_mode_available": true
+    },
+    {
+      "id": "gemini-3-flash",
+      "name": "Gemini 3 Flash",
+      "provider": "google",
+      "rates": {
+        "input": 0.50,
+        "cache_write": null,
+        "cache_read": 0.05,
+        "output": 3.00
+      },
+      "pool": "api",
+      "max_mode_available": true
+    },
+    {
+      "id": "grok-code",
+      "name": "Grok Code",
+      "provider": "xai",
+      "rates": {
+        "input": 0.20,
+        "cache_write": null,
+        "cache_read": 0.02,
+        "output": 1.50
+      },
+      "pool": "api",
+      "max_mode_available": true
+    },
+    {
+      "id": "kimi-k2-5",
+      "name": "Kimi K2.5",
+      "provider": "moonshot",
+      "rates": {
+        "input": 0.60,
+        "cache_write": null,
+        "cache_read": 0.10,
+        "output": 3.00
+      },
+      "pool": "api",
+      "max_mode_available": true
+    },
+    {
+      "id": "composer-1-5",
+      "name": "Composer 1.5",
+      "provider": "cursor",
+      "rates": {
+        "input": 3.50,
+        "cache_write": null,
+        "cache_read": 0.35,
+        "output": 17.50
+      },
+      "pool": "auto_composer",
+      "note": "Draws from Auto+Composer pool (generous included), not API pool",
+      "max_mode_available": false
+    },
+    {
+      "id": "auto",
+      "name": "Auto",
+      "provider": "cursor",
+      "rates": {
+        "input": 1.25,
+        "cache_write": null,
+        "cache_read": 0.25,
+        "output": 6.00
+      },
+      "pool": "auto_composer",
+      "note": "Draws from Auto+Composer pool (generous included), not API pool",
+      "max_mode_available": false
+    }
+  ],
+  "settings": {
+    "max_mode_upcharge": 0.20,
+    "default_input_output_ratio": 3,
+    "token_unit": "per_1m",
+    "cache_savings_note": "Cache read is 10x cheaper than input. Cache write is 1.25x input cost."
+  }
+}
