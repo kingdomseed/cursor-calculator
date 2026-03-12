@@ -22,7 +22,7 @@ function createDefaultConfig(model: Model): ModelConfig {
     fast: model.auto_checks?.fast ?? false,
     thinking: model.auto_checks?.thinking ?? false,
     caching: false,
-    cacheHitRate: 50,
+    cacheHitRate: 75,
   };
 }
 
