@@ -47,8 +47,8 @@ export function ModelConfigRow({ model, config, onChange }: Props) {
         </div>
       </div>
 
-      {/* Variant checkboxes */}
-      {(hasMaxMode || hasFast || hasThinking) && (
+      {/* Variant checkboxes: pricing variants */}
+      {(hasMaxMode || hasFast) && (
         <div className="flex flex-wrap gap-4 text-sm">
           {hasMaxMode && (
             <label className="flex items-center gap-1.5 cursor-pointer">
@@ -65,12 +65,18 @@ export function ModelConfigRow({ model, config, onChange }: Props) {
               <span>Fast</span>
             </label>
           )}
+        </div>
+      )}
+
+      {/* Token usage modifiers: thinking + caching */}
+      {(hasThinking || hasCaching) && (
+        <div className="space-y-2 text-sm">
           {hasThinking && (
             <label className="flex items-center gap-1.5 cursor-pointer">
               <input type="checkbox" checked={config.thinking} onChange={(e) => onChange({ ...config, thinking: e.target.checked })}
                 className="w-4 h-4 rounded border-[#e0e0d8] text-[#14120b] focus:ring-[#14120b]" />
               <span>Thinking</span>
-              <span className="text-xs text-[#14120b]/30">(info only)</span>
+              <span className="text-xs text-[#14120b]/40">(uses more output tokens)</span>
             </label>
           )}
         </div>
