@@ -18,8 +18,6 @@ export interface ModelRates {
 
 export interface MaxModeVariant {
   cursor_upcharge: number;
-  long_context_input_multiplier: number;
-  long_context_output_multiplier: number;
 }
 
 export interface FastVariant {

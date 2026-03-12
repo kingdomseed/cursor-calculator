@@ -55,11 +55,7 @@ export function ModelConfigRow({ model, config, onChange }: Props) {
               <input type="checkbox" checked={config.maxMode} onChange={(e) => toggleMaxMode(e.target.checked)}
                 className="w-4 h-4 rounded border-[#e0e0d8] text-[#14120b] focus:ring-[#14120b]" />
               <span>Max Mode</span>
-              {model.context.max && (
-                <span className="text-xs text-[#14120b]/40">
-                  ({Math.round(model.context.default / 1000)}k → {Math.round(model.context.max / 1000)}k)
-                </span>
-              )}
+              <span className="text-xs text-[#14120b]/40">(+20%)</span>
             </label>
           )}
           {hasFast && (

@@ -19,28 +19,22 @@ export function computeEffectiveRates(model: Model, config: ModelConfig, reReads
   let inputRate = model.rates.input;
   let outputRate = model.rates.output;
 
-  // Layer 2: Cursor Max Mode upcharge
+  // Layer 2: Cursor Max Mode upcharge (20% only — long-context pricing is
+  // captured by separate model entries like "Opus 4.6 Max" and "Sonnet 4 1M")
   if (config.maxMode && model.variants?.max_mode) {
     const upcharge = 1 + model.variants.max_mode.cursor_upcharge;
     inputRate *= upcharge;
     outputRate *= upcharge;
-
-    // Layer 3: Long context multipliers (always applied with Max Mode)
-    inputRate *= model.variants.max_mode.long_context_input_multiplier;
-    outputRate *= model.variants.max_mode.long_context_output_multiplier;
   }
 
-  // Layer 4: Caching blend (affects input only)
-  // When Max Mode is active, cache rates must also be scaled by upcharge + long context,
-  // because Cursor's upcharge applies to all API usage and provider long-context pricing
-  // applies to all token operations including cache reads/writes.
+  // Layer 3: Caching blend (affects input only)
+  // When Max Mode is active, cache rates are also scaled by the upcharge.
   let cacheWrite = model.rates.cache_write;
   let cacheRead = model.rates.cache_read;
   if (config.maxMode && model.variants?.max_mode) {
     const upcharge = 1 + model.variants.max_mode.cursor_upcharge;
-    const lcInput = model.variants.max_mode.long_context_input_multiplier;
-    if (cacheWrite !== null) cacheWrite = cacheWrite * upcharge * lcInput;
-    if (cacheRead !== null) cacheRead = cacheRead * upcharge * lcInput;
+    if (cacheWrite !== null) cacheWrite = cacheWrite * upcharge;
+    if (cacheRead !== null) cacheRead = cacheRead * upcharge;
   }
   inputRate = applyCaching(inputRate, cacheWrite, cacheRead, config, reReads);
 
