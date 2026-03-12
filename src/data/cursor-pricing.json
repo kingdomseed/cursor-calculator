@@ -1,224 +1,407 @@
 {
   "meta": {
-    "version": "2026-03-11",
+    "version": "2.0.0",
     "source_url": "https://cursor.com/docs/models-and-pricing",
-    "retrieved_at": "2026-03-11",
-    "default_currency": "USD",
-    "note": "Auto and Composer 1.5 draw from separate Auto+Composer pool, not API pool"
+    "retrieved_at": "2026-03-12"
   },
   "plans": {
     "pro": {
       "name": "Pro",
       "monthly_cost": 20,
       "api_pool": 20,
-      "auto_composer_included": true,
       "description": "Best for daily tab users and limited agent users"
     },
     "pro_plus": {
-      "name": "Pro Plus", 
+      "name": "Pro Plus",
       "monthly_cost": 60,
       "api_pool": 70,
-      "auto_composer_included": true,
       "description": "Best for daily agent users ($60-100 total usage)"
     },
     "ultra": {
       "name": "Ultra",
       "monthly_cost": 200,
       "api_pool": 400,
-      "auto_composer_included": true,
       "description": "Best for power users with multiple agents/automation"
     }
   },
   "models": [
     {
-      "id": "claude-4-6-opus",
-      "name": "Claude 4.6 Opus",
+      "id": "claude-4-sonnet",
+      "name": "Claude 4 Sonnet",
       "provider": "anthropic",
-      "rates": {
-        "input": 5.00,
-        "cache_write": 6.25,
-        "cache_read": 0.50,
-        "output": 25.00
-      },
       "pool": "api",
-      "max_mode_available": true
+      "context": { "default": 200000, "max": 1000000 },
+      "rates": { "input": 3.00, "cache_write": 3.75, "cache_read": 0.30, "output": 15.00 },
+      "variants": {
+        "max_mode": {
+          "cursor_upcharge": 0.20,
+          "long_context_input_multiplier": 2,
+          "long_context_output_multiplier": 2
+        },
+        "thinking": true
+      }
     },
     {
-      "id": "claude-4-6-sonnet",
-      "name": "Claude 4.6 Sonnet",
+      "id": "claude-4-sonnet-1m",
+      "name": "Claude 4 Sonnet 1M",
       "provider": "anthropic",
-      "rates": {
-        "input": 3.00,
-        "cache_write": 3.75,
-        "cache_read": 0.30,
-        "output": 15.00
-      },
       "pool": "api",
-      "max_mode_available": true
-    },
-    {
-      "id": "claude-4-6-opus-fast",
-      "name": "Claude 4.6 Opus (Fast)",
-      "provider": "anthropic",
-      "rates": {
-        "input": 30.00,
-        "cache_write": 37.50,
-        "cache_read": 3.00,
-        "output": 150.00
+      "context": { "default": 1000000, "max": null },
+      "rates": { "input": 6.00, "cache_write": 7.50, "cache_read": 0.60, "output": 22.50 },
+      "variants": {
+        "thinking": true
       },
-      "pool": "api",
-      "max_mode_available": false
-    },
-    {
-      "id": "claude-4-5-opus",
-      "name": "Claude 4.5 Opus",
-      "provider": "anthropic",
-      "rates": {
-        "input": 5.00,
-        "cache_write": 6.25,
-        "cache_read": 0.50,
-        "output": 25.00
-      },
-      "pool": "api",
-      "max_mode_available": true
-    },
-    {
-      "id": "claude-4-5-sonnet",
-      "name": "Claude 4.5 Sonnet",
-      "provider": "anthropic",
-      "rates": {
-        "input": 3.00,
-        "cache_write": 3.75,
-        "cache_read": 0.30,
-        "output": 15.00
-      },
-      "pool": "api",
-      "max_mode_available": true
+      "auto_checks": {
+        "max_mode": true
+      }
     },
     {
       "id": "claude-4-5-haiku",
       "name": "Claude 4.5 Haiku",
       "provider": "anthropic",
-      "rates": {
-        "input": 1.00,
-        "cache_write": 1.25,
-        "cache_read": 0.10,
-        "output": 5.00
-      },
       "pool": "api",
-      "max_mode_available": true
+      "context": { "default": 200000, "max": 1000000 },
+      "rates": { "input": 1.00, "cache_write": 1.25, "cache_read": 0.10, "output": 5.00 },
+      "variants": {
+        "max_mode": {
+          "cursor_upcharge": 0.20,
+          "long_context_input_multiplier": 2,
+          "long_context_output_multiplier": 2
+        },
+        "thinking": true
+      }
     },
     {
-      "id": "gpt-5-4",
-      "name": "GPT-5.4",
-      "provider": "openai",
-      "rates": {
-        "input": 2.50,
-        "cache_write": null,
-        "cache_read": 0.25,
-        "output": 15.00
-      },
+      "id": "claude-4-5-opus",
+      "name": "Claude 4.5 Opus",
+      "provider": "anthropic",
       "pool": "api",
-      "max_mode_available": true
+      "context": { "default": 200000, "max": 1000000 },
+      "rates": { "input": 5.00, "cache_write": 6.25, "cache_read": 0.50, "output": 25.00 },
+      "variants": {
+        "max_mode": {
+          "cursor_upcharge": 0.20,
+          "long_context_input_multiplier": 2,
+          "long_context_output_multiplier": 2
+        },
+        "thinking": true
+      }
     },
     {
-      "id": "gpt-5-3-codex",
-      "name": "GPT-5.3 Codex",
-      "provider": "openai",
-      "rates": {
-        "input": 1.75,
-        "cache_write": null,
-        "cache_read": 0.175,
-        "output": 14.00
-      },
+      "id": "claude-4-5-sonnet",
+      "name": "Claude 4.5 Sonnet",
+      "provider": "anthropic",
       "pool": "api",
-      "max_mode_available": true
+      "context": { "default": 200000, "max": 1000000 },
+      "rates": { "input": 3.00, "cache_write": 3.75, "cache_read": 0.30, "output": 15.00 },
+      "variants": {
+        "max_mode": {
+          "cursor_upcharge": 0.20,
+          "long_context_input_multiplier": 2,
+          "long_context_output_multiplier": 2
+        },
+        "thinking": true
+      }
     },
     {
-      "id": "gemini-3-1-pro",
-      "name": "Gemini 3.1 Pro",
+      "id": "claude-opus-4-6",
+      "name": "Claude 4.6 Opus",
+      "provider": "anthropic",
+      "pool": "api",
+      "context": { "default": 200000, "max": 1000000 },
+      "rates": { "input": 5.00, "cache_write": 6.25, "cache_read": 0.50, "output": 25.00 },
+      "variants": {
+        "max_mode": {
+          "cursor_upcharge": 0.20,
+          "long_context_input_multiplier": 2,
+          "long_context_output_multiplier": 2
+        },
+        "fast": {
+          "model_id": "claude-opus-4-6-fast",
+          "rates": { "input": 30.00, "cache_write": 37.50, "cache_read": 3.00, "output": 150.00 }
+        },
+        "thinking": true
+      }
+    },
+    {
+      "id": "claude-sonnet-4-6",
+      "name": "Claude 4.6 Sonnet",
+      "provider": "anthropic",
+      "pool": "api",
+      "context": { "default": 200000, "max": 1000000 },
+      "rates": { "input": 3.00, "cache_write": 3.75, "cache_read": 0.30, "output": 15.00 },
+      "variants": {
+        "max_mode": {
+          "cursor_upcharge": 0.20,
+          "long_context_input_multiplier": 2,
+          "long_context_output_multiplier": 2
+        },
+        "thinking": true
+      }
+    },
+    {
+      "id": "composer-1",
+      "name": "Composer 1",
+      "provider": "cursor",
+      "pool": "auto_composer",
+      "context": { "default": 200000, "max": null },
+      "rates": { "input": 1.25, "cache_write": null, "cache_read": 0.125, "output": 10.00 }
+    },
+    {
+      "id": "composer-1.5",
+      "name": "Composer 1.5",
+      "provider": "cursor",
+      "pool": "auto_composer",
+      "context": { "default": 200000, "max": null },
+      "rates": { "input": 3.50, "cache_write": null, "cache_read": 0.35, "output": 17.50 },
+      "variants": {
+        "thinking": true
+      }
+    },
+    {
+      "id": "gemini-2.5-flash",
+      "name": "Gemini 2.5 Flash",
       "provider": "google",
-      "rates": {
-        "input": 2.00,
-        "cache_write": null,
-        "cache_read": 0.20,
-        "output": 12.00
-      },
       "pool": "api",
-      "max_mode_available": true
+      "context": { "default": 200000, "max": 1000000 },
+      "rates": { "input": 0.30, "cache_write": null, "cache_read": 0.03, "output": 2.50 },
+      "variants": {
+        "max_mode": {
+          "cursor_upcharge": 0.20,
+          "long_context_input_multiplier": 2,
+          "long_context_output_multiplier": 2
+        },
+        "thinking": true
+      }
     },
     {
       "id": "gemini-3-flash",
       "name": "Gemini 3 Flash",
       "provider": "google",
-      "rates": {
-        "input": 0.50,
-        "cache_write": null,
-        "cache_read": 0.05,
-        "output": 3.00
-      },
       "pool": "api",
-      "max_mode_available": true
+      "context": { "default": 200000, "max": 1000000 },
+      "rates": { "input": 0.50, "cache_write": null, "cache_read": 0.05, "output": 3.00 },
+      "variants": {
+        "max_mode": {
+          "cursor_upcharge": 0.20,
+          "long_context_input_multiplier": 2,
+          "long_context_output_multiplier": 2
+        },
+        "thinking": true
+      }
     },
     {
-      "id": "grok-code",
+      "id": "gemini-3-pro",
+      "name": "Gemini 3 Pro",
+      "provider": "google",
+      "pool": "api",
+      "context": { "default": 200000, "max": 1000000 },
+      "rates": { "input": 2.00, "cache_write": null, "cache_read": 0.20, "output": 12.00 },
+      "variants": {
+        "max_mode": {
+          "cursor_upcharge": 0.20,
+          "long_context_input_multiplier": 2,
+          "long_context_output_multiplier": 2
+        },
+        "thinking": true
+      }
+    },
+    {
+      "id": "gemini-3-pro-image-preview",
+      "name": "Gemini 3 Pro Image Preview",
+      "provider": "google",
+      "pool": "api",
+      "context": { "default": 200000, "max": 1000000 },
+      "rates": { "input": 2.00, "cache_write": null, "cache_read": 0.20, "output": 12.00 },
+      "variants": {
+        "max_mode": {
+          "cursor_upcharge": 0.20,
+          "long_context_input_multiplier": 2,
+          "long_context_output_multiplier": 2
+        }
+      }
+    },
+    {
+      "id": "gemini-3.1-pro",
+      "name": "Gemini 3.1 Pro",
+      "provider": "google",
+      "pool": "api",
+      "context": { "default": 200000, "max": 1000000 },
+      "rates": { "input": 2.00, "cache_write": null, "cache_read": 0.20, "output": 12.00 },
+      "variants": {
+        "max_mode": {
+          "cursor_upcharge": 0.20,
+          "long_context_input_multiplier": 2,
+          "long_context_output_multiplier": 2
+        },
+        "thinking": true
+      }
+    },
+    {
+      "id": "gpt-5",
+      "name": "GPT-5",
+      "provider": "openai",
+      "pool": "api",
+      "context": { "default": 272000, "max": 1000000 },
+      "rates": { "input": 1.25, "cache_write": null, "cache_read": 0.125, "output": 10.00 },
+      "variants": {
+        "max_mode": {
+          "cursor_upcharge": 0.20,
+          "long_context_input_multiplier": 2,
+          "long_context_output_multiplier": 1.5
+        },
+        "fast": {
+          "model_id": "gpt-5-fast",
+          "rates": { "input": 2.50, "cache_write": null, "cache_read": 0.25, "output": 20.00 }
+        },
+        "thinking": true
+      }
+    },
+    {
+      "id": "gpt-5-mini",
+      "name": "GPT-5 Mini",
+      "provider": "openai",
+      "pool": "api",
+      "context": { "default": 272000, "max": null },
+      "rates": { "input": 0.25, "cache_write": null, "cache_read": 0.025, "output": 2.00 }
+    },
+    {
+      "id": "gpt-5-codex",
+      "name": "GPT-5-Codex",
+      "provider": "openai",
+      "pool": "api",
+      "context": { "default": 272000, "max": null },
+      "rates": { "input": 1.25, "cache_write": null, "cache_read": 0.125, "output": 10.00 },
+      "variants": {
+        "thinking": true
+      }
+    },
+    {
+      "id": "gpt-5.1-codex",
+      "name": "GPT-5.1 Codex",
+      "provider": "openai",
+      "pool": "api",
+      "context": { "default": 272000, "max": 1000000 },
+      "rates": { "input": 1.25, "cache_write": null, "cache_read": 0.125, "output": 10.00 },
+      "variants": {
+        "max_mode": {
+          "cursor_upcharge": 0.20,
+          "long_context_input_multiplier": 2,
+          "long_context_output_multiplier": 1.5
+        },
+        "thinking": true
+      }
+    },
+    {
+      "id": "gpt-5.1-codex-max",
+      "name": "GPT-5.1 Codex Max",
+      "provider": "openai",
+      "pool": "api",
+      "context": { "default": 1000000, "max": null },
+      "rates": { "input": 1.25, "cache_write": null, "cache_read": 0.125, "output": 10.00 },
+      "variants": {
+        "thinking": true
+      },
+      "auto_checks": {
+        "max_mode": true
+      }
+    },
+    {
+      "id": "gpt-5.1-codex-mini",
+      "name": "GPT-5.1 Codex Mini",
+      "provider": "openai",
+      "pool": "api",
+      "context": { "default": 272000, "max": null },
+      "rates": { "input": 0.25, "cache_write": null, "cache_read": 0.025, "output": 2.00 },
+      "variants": {
+        "thinking": true
+      }
+    },
+    {
+      "id": "gpt-5.2",
+      "name": "GPT-5.2",
+      "provider": "openai",
+      "pool": "api",
+      "context": { "default": 272000, "max": 1000000 },
+      "rates": { "input": 1.75, "cache_write": null, "cache_read": 0.175, "output": 14.00 },
+      "variants": {
+        "max_mode": {
+          "cursor_upcharge": 0.20,
+          "long_context_input_multiplier": 2,
+          "long_context_output_multiplier": 1.5
+        },
+        "thinking": true
+      }
+    },
+    {
+      "id": "gpt-5.2-codex",
+      "name": "GPT-5.2 Codex",
+      "provider": "openai",
+      "pool": "api",
+      "context": { "default": 272000, "max": 1000000 },
+      "rates": { "input": 1.75, "cache_write": null, "cache_read": 0.175, "output": 14.00 },
+      "variants": {
+        "max_mode": {
+          "cursor_upcharge": 0.20,
+          "long_context_input_multiplier": 2,
+          "long_context_output_multiplier": 1.5
+        },
+        "thinking": true
+      }
+    },
+    {
+      "id": "gpt-5.3-codex",
+      "name": "GPT-5.3 Codex",
+      "provider": "openai",
+      "pool": "api",
+      "context": { "default": 272000, "max": null },
+      "rates": { "input": 1.75, "cache_write": null, "cache_read": 0.175, "output": 14.00 },
+      "variants": {
+        "thinking": true
+      }
+    },
+    {
+      "id": "gpt-5.4",
+      "name": "GPT-5.4",
+      "provider": "openai",
+      "pool": "api",
+      "context": { "default": 272000, "max": 1000000 },
+      "rates": { "input": 2.50, "cache_write": null, "cache_read": 0.25, "output": 15.00 },
+      "variants": {
+        "max_mode": {
+          "cursor_upcharge": 0.20,
+          "long_context_input_multiplier": 2,
+          "long_context_output_multiplier": 1.5
+        },
+        "thinking": true
+      }
+    },
+    {
+      "id": "grok-code-fast-1",
       "name": "Grok Code",
       "provider": "xai",
-      "rates": {
-        "input": 0.20,
-        "cache_write": null,
-        "cache_read": 0.02,
-        "output": 1.50
-      },
       "pool": "api",
-      "max_mode_available": true
+      "context": { "default": 256000, "max": null },
+      "rates": { "input": 0.20, "cache_write": null, "cache_read": 0.02, "output": 1.50 },
+      "variants": {
+        "thinking": true
+      }
     },
     {
-      "id": "kimi-k2-5",
+      "id": "kimi-k2.5",
       "name": "Kimi K2.5",
       "provider": "moonshot",
-      "rates": {
-        "input": 0.60,
-        "cache_write": null,
-        "cache_read": 0.10,
-        "output": 3.00
-      },
       "pool": "api",
-      "max_mode_available": true
-    },
-    {
-      "id": "composer-1-5",
-      "name": "Composer 1.5",
-      "provider": "cursor",
-      "rates": {
-        "input": 3.50,
-        "cache_write": null,
-        "cache_read": 0.35,
-        "output": 17.50
-      },
-      "pool": "auto_composer",
-      "note": "Draws from Auto+Composer pool (generous included), not API pool",
-      "max_mode_available": false
+      "context": { "default": 128000, "max": null },
+      "rates": { "input": 0.60, "cache_write": null, "cache_read": 0.10, "output": 3.00 }
     },
     {
       "id": "auto",
       "name": "Auto",
       "provider": "cursor",
-      "rates": {
-        "input": 1.25,
-        "cache_write": null,
-        "cache_read": 0.25,
-        "output": 6.00
-      },
       "pool": "auto_composer",
-      "note": "Draws from Auto+Composer pool (generous included), not API pool",
-      "max_mode_available": false
+      "context": { "default": 200000, "max": null },
+      "rates": { "input": 1.25, "cache_write": null, "cache_read": 0.25, "output": 6.00 }
     }
-  ],
-  "settings": {
-    "max_mode_upcharge": 0.20,
-    "default_input_output_ratio": 3,
-    "token_unit": "per_1m",
-    "cache_savings_note": "Cache read is 10x cheaper than input. Cache write is 1.25x input cost."
-  }
+  ]
 }
