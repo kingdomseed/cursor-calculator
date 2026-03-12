@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { computeEffectiveRates } from '../calculations';
-import type { Model, ModelConfig } from '../types';
+import { computeEffectiveRates, computeRecommendation, dollarsToTokens, tokensToDollars } from '../calculations';
+import type { Model, ModelConfig, PricingData, PlanKey } from '../types';
 
 // Test fixture: Claude 4.6 Opus
 const opusModel: Model = {
@@ -148,3 +148,127 @@ describe('computeEffectiveRates - non-Anthropic caching', () => {
     expect(rates.output).toBe(3);
   });
 });
+
+// Minimal pricing data for tests
+const testPlans: PricingData['plans'] = {
+  pro: { name: 'Pro', monthly_cost: 20, api_pool: 20, description: '' },
+  pro_plus: { name: 'Pro Plus', monthly_cost: 60, api_pool: 70, description: '' },
+  ultra: { name: 'Ultra', monthly_cost: 200, api_pool: 400, description: '' },
+};
+
+describe('computeRecommendation - budget mode', () => {
+  it('recommends Pro Plus over Pro at $60 budget (Pro Plus gives more tokens)', () => {
+    const models = [opusModel];
+    const configs: ModelConfig[] = [{
+      modelId: 'claude-4-6-opus', weight: 100,
+      maxMode: false, fast: false, thinking: false,
+      caching: false, cacheHitRate: 0,
+    }];
+    const result = computeRecommendation('budget', 60, 0, models, configs, testPlans, 3);
+    expect(result.best.plan).toBe('pro_plus');
+  });
+
+  it('filters out plans user cannot afford', () => {
+    const models = [opusModel];
+    const configs: ModelConfig[] = [{
+      modelId: 'claude-4-6-opus', weight: 100,
+      maxMode: false, fast: false, thinking: false,
+      caching: false, cacheHitRate: 0,
+    }];
+    const result = computeRecommendation('budget', 50, 0, models, configs, testPlans, 3);
+    expect(result.best.plan).toBe('pro');
+    expect(result.all.find(p => p.plan === 'pro_plus')!.affordable).toBe(false);
+    expect(result.all.find(p => p.plan === 'ultra')!.affordable).toBe(false);
+  });
+
+  it('distributes budget across weighted model mix', () => {
+    const models = [opusModel, gpt54Model];
+    const configs: ModelConfig[] = [
+      { modelId: 'claude-4-6-opus', weight: 60, maxMode: false, fast: false, thinking: false, caching: false, cacheHitRate: 0 },
+      { modelId: 'gpt-5-4', weight: 40, maxMode: false, fast: false, thinking: false, caching: false, cacheHitRate: 0 },
+    ];
+    const result = computeRecommendation('budget', 60, 0, models, configs, testPlans, 3);
+    const best = result.best;
+    expect(best.perModel).toHaveLength(2);
+    expect(best.perModel[0].modelId).toBe('claude-4-6-opus');
+    expect(best.perModel[1].modelId).toBe('gpt-5-4');
+    expect(best.perModel[1].tokens.total).toBeGreaterThan(best.perModel[0].tokens.total);
+  });
+
+  it('normalizes weights that do not sum to 100%', () => {
+    const models = [opusModel, gpt54Model];
+    const configs: ModelConfig[] = [
+      { modelId: 'claude-4-6-opus', weight: 60, maxMode: false, fast: false, thinking: false, caching: false, cacheHitRate: 0 },
+      { modelId: 'gpt-5-4', weight: 60, maxMode: false, fast: false, thinking: false, caching: false, cacheHitRate: 0 },
+    ];
+    const result = computeRecommendation('budget', 60, 0, models, configs, testPlans, 3);
+    const best = result.best;
+    expect(best.perModel[0].apiCost).toBeCloseTo(best.perModel[1].apiCost, 1);
+  });
+});
+
+describe('computeRecommendation - tiebreaking', () => {
+  it('prefers plan with more API pool headroom on tie', () => {
+    const tiePlans2: PricingData['plans'] = {
+      pro:      { name: 'Pro',      monthly_cost: 10, api_pool: 15, description: '' },
+      pro_plus: { name: 'Pro Plus', monthly_cost: 20, api_pool: 25, description: '' },
+      ultra:    { name: 'Ultra',    monthly_cost: 200, api_pool: 400, description: '' },
+    };
+    const models = [opusModel];
+    const configs: ModelConfig[] = [{
+      modelId: 'claude-4-6-opus', weight: 100,
+      maxMode: false, fast: false, thinking: false,
+      caching: false, cacheHitRate: 0,
+    }];
+    const result = computeRecommendation('budget', 30, 0, models, configs, tiePlans2, 3);
+    expect(result.best.plan).toBe('pro_plus');
+  });
+});
+
+describe('computeRecommendation - token mode', () => {
+  it('recommends cheapest plan that covers the usage', () => {
+    const models = [opusModel];
+    const configs: ModelConfig[] = [{
+      modelId: 'claude-4-6-opus', weight: 100,
+      maxMode: false, fast: false, thinking: false,
+      caching: false, cacheHitRate: 0,
+    }];
+    const result = computeRecommendation('tokens', 0, 500_000, models, configs, testPlans, 3);
+    expect(result.best.plan).toBe('pro');
+  });
+
+  it('calculates overage correctly', () => {
+    const models = [opusModel];
+    const configs: ModelConfig[] = [{
+      modelId: 'claude-4-6-opus', weight: 100,
+      maxMode: false, fast: false, thinking: false,
+      caching: false, cacheHitRate: 0,
+    }];
+    const result = computeRecommendation('tokens', 0, 10_000_000, models, configs, testPlans, 3);
+    const proResult = result.all.find(p => p.plan === 'pro')!;
+    expect(proResult.overage).toBeGreaterThan(0);
+    expect(proResult.totalCost).toBe(proResult.subscription + proResult.overage);
+  });
+});
+
+describe('dollarsToTokens / tokensToDollars', () => {
+  it('dollarsToTokens converts correctly at 3:1 ratio', () => {
+    const result = dollarsToTokens(20, { input: 5, output: 25 }, 3);
+    expect(result.input).toBe(1_500_000);
+    expect(result.output).toBe(500_000);
+    expect(result.total).toBe(2_000_000);
+  });
+
+  it('dollarsToTokens returns zero for zero dollars', () => {
+    const result = dollarsToTokens(0, { input: 5, output: 25 }, 3);
+    expect(result.total).toBe(0);
+  });
+
+  it('tokensToDollars is inverse of dollarsToTokens', () => {
+    const rates = { input: 5, output: 25 };
+    const tokens = dollarsToTokens(20, rates, 3);
+    const cost = tokensToDollars(tokens.total, rates, 3);
+    expect(cost).toBeCloseTo(20, 1);
+  });
+});
+
