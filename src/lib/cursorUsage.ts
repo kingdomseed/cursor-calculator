@@ -1,4 +1,4 @@
-import { computeBillableRates } from './calculations';
+import { computeBillableRates } from '../domain/recommendation/rates';
 import {
   getApproximateFastReasoningSuffixes,
   getApproximateImportReplayLabelMappings,

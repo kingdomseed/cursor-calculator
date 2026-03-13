@@ -1,4 +1,4 @@
-import { formatNumber } from '../lib/calculations';
+import { formatNumber } from '../domain/recommendation/formatters';
 import type {
   ApproximationMode,
   CursorImportReport,

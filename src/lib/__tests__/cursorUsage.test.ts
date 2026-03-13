@@ -2,27 +2,15 @@ import { describe, expect, it } from 'vitest';
 import pricingData from '../../data/cursor-pricing.json';
 
 import {
-  computeExactUsageRecommendation,
-  exactTokensToDollars,
-} from '../calculations';
-import {
   parseCursorUsageFiles,
   type CursorImportOptions,
 } from '../cursorUsage';
 import type {
-  ExactTokenBreakdown,
   Model,
   PricingData,
-  UsageLineItemInput,
 } from '../types';
 
 const productionPricing = pricingData as PricingData;
-
-const plans: PricingData['plans'] = {
-  pro: { name: 'Pro', monthly_cost: 20, api_pool: 20, description: '' },
-  pro_plus: { name: 'Pro Plus', monthly_cost: 60, api_pool: 70, description: '' },
-  ultra: { name: 'Ultra', monthly_cost: 200, api_pool: 400, description: '' },
-};
 
 const models: Model[] = [
   {
@@ -172,67 +160,6 @@ const models: Model[] = [
     },
   },
 ];
-
-describe('exactTokensToDollars', () => {
-  it('prices exact imported token categories without using a global ratio', () => {
-    const exactTokens: ExactTokenBreakdown = {
-      inputWithCacheWrite: 0,
-      inputWithoutCacheWrite: 1_000_000,
-      cacheRead: 250_000,
-      output: 500_000,
-      total: 1_750_000,
-    };
-
-    const cost = exactTokensToDollars(exactTokens, {
-      input: 2.5,
-      cache_write: null,
-      cache_read: 0.25,
-      output: 20,
-    });
-
-    expect(cost).toBeCloseTo(12.5625, 4);
-  });
-});
-
-describe('computeExactUsageRecommendation', () => {
-  it('reuses plan pool math for exact per-model usage entries', () => {
-    const usage: UsageLineItemInput[] = [
-      {
-        key: 'gpt-5-fast',
-        modelId: 'gpt-5',
-        label: 'GPT-5 Fast',
-        provider: 'openai',
-        pool: 'api',
-        tokens: {
-          total: 1_750_000,
-          input: 1_250_000,
-          output: 500_000,
-        },
-        exactTokens: {
-          inputWithCacheWrite: 0,
-          inputWithoutCacheWrite: 1_000_000,
-          cacheRead: 250_000,
-          output: 500_000,
-          total: 1_750_000,
-        },
-        maxMode: false,
-        fast: true,
-        thinking: false,
-        caching: true,
-        cacheHitRate: 0,
-        approximated: false,
-      },
-    ];
-
-    const result = computeExactUsageRecommendation(usage, models, plans);
-    const pro = result.all.find((plan) => plan.plan === 'pro');
-
-    expect(result.best.plan).toBe('pro');
-    expect(pro?.apiUsage).toBeCloseTo(12.5625, 4);
-    expect(pro?.overage).toBe(0);
-    expect(pro?.perModel[0].label).toBe('GPT-5 Fast');
-  });
-});
 
 describe('parseCursorUsageFiles', () => {
   const csv = `Date,User,Kind,Model,Max Mode,Input (w/ Cache Write),Input (w/o Cache Write),Cache Read,Output Tokens,Total Tokens,Requests

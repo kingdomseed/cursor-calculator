@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { Model, ModelConfig } from '../lib/types';
-import { computeEffectiveRates, formatRate } from '../lib/calculations';
+import { formatRate } from '../domain/recommendation/formatters';
+import { computeEffectiveRates } from '../domain/recommendation/rates';
 import { PROVIDER_COLORS } from '../lib/constants';
 
 interface Props {

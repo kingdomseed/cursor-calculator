@@ -1,5 +1,5 @@
 import type { Mode, PlanResult } from '../lib/types';
-import { formatCurrency, formatNumber, formatRate } from '../lib/calculations';
+import { formatCurrency, formatNumber, formatRate } from '../domain/recommendation/formatters';
 import { PROVIDER_COLORS } from '../lib/constants';
 import { CircleCheckIcon } from './Icons';
 

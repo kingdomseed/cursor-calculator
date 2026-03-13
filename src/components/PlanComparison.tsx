@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Mode, PlanLineItem, PlanResult } from '../lib/types';
-import { formatCurrency, formatNumber } from '../lib/calculations';
+import { formatCurrency, formatNumber } from '../domain/recommendation/formatters';
 import { PROVIDER_COLORS } from '../lib/constants';
 
 interface Props {
