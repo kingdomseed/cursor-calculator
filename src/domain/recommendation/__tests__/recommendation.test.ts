@@ -155,6 +155,9 @@ describe('computeRecommendation - budget mode', () => {
     const result = computeRecommendation('budget', 60, 0, models, configs, testPlans, 3);
 
     expect(result.best.plan).toBe('pro_plus');
+    expect(result.best.apiUsage).toBe(70);
+    expect(result.best.overage).toBe(0);
+    expect(result.best.totalCost).toBe(60);
   });
 
   it('filters out plans the user cannot afford', () => {
@@ -221,6 +224,16 @@ describe('computeRecommendation - budget mode', () => {
     const result = computeRecommendation('budget', 30, 0, [opusModel], [{ ...baseConfig }], tiePlans, 3);
 
     expect(result.best.plan).toBe('pro_plus');
+  });
+
+  it('charges only the amount above the included pool as additional API usage', () => {
+    const result = computeRecommendation('budget', 500, 0, [opusModel], [{ ...baseConfig }], testPlans, 3);
+    const ultra = result.all.find((plan) => plan.plan === 'ultra');
+
+    expect(ultra?.apiUsage).toBe(500);
+    expect(ultra?.overage).toBe(100);
+    expect(ultra?.totalCost).toBe(300);
+    expect(result.best.plan).toBe('ultra');
   });
 });
 

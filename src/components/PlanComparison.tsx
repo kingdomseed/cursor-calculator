@@ -12,6 +12,9 @@ export function PlanComparison({ results, mode }: Props) {
   const [isOpen, setIsOpen] = useState(false);
 
   const lineItems = results[0]?.perModel ?? [];
+  const apiUsageLabel = mode === 'budget' ? 'API value unlocked' : 'Your API usage';
+  const overageLabel = mode === 'budget' ? 'Additional API billed' : 'Overage';
+  const totalCostLabel = mode === 'budget' ? 'Total cash cost' : 'Total cost';
 
   return (
     <div className="mt-6">
@@ -46,9 +49,9 @@ export function PlanComparison({ results, mode }: Props) {
             <tbody className="divide-y divide-[#e0e0d8]">
               <Row label="Subscription" values={results.map((result) => `$${result.subscription}/mo`)} results={results} mode={mode} />
               <Row label="↳ includes pool" values={results.map((result) => `$${result.apiPool}`)} results={results} mode={mode} subdued />
-              <Row label="Your API usage" values={results.map((result) => formatCurrency(result.apiUsage))} results={results} mode={mode} />
-              <Row label="Overage" values={results.map((result) => result.overage > 0 ? formatCurrency(result.overage) : '—')} results={results} mode={mode} />
-              <Row label="Total cost" values={results.map((result) => formatCurrency(result.totalCost))} results={results} mode={mode} bold />
+              <Row label={apiUsageLabel} values={results.map((result) => formatCurrency(result.apiUsage))} results={results} mode={mode} />
+              <Row label={overageLabel} values={results.map((result) => result.overage > 0 ? formatCurrency(result.overage) : '—')} results={results} mode={mode} />
+              <Row label={totalCostLabel} values={results.map((result) => formatCurrency(result.totalCost))} results={results} mode={mode} bold />
               <Row label="Unused pool" values={results.map((result) => result.unusedPool > 0 ? formatCurrency(result.unusedPool) : '—')} results={results} mode={mode} />
               {lineItems.map((lineItem) => (
                 <tr key={lineItem.key}>

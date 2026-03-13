@@ -88,7 +88,7 @@ function computeBudgetPlanResult(
   ratio: number,
   affordable: boolean,
 ): PlanResult {
-  const apiBudget = plan.api_pool + Math.max(0, budget - plan.monthly_cost);
+  const apiBudget = Math.max(plan.api_pool, budget);
 
   const perModel = configs
     .map((config) => {
