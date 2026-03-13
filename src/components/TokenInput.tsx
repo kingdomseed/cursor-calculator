@@ -1,7 +1,7 @@
 export function TokenInput({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (
     <div className="text-center">
-      <p className="text-[#14120b]/60 mb-4">How many tokens per month?</p>
+      <p className="text-[#14120b]/60 mb-4">How many tokens will you use this month?</p>
       <div className="inline-flex items-baseline gap-2">
         <input
           type="text"
