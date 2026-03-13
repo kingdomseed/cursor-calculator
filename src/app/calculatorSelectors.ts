@@ -3,6 +3,10 @@ import type { CursorImportReport } from '../domain/importReplay/types';
 import { computeExactUsageRecommendation, computeRecommendation } from '../domain/recommendation/recommendation';
 import type { Recommendation } from '../domain/recommendation/types';
 import type { Model, PricingData } from '../domain/catalog/types';
+import {
+  buildRecommendationPresentation,
+  type RecommendationPresentation,
+} from './recommendationPresentation';
 import type { CalculatorState } from './calculatorState';
 
 interface RecommendationSelectorInputs {
@@ -86,4 +90,20 @@ export function selectRecommendation(
     inputs.plans,
     state.inputRatio,
   );
+}
+
+export function selectRecommendationPresentation(
+  state: CalculatorState,
+  recommendation: Recommendation | null,
+): RecommendationPresentation | null {
+  if (!recommendation) {
+    return null;
+  }
+
+  return buildRecommendationPresentation({
+    mode: state.mode,
+    tokenSource: state.tokenSource,
+    budgetCeiling: state.mode === 'budget' ? state.budget : undefined,
+    recommendation,
+  });
 }

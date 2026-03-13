@@ -19,11 +19,13 @@ import {
   deriveCursorImportReport,
   selectIsImportMode,
   selectRecommendation,
+  selectRecommendationPresentation,
   selectSelectedFileName,
   selectSelectedModelIds,
   selectSelectedModels,
   selectShowManualControls,
 } from './calculatorSelectors';
+import type { RecommendationPresentation } from './recommendationPresentation';
 
 interface CalculatorControllerDependencies {
   manualModels?: Model[];
@@ -41,6 +43,7 @@ interface CalculatorController {
   selectedFileName: string | null;
   cursorImportReport: CursorImportReport | null;
   recommendation: Recommendation | null;
+  recommendationPresentation: RecommendationPresentation | null;
   setMode: (mode: CalculatorState['mode']) => void;
   setTokenSource: (tokenSource: TokenSource) => void;
   setBudget: (budget: number) => void;
@@ -82,6 +85,10 @@ export function useCalculatorController(
   const recommendation = useMemo(
     () => selectRecommendation(state, { manualModels, importReplayModels, plans, cursorImportReport }),
     [cursorImportReport, importReplayModels, manualModels, plans, state],
+  );
+  const recommendationPresentation = useMemo(
+    () => selectRecommendationPresentation(state, recommendation),
+    [recommendation, state],
   );
 
   const setMode = useCallback((mode: CalculatorState['mode']) => {
@@ -156,6 +163,7 @@ export function useCalculatorController(
     selectedFileName: selectSelectedFileName(state),
     cursorImportReport,
     recommendation,
+    recommendationPresentation,
     setMode,
     setTokenSource,
     setBudget,

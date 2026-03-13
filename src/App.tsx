@@ -35,6 +35,7 @@ function App() {
     selectedFileName,
     cursorImportReport,
     recommendation,
+    recommendationPresentation,
     setMode,
     setTokenSource,
     setBudget,
@@ -166,7 +167,7 @@ function App() {
           </>
         )}
 
-        {recommendation && (
+        {recommendation && recommendationPresentation && (
           <>
             <div className="mt-8">
               <BestPlanCard result={recommendation.best} mode={mode} />
