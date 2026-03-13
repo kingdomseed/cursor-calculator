@@ -1,10 +1,10 @@
 import { startTransition, useCallback, useMemo, useState } from 'react';
 import { Analytics } from '@vercel/analytics/react';
-import pricingData from './data/cursor-pricing.json';
 import { PROVIDER_IMPORT_MODELS } from './data/providerImportModels';
+import { getCurrentModels, getManualApiModels, getPricingCatalog } from './domain/catalog/currentCatalog';
 import type { ApproximationMode, CursorImportOptions, CursorImportReport } from './lib/cursorUsage';
 import { parseCursorUsageFiles } from './lib/cursorUsage';
-import type { Mode, Model, ModelConfig, PricingData } from './lib/types';
+import type { Mode, Model, ModelConfig } from './lib/types';
 import { computeExactUsageRecommendation, computeRecommendation } from './lib/calculations';
 import { ModeToggle } from './components/ModeToggle';
 import { BudgetInput } from './components/BudgetInput';
@@ -17,9 +17,10 @@ import { CursorImportPanel } from './components/CursorImportPanel';
 import { WelcomeModal } from './components/WelcomeModal';
 import { CalculatorIcon, GitHubIcon, JHDIcon } from './components/Icons';
 
-const PRICING = pricingData as PricingData;
-const API_MODELS = PRICING.models.filter((model) => model.pool === 'api');
-const IMPORT_REPLAY_MODELS = [...PRICING.models, ...PROVIDER_IMPORT_MODELS];
+const PRICING = getPricingCatalog();
+const CURRENT_MODELS = getCurrentModels();
+const API_MODELS = getManualApiModels();
+const IMPORT_REPLAY_MODELS = [...CURRENT_MODELS, ...PROVIDER_IMPORT_MODELS];
 
 type TokenSource = 'manual' | 'cursor_import';
 type ImportedCsvFile = { name: string; text: string };
