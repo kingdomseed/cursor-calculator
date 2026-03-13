@@ -170,7 +170,7 @@ function App() {
         {recommendation && recommendationPresentation && (
           <>
             <div className="mt-8">
-              <BestPlanCard result={recommendation.best} mode={mode} />
+              <BestPlanCard presentation={recommendationPresentation} />
             </div>
             <PlanComparison results={recommendation.all} mode={mode} />
           </>

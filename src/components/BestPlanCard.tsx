@@ -1,115 +1,122 @@
-import type { Mode, PlanResult } from '../lib/types';
-import { formatCurrency, formatNumber, formatRate } from '../domain/recommendation/formatters';
+import type {
+  RecommendationComparisonSection,
+  RecommendationPresentation,
+} from '../app/recommendationPresentation';
 import { PROVIDER_COLORS } from '../lib/constants';
 import { CircleCheckIcon } from './Icons';
 
 interface Props {
-  result: PlanResult;
-  mode: Mode;
+  presentation: RecommendationPresentation;
 }
 
-export function BestPlanCard({ result, mode }: Props) {
-  const headlineValue = mode === 'budget' ? result.apiUsage : result.totalCost;
-  const headlineCaption = mode === 'budget' ? 'API value /month' : '/month';
-  const overageLabel = mode === 'budget' ? 'Additional API billed' : 'Additional API usage';
-  const coveredLabel = mode === 'budget' ? 'API value covered by included pool' : 'API usage covered by pool';
+interface CardBreakdownSection {
+  title: string;
+  rows: Array<{
+    key: string;
+    label: string;
+    value: string;
+  }>;
+}
+
+export function BestPlanCard({ presentation }: Props) {
+  const breakdownSections = getBreakdownSections(presentation);
+  const { hero, bestPlan } = presentation;
 
   return (
     <div className="bg-[#14120b] text-white rounded-2xl p-6 sm:p-8">
       <div className="flex items-center gap-2 mb-4">
         <CircleCheckIcon className="w-5 h-5 text-green-400" />
-        <span className="text-sm font-medium text-white/70 uppercase tracking-wide">Your Best Option</span>
+        <span className="text-sm font-medium text-white/70 uppercase tracking-wide">Recommended plan</span>
       </div>
 
-      <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2 mb-6">
-        <h2 className="text-3xl sm:text-4xl font-bold">
-          {result.plan === 'pro_plus' ? 'Pro Plus' : result.plan === 'ultra' ? 'Ultra' : 'Pro'}
-        </h2>
-        <div className="text-right">
-          <p className="text-4xl sm:text-5xl font-bold">{formatCurrency(headlineValue)}</p>
-          <p className="text-white/60 text-sm">{headlineCaption}</p>
-        </div>
-      </div>
-
-      <div className="space-y-3 border-t border-white/20 pt-4 text-sm">
-        <div>
-          <div className="flex justify-between">
-            <span className="text-white/60">Plan subscription</span>
-            <span>${result.subscription}/mo</span>
+      <div className="mb-6">
+        <p className="text-sm font-medium text-white/70 uppercase tracking-wide">{hero.title}</p>
+        <div className="mt-3 flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-3">
+          <h2 className="text-3xl sm:text-4xl font-bold">{bestPlan.planLabel}</h2>
+          <div className="text-right">
+            <p className="text-sm text-white/60">{hero.primaryMetric.label}</p>
+            <p className="text-4xl sm:text-5xl font-bold">{hero.primaryMetric.formattedValue}</p>
           </div>
-          <p className="text-xs text-white/40 mt-0.5">
-            includes ${result.apiPool} API pool
-          </p>
         </div>
-
-        {result.overage > 0 ? (
-          <div className="flex justify-between">
-            <span className="text-white/60">{overageLabel}</span>
-            <span className="text-amber-400">+{formatCurrency(result.overage)}</span>
-          </div>
-        ) : (
-          <div className="flex justify-between">
-            <span className="text-white/60">{coveredLabel}</span>
-            <span className="text-green-400">{formatCurrency(result.apiUsage)}</span>
+        {hero.secondaryMetric && (
+          <div className="mt-3 flex justify-between gap-3 text-sm">
+            <span className="text-white/60">{hero.secondaryMetric.label}</span>
+            <span className="font-semibold">{hero.secondaryMetric.formattedValue}</span>
           </div>
         )}
+        <p className="mt-3 text-sm text-white/60">{hero.context}</p>
+      </div>
+
+      <div className="space-y-4 border-t border-white/20 pt-4">
+        {breakdownSections.map((section) => (
+          <div key={section.title}>
+            <p className="text-sm text-white/60 mb-2">{section.title}</p>
+            <div className="space-y-2 text-sm">
+              {section.rows.map((row) => (
+                <div key={row.key} className="flex justify-between gap-3">
+                  <span className="text-white/60">{row.label}</span>
+                  <span className="text-right">{row.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
 
       <div className="mt-6 pt-4 border-t border-white/20">
-        <p className="text-sm text-white/60 mb-3">
-          {mode === 'budget' ? 'What you get' : 'Your usage breakdown'}
-        </p>
+        <p className="text-sm text-white/60 mb-3">Model details</p>
         <div className="space-y-3">
-          {['Auto', 'Composer 1.5'].map((name) => (
-            <div key={name} className="flex items-start justify-between">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#14120b] ring-1 ring-white/20" />
-                <span className="font-medium text-sm">{name}</span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-white/60">Included</span>
+          {bestPlan.modelRows.map((item) => (
+            <div key={item.key} className="flex items-start justify-between gap-3">
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className={`w-2 h-2 rounded-full ${PROVIDER_COLORS[item.provider] || 'bg-gray-400'}`} />
+                  <span className="font-medium text-sm">{item.label}</span>
+                  {item.badges.map((badge) => (
+                    <span key={badge} className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-white/60">
+                      {badge}
+                    </span>
+                  ))}
+                </div>
+                <p className="text-xs text-white/40 ml-4">{item.rateLabel}</p>
+                {item.secondaryMetric && (
+                  <p className="text-xs text-white/40 ml-4 mt-1">
+                    {item.secondaryMetric.label}: {item.secondaryMetric.formattedValue}
+                  </p>
+                )}
               </div>
-              <span className="font-semibold text-white/50">Usage based</span>
+              <div className="text-right">
+                <p className="text-xs text-white/60">{item.primaryMetric.label}</p>
+                <span className="font-semibold">{item.primaryMetric.formattedValue}</span>
+              </div>
             </div>
           ))}
-
-          {result.perModel.map((item) => {
-            const variantBadges: string[] = [];
-            if (item.maxMode) variantBadges.push('Max');
-            if (item.fast) variantBadges.push('Fast');
-            if (item.thinking) variantBadges.push('Thinking');
-            if (item.caching) {
-              variantBadges.push(item.exactTokens ? 'Cache' : `Cache ${item.cacheHitRate}%`);
-            }
-            if (item.approximated) variantBadges.push('Approx');
-            if (item.sourceLabel) variantBadges.push(item.sourceLabel);
-
-            return (
-              <div key={item.key} className="flex items-start justify-between">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className={`w-2 h-2 rounded-full ${PROVIDER_COLORS[item.provider] || 'bg-gray-400'}`} />
-                    <span className="font-medium text-sm">{item.label}</span>
-                    {variantBadges.map((badge) => (
-                      <span key={badge} className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-white/60">
-                        {badge}
-                      </span>
-                    ))}
-                  </div>
-                  <p className="text-xs text-white/40 ml-4">
-                    {formatRate(item.effectiveRates.input)} / {formatRate(item.effectiveRates.output)} per M
-                  </p>
-                </div>
-                <div className="text-right">
-                  {mode === 'budget' ? (
-                    <span className="font-semibold">{formatNumber(item.tokens.total)} tokens</span>
-                  ) : (
-                    <span className="font-semibold">{formatCurrency(item.apiCost)}</span>
-                  )}
-                </div>
-              </div>
-            );
-          })}
         </div>
       </div>
     </div>
   );
+}
+
+function getBreakdownSections(presentation: RecommendationPresentation): CardBreakdownSection[] {
+  return presentation.comparisonSections
+    .filter((section) => section.kind !== 'primary_answer')
+    .map((section) => buildBreakdownSection(section, presentation.bestPlan.plan));
+}
+
+function buildBreakdownSection(
+  section: RecommendationComparisonSection,
+  bestPlan: RecommendationPresentation['bestPlan']['plan'],
+): CardBreakdownSection {
+  return {
+    title: section.title,
+    rows: section.rows.map((row) => {
+      const value = row.values.find((entry) => entry.plan === bestPlan);
+
+      return {
+        key: row.key,
+        label: row.label,
+        value: value?.formattedValue ?? '—',
+      };
+    }),
+  };
 }

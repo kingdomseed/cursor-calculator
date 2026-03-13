@@ -61,7 +61,14 @@ export interface RecommendationComparisonRow {
   values: RecommendationComparisonValue[];
 }
 
+export type RecommendationComparisonSectionKind =
+  | 'primary_answer'
+  | 'plan_coverage'
+  | 'out_of_pocket_breakdown'
+  | 'usage_value_details';
+
 export interface RecommendationComparisonSection {
+  kind: RecommendationComparisonSectionKind;
   title: string;
   rows: RecommendationComparisonRow[];
 }
@@ -216,10 +223,12 @@ function buildComparisonSections(
 
   return [
     {
+      kind: 'primary_answer',
       title: 'Primary answer',
       rows: primaryRows,
     },
     {
+      kind: 'plan_coverage',
       title: 'Plan coverage',
       rows: [
         createRow(plans, 'includedPool', 'Included API pool', (plan) => plan.includedPool, formatCurrency),
@@ -228,6 +237,7 @@ function buildComparisonSections(
       ],
     },
     {
+      kind: 'out_of_pocket_breakdown',
       title: 'Out-of-pocket breakdown',
       rows: [
         createRow(plans, 'subscription', 'Subscription', (plan) => plan.subscription, formatCurrency),
@@ -236,6 +246,7 @@ function buildComparisonSections(
       ],
     },
     {
+      kind: 'usage_value_details',
       title: 'Usage/value details',
       rows: [
         createRow(plans, 'usageValue', 'Usage value', (plan) => plan.derived.usageValue, formatCurrency),
