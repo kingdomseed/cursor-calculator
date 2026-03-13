@@ -1,5 +1,5 @@
 import type { Mode, PlanResult } from '../lib/types';
-import { formatCurrency, formatNumber, formatRate } from '../lib/calculations';
+import { formatCurrency, formatNumber, formatRate } from '../domain/recommendation/formatters';
 import { PROVIDER_COLORS } from '../lib/constants';
 import { CircleCheckIcon } from './Icons';
 
@@ -9,6 +9,11 @@ interface Props {
 }
 
 export function BestPlanCard({ result, mode }: Props) {
+  const headlineValue = mode === 'budget' ? result.apiUsage : result.totalCost;
+  const headlineCaption = mode === 'budget' ? 'API value /month' : '/month';
+  const overageLabel = mode === 'budget' ? 'Additional API billed' : 'Additional API usage';
+  const coveredLabel = mode === 'budget' ? 'API value covered by included pool' : 'API usage covered by pool';
+
   return (
     <div className="bg-[#14120b] text-white rounded-2xl p-6 sm:p-8">
       <div className="flex items-center gap-2 mb-4">
@@ -21,8 +26,8 @@ export function BestPlanCard({ result, mode }: Props) {
           {result.plan === 'pro_plus' ? 'Pro Plus' : result.plan === 'ultra' ? 'Ultra' : 'Pro'}
         </h2>
         <div className="text-right">
-          <p className="text-4xl sm:text-5xl font-bold">{formatCurrency(result.totalCost)}</p>
-          <p className="text-white/60 text-sm">/month</p>
+          <p className="text-4xl sm:text-5xl font-bold">{formatCurrency(headlineValue)}</p>
+          <p className="text-white/60 text-sm">{headlineCaption}</p>
         </div>
       </div>
 
@@ -39,12 +44,12 @@ export function BestPlanCard({ result, mode }: Props) {
 
         {result.overage > 0 ? (
           <div className="flex justify-between">
-            <span className="text-white/60">Additional API usage</span>
+            <span className="text-white/60">{overageLabel}</span>
             <span className="text-amber-400">+{formatCurrency(result.overage)}</span>
           </div>
         ) : (
           <div className="flex justify-between">
-            <span className="text-white/60">API usage covered by pool</span>
+            <span className="text-white/60">{coveredLabel}</span>
             <span className="text-green-400">{formatCurrency(result.apiUsage)}</span>
           </div>
         )}

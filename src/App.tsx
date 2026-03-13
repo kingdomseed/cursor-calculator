@@ -1,11 +1,6 @@
-import { startTransition, useCallback, useMemo, useState } from 'react';
 import { Analytics } from '@vercel/analytics/react';
-import pricingData from './data/cursor-pricing.json';
-import { PROVIDER_IMPORT_MODELS } from './data/providerImportModels';
-import type { ApproximationMode, CursorImportOptions, CursorImportReport } from './lib/cursorUsage';
-import { parseCursorUsageFiles } from './lib/cursorUsage';
-import type { Mode, Model, ModelConfig, PricingData } from './lib/types';
-import { computeExactUsageRecommendation, computeRecommendation } from './lib/calculations';
+import { getPricingCatalog } from './domain/catalog/currentCatalog';
+import { useCalculatorController } from './app/useCalculatorController';
 import { ModeToggle } from './components/ModeToggle';
 import { BudgetInput } from './components/BudgetInput';
 import { TokenInput } from './components/TokenInput';
@@ -17,151 +12,41 @@ import { CursorImportPanel } from './components/CursorImportPanel';
 import { WelcomeModal } from './components/WelcomeModal';
 import { CalculatorIcon, GitHubIcon, JHDIcon } from './components/Icons';
 
-const PRICING = pricingData as PricingData;
-const API_MODELS = PRICING.models.filter((model) => model.pool === 'api');
-const IMPORT_REPLAY_MODELS = [...PRICING.models, ...PROVIDER_IMPORT_MODELS];
-
-type TokenSource = 'manual' | 'cursor_import';
-type ImportedCsvFile = { name: string; text: string };
-
-function createDefaultConfig(model: Model): ModelConfig {
-  return {
-    modelId: model.id,
-    weight: 0,
-    maxMode: model.auto_checks?.max_mode ?? false,
-    fast: model.auto_checks?.fast ?? false,
-    thinking: model.auto_checks?.thinking ?? false,
-    caching: false,
-    cacheHitRate: 75,
-  };
-}
-
-function redistributeWeights(configs: ModelConfig[]): ModelConfig[] {
-  if (configs.length === 0) return configs;
-  const evenWeight = Math.round(100 / configs.length);
-  return configs.map((config, index) => ({
-    ...config,
-    weight: index === configs.length - 1
-      ? 100 - evenWeight * (configs.length - 1)
-      : evenWeight,
-  }));
-}
+const PRICING = getPricingCatalog();
 
 function App() {
-  const [mode, setMode] = useState<Mode>('budget');
-  const [tokenSource, setTokenSource] = useState<TokenSource>('manual');
-  const [budget, setBudget] = useState(60);
-  const [tokens, setTokens] = useState(1_000_000);
-  const [inputRatio, setInputRatio] = useState(3);
-  const [showAdvanced, setShowAdvanced] = useState(false);
-  const [cursorImportFiles, setCursorImportFiles] = useState<ImportedCsvFile[]>([]);
-  const [cursorImportReport, setCursorImportReport] = useState<CursorImportReport | null>(null);
-  const [cursorImportError, setCursorImportError] = useState<string | null>(null);
-  const [isImporting, setIsImporting] = useState(false);
-  const [cursorImportOptions, setCursorImportOptions] = useState<CursorImportOptions>({
-    includeUserApiKey: true,
-    approximationMode: 'best_effort',
-  });
-  const [modelConfigs, setModelConfigs] = useState<ModelConfig[]>(() => {
-    const defaultModel = API_MODELS.find((model) => model.id === 'claude-sonnet-4-6') ?? API_MODELS[0];
-    return defaultModel ? redistributeWeights([createDefaultConfig(defaultModel)]) : [];
-  });
-
-  const selectedModelIds = useMemo(() => modelConfigs.map((config) => config.modelId), [modelConfigs]);
-  const selectedModels = useMemo(
-    () => API_MODELS.filter((model) => selectedModelIds.includes(model.id)),
-    [selectedModelIds],
-  );
-  const isImportMode = mode === 'tokens' && tokenSource === 'cursor_import';
-  const showManualControls = mode === 'budget' || tokenSource === 'manual';
-
-  const handleModelSelectionChange = useCallback((ids: string[]) => {
-    setModelConfigs((previous) => {
-      const kept = previous.filter((config) => ids.includes(config.modelId));
-      const newIds = ids.filter((id) => !previous.some((config) => config.modelId === id));
-      const added = newIds.map((id) => {
-        const model = API_MODELS.find((candidate) => candidate.id === id)!;
-        return createDefaultConfig(model);
-      });
-      return redistributeWeights([...kept, ...added]);
-    });
-  }, []);
-
-  const recommendation = useMemo(() => {
-    if (isImportMode) {
-      if (!cursorImportReport || cursorImportReport.pricedEntries.length === 0) return null;
-      return computeExactUsageRecommendation(cursorImportReport.pricedEntries, IMPORT_REPLAY_MODELS, PRICING.plans);
-    }
-
-    if (modelConfigs.length === 0) return null;
-    return computeRecommendation(
+  const {
+    state: {
       mode,
+      tokenSource,
       budget,
       tokens,
-      selectedModels,
-      modelConfigs,
-      PRICING.plans,
       inputRatio,
-    );
-  }, [
-    budget,
-    cursorImportReport,
-    inputRatio,
-    isImportMode,
-    mode,
-    modelConfigs,
+      showAdvanced,
+      cursorImportError,
+      isImporting,
+      cursorImportOptions,
+      modelConfigs,
+    },
+    manualModels,
+    selectedModelIds,
     selectedModels,
-    tokens,
-  ]);
-
-  async function handleCursorImportFilesSelected(files: FileList | null) {
-    setCursorImportError(null);
-
-    if (!files || files.length === 0) {
-      return;
-    }
-
-    setIsImporting(true);
-    try {
-      const selectedFile = files[0];
-      const loadedFiles = [{
-        name: selectedFile.name,
-        text: await selectedFile.text(),
-      }];
-
-      setCursorImportFiles(loadedFiles);
-      const report = parseCursorUsageFiles(loadedFiles, IMPORT_REPLAY_MODELS, cursorImportOptions);
-      startTransition(() => setCursorImportReport(report));
-    } catch {
-      setCursorImportFiles([]);
-      startTransition(() => setCursorImportReport(null));
-      setCursorImportError('Could not read the selected CSV files.');
-    } finally {
-      setIsImporting(false);
-    }
-  }
-
-  function applyCursorImportOptions(nextOptions: CursorImportOptions) {
-    setCursorImportOptions(nextOptions);
-    if (cursorImportFiles.length === 0) return;
-
-    const report = parseCursorUsageFiles(cursorImportFiles, IMPORT_REPLAY_MODELS, nextOptions);
-    startTransition(() => setCursorImportReport(report));
-  }
-
-  function handleApproximationModeChange(nextMode: ApproximationMode) {
-    applyCursorImportOptions({
-      ...cursorImportOptions,
-      approximationMode: nextMode,
-    });
-  }
-
-  function handleIncludeUserApiKeyChange(checked: boolean) {
-    applyCursorImportOptions({
-      ...cursorImportOptions,
-      includeUserApiKey: checked,
-    });
-  }
+    showManualControls,
+    selectedFileName,
+    cursorImportReport,
+    recommendation,
+    setMode,
+    setTokenSource,
+    setBudget,
+    setTokens,
+    setInputRatio,
+    setShowAdvanced,
+    setModelConfigs,
+    handleModelSelectionChange,
+    handleCursorImportFilesSelected,
+    handleApproximationModeChange,
+    handleIncludeUserApiKeyChange,
+  } = useCalculatorController();
 
   return (
     <div className="min-h-screen bg-[#f7f7f4] text-[#14120b]">
@@ -214,10 +99,10 @@ function App() {
             <CursorImportPanel
               report={cursorImportReport}
               error={cursorImportError}
-              selectedFileName={cursorImportFiles[0]?.name ?? null}
+              selectedFileName={selectedFileName}
               isImporting={isImporting}
-              approximationMode={cursorImportOptions.approximationMode ?? 'best_effort'}
-              includeUserApiKey={cursorImportOptions.includeUserApiKey ?? true}
+              approximationMode={cursorImportOptions.approximationMode}
+              includeUserApiKey={cursorImportOptions.includeUserApiKey}
               onFilesSelected={handleCursorImportFilesSelected}
               onApproximationModeChange={handleApproximationModeChange}
               onIncludeUserApiKeyChange={handleIncludeUserApiKeyChange}
@@ -230,7 +115,7 @@ function App() {
             <div className="mt-8">
               <label className="block text-sm font-medium text-[#14120b]/60 mb-2">Models to compare</label>
               <ModelSelector
-                options={API_MODELS}
+                options={manualModels}
                 selected={selectedModelIds}
                 onChange={handleModelSelectionChange}
                 placeholder="Select models..."

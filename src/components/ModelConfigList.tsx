@@ -1,3 +1,4 @@
+import { getWeightSummary } from '../domain/modelConfig/weights';
 import type { Model, ModelConfig } from '../lib/types';
 import { ModelConfigRow } from './ModelConfigRow';
 
@@ -8,8 +9,7 @@ interface Props {
 }
 
 export function ModelConfigList({ models, configs, onChange }: Props) {
-  const weightSum = configs.reduce((s, c) => s + c.weight, 0);
-  const needsNormalization = configs.length > 0 && weightSum !== 100;
+  const { weightSum, needsNormalization } = getWeightSummary(configs);
 
   function handleConfigChange(index: number, updated: ModelConfig) {
     const next = [...configs];

@@ -1,236 +1,104 @@
 import { describe, expect, it } from 'vitest';
-import pricingData from '../../data/cursor-pricing.json';
 
-import {
-  computeExactUsageRecommendation,
-  exactTokensToDollars,
-} from '../calculations';
-import {
-  parseCursorUsageFiles,
-  type CursorImportOptions,
-} from '../cursorUsage';
-import type {
-  ExactTokenBreakdown,
-  Model,
-  PricingData,
-  UsageLineItemInput,
-} from '../types';
+import { getImportReplayModelById, getImportReplayModels } from '../catalog';
+import { normalizeImportedModel } from '../normalization';
+import { parseCursorCsvText } from '../csvParser';
+import { priceImportedRow } from '../pricing';
+import { parseCursorUsageFiles } from '../summary';
+import type { CursorImportOptions, ExactTokenBreakdown, SupportedNormalization } from '../types';
 
-const productionPricing = pricingData as PricingData;
+const IMPORT_REPLAY_MODELS = getImportReplayModels();
+const IMPORT_REPLAY_MODEL_BY_ID = new Map(
+  IMPORT_REPLAY_MODELS.map((model) => [model.id, model]),
+);
 
-const plans: PricingData['plans'] = {
-  pro: { name: 'Pro', monthly_cost: 20, api_pool: 20, description: '' },
-  pro_plus: { name: 'Pro Plus', monthly_cost: 60, api_pool: 70, description: '' },
-  ultra: { name: 'Ultra', monthly_cost: 200, api_pool: 400, description: '' },
+const baseOptions: CursorImportOptions = {
+  includeUserApiKey: true,
+  approximationMode: 'best_effort',
 };
 
-const models: Model[] = [
-  {
-    id: 'gpt-5',
-    name: 'GPT-5',
-    provider: 'openai',
-    pool: 'api',
-    context: { default: 272000, max: 1000000 },
-    rates: { input: 1.25, cache_write: null, cache_read: 0.125, output: 10 },
-    variants: {
-      max_mode: { cursor_upcharge: 0.2 },
-      fast: {
-        model_id: 'gpt-5-fast',
-        rates: { input: 2.5, cache_write: null, cache_read: 0.25, output: 20 },
-      },
-      thinking: true,
-    },
-  },
-  {
-    id: 'gpt-5.1-codex',
-    name: 'GPT-5.1 Codex',
-    provider: 'openai',
-    pool: 'api',
-    context: { default: 272000, max: 1000000 },
-    rates: { input: 1.25, cache_write: null, cache_read: 0.125, output: 10 },
-    variants: {
-      max_mode: { cursor_upcharge: 0.2 },
-      thinking: true,
-    },
-  },
-  {
-    id: 'gpt-5.2',
-    name: 'GPT-5.2',
-    provider: 'openai',
-    pool: 'api',
-    context: { default: 272000, max: 1000000 },
-    rates: { input: 1.75, cache_write: null, cache_read: 0.175, output: 14 },
-    variants: {
-      max_mode: { cursor_upcharge: 0.2 },
-      thinking: true,
-    },
-  },
-  {
-    id: 'gpt-5.2-codex',
-    name: 'GPT-5.2 Codex',
-    provider: 'openai',
-    pool: 'api',
-    context: { default: 272000, max: 1000000 },
-    rates: { input: 1.75, cache_write: null, cache_read: 0.175, output: 14 },
-    variants: {
-      max_mode: { cursor_upcharge: 0.2 },
-      thinking: true,
-    },
-  },
-  {
-    id: 'claude-4-5-opus',
-    name: 'Claude 4.5 Opus',
-    provider: 'anthropic',
-    pool: 'api',
-    context: { default: 200000, max: 1000000 },
-    rates: { input: 5, cache_write: 6.25, cache_read: 0.5, output: 25 },
-    variants: {
-      max_mode: { cursor_upcharge: 0.2 },
-      thinking: true,
-    },
-  },
-  {
-    id: 'claude-opus-4-6',
-    name: 'Claude 4.6 Opus',
-    provider: 'anthropic',
-    pool: 'api',
-    context: { default: 200000, max: 1000000 },
-    rates: { input: 5, cache_write: 6.25, cache_read: 0.5, output: 25 },
-    variants: {
-      max_mode: { cursor_upcharge: 0.2 },
-      fast: {
-        model_id: 'claude-opus-4-6-fast',
-        rates: { input: 30, cache_write: 37.5, cache_read: 3, output: 150 },
-      },
-      thinking: true,
-    },
-  },
-  {
-    id: 'claude-opus-4-6-max',
-    name: 'Claude 4.6 Opus Max',
-    provider: 'anthropic',
-    pool: 'api',
-    context: { default: 1000000, max: null },
-    rates: { input: 10, cache_write: 12.5, cache_read: 1, output: 50 },
-    variants: {
-      thinking: true,
-    },
-    auto_checks: {
-      max_mode: true,
-    },
-  },
-  {
-    id: 'provider-openai-o3',
-    name: 'o3',
-    provider: 'openai',
-    pool: 'api',
-    context: { default: 200000, max: null },
-    rates: { input: 2, cache_write: null, cache_read: 0.5, output: 8 },
-    variants: {
-      thinking: true,
-    },
-  },
-  {
-    id: 'provider-anthropic-claude-opus-4',
-    name: 'Claude Opus 4',
-    provider: 'anthropic',
-    pool: 'api',
-    context: { default: 200000, max: null },
-    rates: { input: 15, cache_write: 18.75, cache_read: 1.5, output: 75 },
-    variants: {
-      thinking: true,
-    },
-  },
-  {
-    id: 'provider-anthropic-claude-opus-4-1',
-    name: 'Claude Opus 4.1',
-    provider: 'anthropic',
-    pool: 'api',
-    context: { default: 200000, max: null },
-    rates: { input: 15, cache_write: 18.75, cache_read: 1.5, output: 75 },
-    variants: {
-      thinking: true,
-    },
-  },
-  {
-    id: 'auto',
-    name: 'Auto',
-    provider: 'cursor',
-    pool: 'auto_composer',
-    context: { default: 200000, max: null },
-    rates: { input: 1.25, cache_write: null, cache_read: 0.25, output: 6 },
-  },
-  {
-    id: 'grok-code-fast-1',
-    name: 'Grok Code',
-    provider: 'xai',
-    pool: 'api',
-    context: { default: 256000, max: null },
-    rates: { input: 0.2, cache_write: null, cache_read: 0.02, output: 1.5 },
-    variants: {
-      thinking: true,
-    },
-  },
-];
+describe('parseCursorCsvText', () => {
+  it('parses rows and reconstructs total tokens from the detailed columns', () => {
+    const rows = parseCursorCsvText(`Date,User,Kind,Model,Max Mode,Input (w/ Cache Write),Input (w/o Cache Write),Cache Read,Output Tokens,Total Tokens,Requests
+"2026-02-19T13:06:04.478Z","developer@jasonholtdigital.com","Included","gpt-5-fast","No","0","1000000","250000","500000","0","1"`);
 
-describe('exactTokensToDollars', () => {
-  it('prices exact imported token categories without using a global ratio', () => {
-    const exactTokens: ExactTokenBreakdown = {
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({
+      dayKey: '2026-02-19',
+      kind: 'Included',
+      model: 'gpt-5-fast',
+      maxMode: false,
+    });
+    expect(rows[0].tokens).toEqual({
       inputWithCacheWrite: 0,
       inputWithoutCacheWrite: 1_000_000,
       cacheRead: 250_000,
       output: 500_000,
       total: 1_750_000,
-    };
-
-    const cost = exactTokensToDollars(exactTokens, {
-      input: 2.5,
-      cache_write: null,
-      cache_read: 0.25,
-      output: 20,
     });
-
-    expect(cost).toBeCloseTo(12.5625, 4);
   });
 });
 
-describe('computeExactUsageRecommendation', () => {
-  it('reuses plan pool math for exact per-model usage entries', () => {
-    const usage: UsageLineItemInput[] = [
-      {
-        key: 'gpt-5-fast',
-        modelId: 'gpt-5',
-        label: 'GPT-5 Fast',
-        provider: 'openai',
-        pool: 'api',
-        tokens: {
-          total: 1_750_000,
-          input: 1_250_000,
-          output: 500_000,
-        },
-        exactTokens: {
-          inputWithCacheWrite: 0,
-          inputWithoutCacheWrite: 1_000_000,
-          cacheRead: 250_000,
-          output: 500_000,
-          total: 1_750_000,
-        },
-        maxMode: false,
-        fast: true,
-        thinking: false,
-        caching: true,
-        cacheHitRate: 0,
-        approximated: false,
-      },
-    ];
+describe('normalizeImportedModel', () => {
+  it('approximates unsupported GPT-5.x fast labels in best-effort mode and rejects them in strict mode', () => {
+    expect(
+      normalizeImportedModel(
+        'gpt-5.2-xhigh-fast',
+        false,
+        IMPORT_REPLAY_MODEL_BY_ID,
+        'best_effort',
+      ),
+    ).toMatchObject({
+      kind: 'supported',
+      modelId: 'gpt-5.2',
+      fast: true,
+      maxMode: false,
+      thinking: false,
+      approximated: true,
+      rateMultiplier: 2,
+    });
 
-    const result = computeExactUsageRecommendation(usage, models, plans);
-    const pro = result.all.find((plan) => plan.plan === 'pro');
+    expect(
+      normalizeImportedModel(
+        'gpt-5.2-xhigh-fast',
+        false,
+        IMPORT_REPLAY_MODEL_BY_ID,
+        'strict',
+      ),
+    ).toMatchObject({
+      kind: 'unsupported',
+    });
+  });
+});
 
-    expect(result.best.plan).toBe('pro');
-    expect(pro?.apiUsage).toBeCloseTo(12.5625, 4);
-    expect(pro?.overage).toBe(0);
-    expect(pro?.perModel[0].label).toBe('GPT-5 Fast');
+describe('priceImportedRow', () => {
+  it('applies long-context companion pricing when max-mode input exceeds the default context', () => {
+    const model = getImportReplayModelById('claude-opus-4-6');
+    const normalized: SupportedNormalization = {
+      kind: 'supported',
+      modelId: 'claude-opus-4-6',
+      fast: false,
+      maxMode: true,
+      thinking: false,
+      approximated: false,
+    };
+    const tokens: ExactTokenBreakdown = {
+      inputWithCacheWrite: 0,
+      inputWithoutCacheWrite: 250_000,
+      cacheRead: 0,
+      output: 50_000,
+      total: 300_000,
+    };
+
+    const priced = priceImportedRow(
+      model!,
+      normalized,
+      tokens,
+      IMPORT_REPLAY_MODEL_BY_ID,
+    );
+
+    expect(priced.approximated).toBe(false);
+    expect(priced.exactCost.total).toBeCloseTo(6, 4);
   });
 });
 
@@ -245,15 +113,10 @@ describe('parseCursorUsageFiles', () => {
 "2025-11-11T15:27:29.116Z","developer@jasonholtdigital.com","Included","grok-4-0709","No","0","100208","5928","1576","107712","1"
 "2026-02-19T12:44:02.199Z","developer@jasonholtdigital.com","Included","auto","No","0","50000","0","10000","60000","1"`;
 
-  const baseOptions: CursorImportOptions = {
-    includeUserApiKey: true,
-    approximationMode: 'best_effort',
-  };
-
   it('aggregates supported API usage, flags approximations, and includes API-key rows in Cursor-only estimates by default', () => {
     const report = parseCursorUsageFiles(
       [{ name: 'cursor-usage-sample.csv', text: csv }],
-      models,
+      IMPORT_REPLAY_MODELS,
       baseOptions,
     );
 
@@ -294,7 +157,7 @@ describe('parseCursorUsageFiles', () => {
   it('drops approximate labels in strict mode', () => {
     const report = parseCursorUsageFiles(
       [{ name: 'cursor-usage-sample.csv', text: csv }],
-      models,
+      IMPORT_REPLAY_MODELS,
       { ...baseOptions, approximationMode: 'strict' },
     );
 
@@ -307,7 +170,7 @@ describe('parseCursorUsageFiles', () => {
   it('can still exclude User API Key rows explicitly', () => {
     const report = parseCursorUsageFiles(
       [{ name: 'cursor-usage-sample.csv', text: csv }],
-      models,
+      IMPORT_REPLAY_MODELS,
       { ...baseOptions, includeUserApiKey: false },
     );
 
@@ -316,10 +179,10 @@ describe('parseCursorUsageFiles', () => {
     expect(report.summary.activeDays).toBe(2);
   });
 
-  it('applies only the flat Max upcharge when the model has no documented long-context multiplier', () => {
+  it('applies only the flat max upcharge when the model has no documented long-context multiplier', () => {
     const report = parseCursorUsageFiles(
       [{ name: 'cursor-usage-sample.csv', text: csv }],
-      models,
+      IMPORT_REPLAY_MODELS,
       baseOptions,
     );
 
@@ -338,7 +201,7 @@ describe('parseCursorUsageFiles', () => {
 
     const report = parseCursorUsageFiles(
       [{ name: 'cursor-usage-max.csv', text: maxCsv }],
-      models,
+      IMPORT_REPLAY_MODELS,
       baseOptions,
     );
 
@@ -364,7 +227,7 @@ describe('parseCursorUsageFiles', () => {
 
     const report = parseCursorUsageFiles(
       [{ name: 'cursor-usage-fast-approx.csv', text: fastApproxCsv }],
-      models,
+      IMPORT_REPLAY_MODELS,
       baseOptions,
     );
 
@@ -398,7 +261,7 @@ describe('parseCursorUsageFiles', () => {
 
     const report = parseCursorUsageFiles(
       [{ name: 'cursor-usage-provider-backed.csv', text: providerBackedCsv }],
-      models,
+      IMPORT_REPLAY_MODELS,
       baseOptions,
     );
 
@@ -420,13 +283,43 @@ describe('parseCursorUsageFiles', () => {
     expect(opus41Entry?.exactCost?.total).toBeCloseTo(6.75, 4);
   });
 
-  it('treats composer-1 as a known API-priced model in the production pricing catalog', () => {
+  it('maps non-fast GPT reasoning labels and Gemini 3.1 preview labels instead of leaving them unsupported', () => {
+    const replayCsv = `Date,User,Kind,Model,Max Mode,Input (w/ Cache Write),Input (w/o Cache Write),Cache Read,Output Tokens,Total Tokens,Requests
+"2026-03-05T09:35:07.343Z","developer@jasonholtdigital.com","Included","gpt-5.2-xhigh","No","0","14428","1081472","6612","1102512","1"
+"2026-03-10T16:36:52.557Z","developer@jasonholtdigital.com","On-Demand","gpt-5.4-high","Yes","0","1000000","250000","500000","1750000","1"
+"2026-03-04T19:25:55.496Z","developer@jasonholtdigital.com","Included","gemini-3.1-pro-preview","No","0","8062","10555","444","19061","1"`;
+
+    const report = parseCursorUsageFiles(
+      [{ name: 'cursor-usage-missing-mappings.csv', text: replayCsv }],
+      IMPORT_REPLAY_MODELS,
+      baseOptions,
+    );
+
+    expect(report.summary.unsupportedTokens).toBe(0);
+
+    const gpt52Entry = report.pricedEntries.find((entry) => entry.modelId === 'gpt-5.2');
+    expect(gpt52Entry?.fast).toBe(false);
+    expect(gpt52Entry?.maxMode).toBe(false);
+    expect(gpt52Entry?.approximated).toBe(true);
+
+    const gpt54Entry = report.pricedEntries.find((entry) => entry.modelId === 'gpt-5.4');
+    expect(gpt54Entry?.fast).toBe(false);
+    expect(gpt54Entry?.maxMode).toBe(true);
+    expect(gpt54Entry?.approximated).toBe(true);
+
+    const geminiEntry = report.pricedEntries.find((entry) => entry.modelId === 'gemini-3.1-pro');
+    expect(geminiEntry?.fast).toBe(false);
+    expect(geminiEntry?.maxMode).toBe(false);
+    expect(geminiEntry?.approximated).toBe(true);
+  });
+
+  it('treats composer-1 as a known API-priced model in the production catalog', () => {
     const composerCsv = `Date,User,Kind,Model,Max Mode,Input (w/ Cache Write),Input (w/o Cache Write),Cache Read,Output Tokens,Total Tokens,Requests
 "2026-02-10T13:06:04.478Z","developer@jasonholtdigital.com","Included","composer-1","No","0","1000000","250000","500000","1750000","1"`;
 
     const report = parseCursorUsageFiles(
       [{ name: 'cursor-usage-composer.csv', text: composerCsv }],
-      productionPricing.models,
+      IMPORT_REPLAY_MODELS,
       baseOptions,
     );
 
@@ -439,13 +332,13 @@ describe('parseCursorUsageFiles', () => {
     expect(composerEntry?.exactCost?.total).toBeCloseTo(6.28125, 5);
   });
 
-  it('keeps composer-1.5 in the included Auto + Composer pool in the production pricing catalog', () => {
+  it('keeps composer-1.5 in the included Auto + Composer pool', () => {
     const composerCsv = `Date,User,Kind,Model,Max Mode,Input (w/ Cache Write),Input (w/o Cache Write),Cache Read,Output Tokens,Total Tokens,Requests
 "2026-02-10T13:06:04.478Z","developer@jasonholtdigital.com","Included","composer-1.5","No","0","1000000","250000","500000","1750000","1"`;
 
     const report = parseCursorUsageFiles(
       [{ name: 'cursor-usage-composer-1-5.csv', text: composerCsv }],
-      productionPricing.models,
+      IMPORT_REPLAY_MODELS,
       baseOptions,
     );
 

@@ -1,89 +1,9 @@
-import type {
-  EffectiveRates,
-  ExactCostBreakdown,
-  ExactTokenBreakdown,
-  Mode,
-  Model,
-  ModelConfig,
-  ModelRates,
-  Plan,
-  PlanKey,
-  PlanLineItem,
-  PlanResult,
-  PricingData,
-  Recommendation,
-  TokenBreakdown,
-  UsageLineItemInput,
-} from './types';
+import type { Model, Plan, PlanKey, PricingData } from '../catalog/types';
+import { directBreakdownToDollars, dollarsToTokens, exactTokensToDollars, tokensToDollars } from './conversions';
+import { computeBillableRates, computeEffectiveRates, effectiveRatesFromExactCost, effectiveRatesFromExactTokens } from './rates';
+import type { Mode, ModelConfig, PlanLineItem, PlanResult, Recommendation, UsageLineItemInput } from './types';
 
-// TODO: Spec says RE_READS should be configurable as an advanced option. For now hardcoded.
-const DEFAULT_RE_READS = 3;
-
-export function computeBillableRates(model: Model, config: ModelConfig): ModelRates {
-  const rates: ModelRates = config.fast && model.variants?.fast
-    ? { ...model.variants.fast.rates }
-    : { ...model.rates };
-
-  // Cursor Max Mode adds a flat upcharge in the current calculator.
-  if (config.maxMode && model.variants?.max_mode) {
-    const upcharge = 1 + model.variants.max_mode.cursor_upcharge;
-    rates.input *= upcharge;
-    rates.output *= upcharge;
-    if (rates.cache_write !== null) rates.cache_write *= upcharge;
-    if (rates.cache_read !== null) rates.cache_read *= upcharge;
-  }
-
-  return rates;
-}
-
-export function computeEffectiveRates(model: Model, config: ModelConfig, reReads = DEFAULT_RE_READS): EffectiveRates {
-  const rates = computeBillableRates(model, config);
-  return {
-    input: applyCaching(rates.input, rates.cache_write, rates.cache_read, config, reReads),
-    output: rates.output,
-  };
-}
-
-function applyCaching(
-  inputRate: number,
-  cacheWrite: number | null,
-  cacheRead: number | null,
-  config: ModelConfig,
-  reReads: number = DEFAULT_RE_READS,
-): number {
-  const clampedCacheHitRate = Math.min(100, Math.max(0, config.cacheHitRate));
-
-  if (!config.caching || clampedCacheHitRate <= 0 || cacheRead === null) {
-    return inputRate;
-  }
-
-  const cachedRatio = clampedCacheHitRate / 100;
-  const uncachedRatio = 1 - cachedRatio;
-
-  if (cacheWrite !== null) {
-    // Anthropic: cache_write + cache_read with RE_READS amortization
-    return (
-      cachedRatio * cacheWrite +
-      cachedRatio * cacheRead * reReads +
-      uncachedRatio * inputRate * reReads
-    ) / reReads;
-  }
-
-  // Non-Anthropic: simple blend of cache_read and input rate
-  return cachedRatio * cacheRead + uncachedRatio * inputRate;
-}
-
-export function exactTokensToDollars(tokens: ExactTokenBreakdown, rates: ModelRates): number {
-  const cacheWriteRate = rates.cache_write ?? rates.input;
-  const cacheReadRate = rates.cache_read ?? rates.input;
-
-  return (
-    (tokens.inputWithCacheWrite / 1_000_000) * cacheWriteRate +
-    (tokens.inputWithoutCacheWrite / 1_000_000) * rates.input +
-    (tokens.cacheRead / 1_000_000) * cacheReadRate +
-    (tokens.output / 1_000_000) * rates.output
-  );
-}
+const PLAN_KEYS: PlanKey[] = ['pro', 'pro_plus', 'ultra'];
 
 export function computeRecommendation(
   mode: Mode,
@@ -94,14 +14,12 @@ export function computeRecommendation(
   plans: PricingData['plans'],
   inputOutputRatio: number,
 ): Recommendation {
-  const planKeys: PlanKey[] = ['pro', 'pro_plus', 'ultra'];
-
-  const weightSum = configs.reduce((sum, c) => sum + c.weight, 0);
+  const weightSum = configs.reduce((sum, config) => sum + config.weight, 0);
   const normalizedConfigs = weightSum > 0
-    ? configs.map(c => ({ ...c, weight: c.weight / weightSum * 100 }))
+    ? configs.map((config) => ({ ...config, weight: (config.weight / weightSum) * 100 }))
     : configs;
 
-  const allResults: PlanResult[] = planKeys.map(key => {
+  const allResults = PLAN_KEYS.map((key) => {
     const plan = plans[key];
     const affordable = mode === 'budget' ? plan.monthly_cost <= budget : true;
 
@@ -123,9 +41,8 @@ export function computeExactUsageRecommendation(
   models: Model[],
   plans: PricingData['plans'],
 ): Recommendation {
-  const planKeys: PlanKey[] = ['pro', 'pro_plus', 'ultra'];
-  const allResults = planKeys.map((key) =>
-    computeExactUsagePlanResult(key, plans[key], usageItems, models)
+  const allResults = PLAN_KEYS.map((key) =>
+    computeExactUsagePlanResult(key, plans[key], usageItems, models),
   );
 
   return {
@@ -135,23 +52,30 @@ export function computeExactUsageRecommendation(
 }
 
 function pickBestPlanResult(results: PlanResult[], mode: Mode): PlanResult {
-  const affordableResults = results.filter(r => r.affordable);
+  const affordableResults = results.filter((result) => result.affordable);
   if (affordableResults.length === 0) {
     return results[0];
   }
 
   if (mode === 'budget') {
-    return affordableResults.reduce((a, b) => {
-      const aTokens = a.perModel.reduce((sum, item) => sum + item.tokens.total, 0);
-      const bTokens = b.perModel.reduce((sum, item) => sum + item.tokens.total, 0);
-      if (aTokens === bTokens) return a.apiPool > b.apiPool ? a : b;
-      return aTokens > bTokens ? a : b;
+    return affordableResults.reduce((left, right) => {
+      const leftTokens = left.perModel.reduce((sum, item) => sum + item.tokens.total, 0);
+      const rightTokens = right.perModel.reduce((sum, item) => sum + item.tokens.total, 0);
+
+      if (leftTokens === rightTokens) {
+        return left.apiPool > right.apiPool ? left : right;
+      }
+
+      return leftTokens > rightTokens ? left : right;
     });
   }
 
-  return affordableResults.reduce((a, b) => {
-    if (a.totalCost === b.totalCost) return a.apiPool > b.apiPool ? a : b;
-    return a.totalCost < b.totalCost ? a : b;
+  return affordableResults.reduce((left, right) => {
+    if (left.totalCost === right.totalCost) {
+      return left.apiPool > right.apiPool ? left : right;
+    }
+
+    return left.totalCost < right.totalCost ? left : right;
   });
 }
 
@@ -164,13 +88,11 @@ function computeBudgetPlanResult(
   ratio: number,
   affordable: boolean,
 ): PlanResult {
-  // Even if the plan isn't affordable, show what you'd get at its subscription cost
-  // so the comparison table is useful. The greyed-out styling signals it's over budget.
-  const apiBudget = plan.api_pool + Math.max(0, budget - plan.monthly_cost);
+  const apiBudget = Math.max(plan.api_pool, budget);
 
   const perModel = configs
     .map((config) => {
-      const model = models.find(m => m.id === config.modelId);
+      const model = models.find((candidate) => candidate.id === config.modelId);
       if (!model) return null;
 
       const effectiveRates = computeEffectiveRates(model, config);
@@ -226,7 +148,7 @@ function computeTokenPlanResult(
 ): PlanResult {
   const perModel = configs
     .map((config) => {
-      const model = models.find(m => m.id === config.modelId);
+      const model = models.find((candidate) => candidate.id === config.modelId);
       if (!model) return null;
 
       const effectiveRates = computeEffectiveRates(model, config);
@@ -328,7 +250,7 @@ function computeExactUsagePlanResult(
 
 function buildPlanLineItem(
   usage: UsageLineItemInput,
-  effectiveRates: EffectiveRates,
+  effectiveRates: PlanLineItem['effectiveRates'],
   apiCost: number,
 ): PlanLineItem {
   return {
@@ -348,79 +270,4 @@ function createConfigFromUsage(usage: UsageLineItemInput): ModelConfig {
     caching: usage.caching,
     cacheHitRate: usage.cacheHitRate,
   };
-}
-
-function effectiveRatesFromExactTokens(tokens: ExactTokenBreakdown, rates: ModelRates): EffectiveRates {
-  const cacheWriteRate = rates.cache_write ?? rates.input;
-  const cacheReadRate = rates.cache_read ?? rates.input;
-  const totalInputTokens =
-    tokens.inputWithCacheWrite +
-    tokens.inputWithoutCacheWrite +
-    tokens.cacheRead;
-
-  if (totalInputTokens <= 0) {
-    return { input: rates.input, output: rates.output };
-  }
-
-  const inputCost = (
-    (tokens.inputWithCacheWrite / 1_000_000) * cacheWriteRate +
-    (tokens.inputWithoutCacheWrite / 1_000_000) * rates.input +
-    (tokens.cacheRead / 1_000_000) * cacheReadRate
-  );
-
-  return {
-    input: inputCost * 1_000_000 / totalInputTokens,
-    output: rates.output,
-  };
-}
-
-function effectiveRatesFromExactCost(
-  costs: ExactCostBreakdown,
-  tokens: TokenBreakdown,
-  fallbackRates: ModelRates,
-): EffectiveRates {
-  return {
-    input: tokens.input > 0 ? (costs.input * 1_000_000) / tokens.input : fallbackRates.input,
-    output: tokens.output > 0 ? (costs.output * 1_000_000) / tokens.output : fallbackRates.output,
-  };
-}
-
-function directBreakdownToDollars(tokens: TokenBreakdown, rates: EffectiveRates): number {
-  return (
-    (tokens.input / 1_000_000) * rates.input +
-    (tokens.output / 1_000_000) * rates.output
-  );
-}
-
-export function dollarsToTokens(dollars: number, rates: EffectiveRates, ratio: number): TokenBreakdown {
-  const costPerCycle = (ratio * rates.input + rates.output) / 1_000_000;
-  if (costPerCycle <= 0) return { total: 0, input: 0, output: 0 };
-
-  const cycles = dollars / costPerCycle;
-  const total = Math.round(cycles * (ratio + 1));
-  const input = Math.round(total * ratio / (ratio + 1));
-  const output = total - input;
-
-  return { total, input, output };
-}
-
-export function tokensToDollars(tokens: number, rates: EffectiveRates, ratio: number): number {
-  const weightInput = ratio / (ratio + 1);
-  const inputTokens = tokens * weightInput;
-  const outputTokens = tokens - inputTokens;
-  return (inputTokens / 1_000_000) * rates.input + (outputTokens / 1_000_000) * rates.output;
-}
-
-export function formatNumber(num: number): string {
-  if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(2)}M`;
-  if (num >= 1_000) return `${(num / 1_000).toFixed(1)}k`;
-  return String(Math.round(num));
-}
-
-export function formatCurrency(num: number): string {
-  return `$${num.toFixed(2)}`;
-}
-
-export function formatRate(rate: number): string {
-  return `$${rate.toFixed(2)}`;
 }

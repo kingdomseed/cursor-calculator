@@ -1,6 +1,8 @@
+import { getActiveModelConfigBadges, getModelConfigCapabilities } from '../domain/modelConfig/capabilities';
 import { useMemo, useState } from 'react';
 import type { Model, ModelConfig } from '../lib/types';
-import { computeEffectiveRates, formatRate } from '../lib/calculations';
+import { formatRate } from '../domain/recommendation/formatters';
+import { computeEffectiveRates } from '../domain/recommendation/rates';
 import { PROVIDER_COLORS } from '../lib/constants';
 
 interface Props {
@@ -16,17 +18,13 @@ export function ModelConfigRow({ model, config, onChange }: Props) {
     [model, config]
   );
 
-  const hasMaxMode = !!model.variants?.max_mode;
-  const hasFast = !!model.variants?.fast;
-  const hasThinking = !!model.variants?.thinking;
-  const hasCaching = model.rates.cache_read !== null;
-
-  // Summary of active variants for collapsed view
-  const activeBadges: string[] = [];
-  if (config.maxMode) activeBadges.push('Max');
-  if (config.fast) activeBadges.push('Fast');
-  if (config.thinking) activeBadges.push('Thinking');
-  if (config.caching) activeBadges.push(`Cache ${config.cacheHitRate}%`);
+  const {
+    hasMaxMode,
+    hasFast,
+    hasThinking,
+    hasCaching,
+  } = getModelConfigCapabilities(model);
+  const activeBadges = getActiveModelConfigBadges(config);
 
   return (
     <div className="bg-white rounded-xl border border-[#e0e0d8] p-4">

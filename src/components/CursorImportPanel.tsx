@@ -1,8 +1,9 @@
-import { formatNumber } from '../lib/calculations';
+import { buildImportSummarySections } from '../app/cursorImportPresentation';
+import { formatNumber } from '../domain/recommendation/formatters';
 import type {
   ApproximationMode,
   CursorImportReport,
-} from '../lib/cursorUsage';
+} from '../domain/importReplay/types';
 
 interface Props {
   report: CursorImportReport | null;
@@ -109,23 +110,33 @@ export function CursorImportPanel({
 
         {report && (
           <div className="space-y-4">
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              <SummaryStat label="API tokens priced" value={formatNumber(report.summary.pricedApiTokens)} />
-              <SummaryStat
-                label="Days used"
-                value={`${formatNumber(report.summary.activeDays)} / ${formatNumber(report.summary.comparisonDays)}`}
-                note={buildDaysUsedNote(report)}
-              />
-              <SummaryStat
-                label="API tokens / used day"
-                value={formatNumber(getTokensPerUsedDay(report))}
-                note={report.summary.activeDays > 0 ? 'Average across distinct usage days' : 'No usage days detected'}
-              />
-              <SummaryStat label="Approximate tokens" value={formatNumber(report.summary.approximatedApiTokens)} tone="amber" />
-              <SummaryStat label="Unsupported tokens" value={formatNumber(report.summary.unsupportedTokens)} tone="red" />
-              <SummaryStat label="Excluded tokens" value={formatNumber(report.summary.excludedTokens)} />
-              <SummaryStat label="Included pool tokens" value={formatNumber(report.summary.includedNonApiTokens)} />
-            </div>
+            {buildImportSummarySections(report).map((section) => (
+              <section
+                key={section.title}
+                className="rounded-2xl border border-[#e0e0d8] bg-[#fcfcfa] p-4"
+              >
+                <h4 className="text-sm font-semibold uppercase tracking-[0.18em] text-[#14120b]/55">
+                  {section.title}
+                </h4>
+                <div
+                  className={`mt-3 grid gap-3 ${
+                    section.layout === 'usage'
+                      ? 'sm:grid-cols-2'
+                      : 'sm:grid-cols-2 lg:grid-cols-3'
+                  }`}
+                >
+                  {section.stats.map((stat) => (
+                    <SummaryStat
+                      key={`${section.title}-${stat.label}`}
+                      label={stat.label}
+                      value={stat.value}
+                      note={stat.note}
+                      tone={stat.tone}
+                    />
+                  ))}
+                </div>
+              </section>
+            ))}
 
             {report.summary.approximatedApiTokens > 0 && (
               <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
@@ -199,39 +210,4 @@ function SummaryStat({
       )}
     </div>
   );
-}
-
-function getTokensPerUsedDay(report: CursorImportReport): number {
-  if (report.summary.activeDays <= 0) {
-    return 0;
-  }
-
-  return report.summary.pricedApiTokens / report.summary.activeDays;
-}
-
-function buildDaysUsedNote(report: CursorImportReport): string {
-  const { comparisonMode, firstActiveDate, lastActiveDate } = report.summary;
-
-  if (comparisonMode === 'month') {
-    return firstActiveDate ? `Distinct usage days in ${formatMonthYear(firstActiveDate)}` : 'Distinct usage days in imported month';
-  }
-
-  if (firstActiveDate && lastActiveDate) {
-    return `${firstActiveDate} to ${lastActiveDate}`;
-  }
-
-  return 'Distinct usage days across imported date span';
-}
-
-function formatMonthYear(dayKey: string): string {
-  const parsed = new Date(`${dayKey}T00:00:00Z`);
-  if (Number.isNaN(parsed.getTime())) {
-    return dayKey.slice(0, 7);
-  }
-
-  return parsed.toLocaleString('en-US', {
-    month: 'long',
-    year: 'numeric',
-    timeZone: 'UTC',
-  });
 }

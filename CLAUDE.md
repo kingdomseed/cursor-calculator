@@ -13,7 +13,7 @@ The tool answers three related questions:
 
 Manual mode and CSV replay do **not** use the same source catalog:
 - `src/data/cursor-pricing.json` is the source of truth for current Cursor-supported manual calculations.
-- `src/data/providerImportModels.ts` exists only for CSV replay of retired historical labels that no longer have a current Cursor catalog entry. Those rows must stay visibly approximate and must not leak into the manual selector as if they were current Cursor-native models.
+- `src/data/importReplayHistoricalModels.ts` and `src/data/importReplayLabelMappings.ts` exist only for CSV replay of retired historical labels and mapping policy that no longer have a current Cursor catalog entry. Those rows must stay visibly approximate and must not leak into the manual selector as if they were current Cursor-native models.
 
 ## Commands
 
@@ -31,30 +31,43 @@ Single-page React + TypeScript app deployed to Vercel.
 
 ### Key structure
 
-- `src/App.tsx` — Top-level state and composition. Wires budget mode, manual token mode, and Cursor CSV replay mode together.
+- `src/App.tsx` — Composition root and page layout. Consumes the calculator controller and renders the UI.
+- `src/app/calculatorState.ts` — Reducer-owned source state and initial defaults.
+- `src/app/calculatorReducer.ts` — Calculator state transitions.
+- `src/app/calculatorSelectors.ts` — Derived app view data, including replay reports and recommendations.
+- `src/app/cursorImportActions.ts` — Pure app-layer import action sequencing for selected CSV files.
+- `src/app/cursorImportPresentation.ts` — Replay-summary presentation helpers for UI-facing note/value formatting.
+- `src/app/useCalculatorController.ts` — App-layer controller for reducer wiring, file reading, and UI-facing callbacks.
 - `src/components/*` — Presentational calculator UI, including `CursorImportPanel.tsx` for the import flow.
 - `src/data/cursor-pricing.json` — Current Cursor pricing data (plans, model rates, settings). This is the empirical source of truth for manual mode.
-- `src/data/providerImportModels.ts` — Import-only provider-backed rates used to replay retired labels from historical CSV exports. These are estimates, not current Cursor-native catalog entries.
-- `src/lib/calculations.ts` — Shared pricing math for budget mode, manual token mode, and exact imported-usage plan recommendations.
-- `src/lib/cursorUsage.ts` — CSV parsing, row filtering, model-label normalization, exact token pricing, imported-month summaries, and approximation reporting.
-- `src/lib/types.ts` — Shared domain types.
-- `src/lib/__tests__/calculations.test.ts` and `src/lib/__tests__/cursorUsage.test.ts` — Vitest coverage for pricing math and import replay logic.
+- `src/data/importReplayHistoricalModels.ts` — Import-only replay models for retired labels and historical provider-backed rates.
+- `src/data/importReplayLabelMappings.ts` — Import-only exact/approximate label mappings, long-context companions, and historical fast-mode approximation rules.
+- `src/domain/importReplay/options.ts` — Shared replay-option defaults and option-resolution logic.
+- `src/domain/catalog/*` — Current Cursor catalog accessors and types.
+- `src/domain/recommendation/*` — Pricing math, effective-rate logic, conversions, formatters, and plan recommendation logic.
+- `src/domain/importReplay/*` — CSV parsing, filtering, normalization, pricing, aggregation, summary generation, and replay catalog assembly.
+- `src/domain/modelConfig/*` — Model-config defaults, selection reconciliation, weight logic, and capability helpers.
+- `src/lib/types.ts` — Shared type re-export barrel for component imports.
+- `src/domain/*/__tests__` and `src/app/__tests__` — Vitest coverage for catalog, recommendation, import replay, model config, and app orchestration behavior.
 - `data/private/raw/cursor/` — Optional local-only fixture location for copied Cursor monthly exports. `data/private/` is gitignored.
 
-There is no routing or external state management library. `App.tsx` is now orchestration, not the single source of business logic.
+There is no routing or external state management library. `App.tsx` is now composition-only; calculator session behavior lives in `src/app/*` and domain behavior lives in `src/domain/*`.
 
 ### Core calculation logic
 
+- `getPricingCatalog()` / `getManualApiModels()` / `getPlans()` — Current Cursor catalog accessors for the manual calculator path.
+- `getImportReplayModels()` — Replay catalog assembly that combines current models with historical import-only models.
 - `computeRecommendation()` — Shared recommendation entry point for budget mode and manual token mode.
 - `computeExactUsageRecommendation()` — Reuses the same plan-pool comparison logic for imported exact-usage rows.
 - `computeBillableRates()` / `computeEffectiveRates()` — Apply Cursor Max upcharge, fast variants, and caching math.
 - `parseCursorUsageFiles()` — Parses exported Cursor CSVs, filters billable rows, normalizes labels, computes exact replay costs, and produces monthly summary data.
+- `useCalculatorController()` — App-facing orchestration layer that wires reducer state, selectors, and CSV file-loading side effects together.
 - Caching still assumes a hardcoded 3x re-read pattern (`DEFAULT_RE_READS = 3`) for iterative coding workflows.
 
 ### Testing reality
 
 - Vitest is configured and active.
-- Current automated coverage is library-level and runs in the Node environment configured in `vite.config.ts`.
+- Current automated coverage is domain-level plus app-orchestration-level and runs in the Node environment configured in `vite.config.ts`.
 - There is not yet a committed jsdom/browser integration suite for the import UI path, so browser verification still matters for file-upload behavior.
 
 ### Styling
