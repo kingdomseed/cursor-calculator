@@ -190,6 +190,13 @@ export const APPROXIMATE_IMPORT_REPLAY_LABEL_MAPPINGS: Record<string, ImportRepl
     thinking: false,
     approximated: true,
   },
+  'gemini-3.1-pro-preview': {
+    modelId: 'gemini-3.1-pro',
+    fast: false,
+    maxMode: false,
+    thinking: false,
+    approximated: true,
+  },
   'gemini-3-flash-preview': {
     modelId: 'gemini-3-flash',
     fast: false,

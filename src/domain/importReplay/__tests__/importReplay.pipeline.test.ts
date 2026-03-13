@@ -283,6 +283,36 @@ describe('parseCursorUsageFiles', () => {
     expect(opus41Entry?.exactCost?.total).toBeCloseTo(6.75, 4);
   });
 
+  it('maps non-fast GPT reasoning labels and Gemini 3.1 preview labels instead of leaving them unsupported', () => {
+    const replayCsv = `Date,User,Kind,Model,Max Mode,Input (w/ Cache Write),Input (w/o Cache Write),Cache Read,Output Tokens,Total Tokens,Requests
+"2026-03-05T09:35:07.343Z","developer@jasonholtdigital.com","Included","gpt-5.2-xhigh","No","0","14428","1081472","6612","1102512","1"
+"2026-03-10T16:36:52.557Z","developer@jasonholtdigital.com","On-Demand","gpt-5.4-high","Yes","0","1000000","250000","500000","1750000","1"
+"2026-03-04T19:25:55.496Z","developer@jasonholtdigital.com","Included","gemini-3.1-pro-preview","No","0","8062","10555","444","19061","1"`;
+
+    const report = parseCursorUsageFiles(
+      [{ name: 'cursor-usage-missing-mappings.csv', text: replayCsv }],
+      IMPORT_REPLAY_MODELS,
+      baseOptions,
+    );
+
+    expect(report.summary.unsupportedTokens).toBe(0);
+
+    const gpt52Entry = report.pricedEntries.find((entry) => entry.modelId === 'gpt-5.2');
+    expect(gpt52Entry?.fast).toBe(false);
+    expect(gpt52Entry?.maxMode).toBe(false);
+    expect(gpt52Entry?.approximated).toBe(true);
+
+    const gpt54Entry = report.pricedEntries.find((entry) => entry.modelId === 'gpt-5.4');
+    expect(gpt54Entry?.fast).toBe(false);
+    expect(gpt54Entry?.maxMode).toBe(true);
+    expect(gpt54Entry?.approximated).toBe(true);
+
+    const geminiEntry = report.pricedEntries.find((entry) => entry.modelId === 'gemini-3.1-pro');
+    expect(geminiEntry?.fast).toBe(false);
+    expect(geminiEntry?.maxMode).toBe(false);
+    expect(geminiEntry?.approximated).toBe(true);
+  });
+
   it('treats composer-1 as a known API-priced model in the production catalog', () => {
     const composerCsv = `Date,User,Kind,Model,Max Mode,Input (w/ Cache Write),Input (w/o Cache Write),Cache Read,Output Tokens,Total Tokens,Requests
 "2026-02-10T13:06:04.478Z","developer@jasonholtdigital.com","Included","composer-1","No","0","1000000","250000","500000","1750000","1"`;

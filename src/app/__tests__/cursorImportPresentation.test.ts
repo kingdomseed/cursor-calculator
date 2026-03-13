@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   buildDaysUsedNote,
+  buildImportSummarySections,
   formatMonthYear,
   getTokensPerUsedDay,
 } from '../cursorImportPresentation';
@@ -51,5 +52,37 @@ describe('cursor import presentation', () => {
   it('formats imported month labels with a safe fallback', () => {
     expect(formatMonthYear('2026-02-10')).toBe('February 2026');
     expect(formatMonthYear('not-a-date')).toBe('not-a-d');
+  });
+
+  it('groups usage cadence separately from pricing summary and clarifies approximate priced tokens', () => {
+    const sections = buildImportSummarySections(createReport({
+      approximatedApiTokens: 170_470_000,
+      unsupportedTokens: 0,
+      excludedTokens: 4_030_000,
+    }));
+
+    expect(sections.map((section) => section.title)).toEqual([
+      'Usage cadence',
+      'Pricing summary',
+    ]);
+
+    expect(sections[0]?.stats.map((stat) => stat.label)).toEqual([
+      'Days used',
+      'API tokens / used day',
+    ]);
+
+    expect(sections[1]?.stats.map((stat) => stat.label)).toEqual([
+      'API tokens priced',
+      'Priced via approximation',
+      'Unsupported tokens',
+      'Excluded tokens',
+      'Included pool tokens',
+    ]);
+
+    expect(sections[1]?.stats[1]).toMatchObject({
+      label: 'Priced via approximation',
+      note: 'Subset of API tokens priced',
+      tone: 'amber',
+    });
   });
 });

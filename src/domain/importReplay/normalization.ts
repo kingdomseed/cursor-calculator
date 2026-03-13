@@ -53,14 +53,14 @@ export function normalizeImportedModel(
     });
   }
 
-  const approximateFastLabel = normalizeApproximateFastLabel(
+  const approximateGptLabel = normalizeApproximateGpt5Label(
     rawLabel,
     maxMode,
     modelsById,
     approximationMode,
   );
-  if (approximateFastLabel) {
-    return approximateFastLabel;
+  if (approximateGptLabel) {
+    return approximateGptLabel;
   }
 
   return {
@@ -106,7 +106,7 @@ function resolveMaxMode(
   return !!(model?.variants?.max_mode || model?.auto_checks?.max_mode);
 }
 
-function normalizeApproximateFastLabel(
+function normalizeApproximateGpt5Label(
   rawLabel: string,
   rawMaxMode: boolean,
   modelsById: ImportReplayModelsById,
@@ -116,7 +116,7 @@ function normalizeApproximateFastLabel(
     return null;
   }
 
-  if (!rawLabel.startsWith('gpt-5.') || !rawLabel.endsWith('-fast')) {
+  if (!rawLabel.startsWith('gpt-5.')) {
     return null;
   }
 
@@ -125,7 +125,10 @@ function normalizeApproximateFastLabel(
     return null;
   }
 
-  segments.pop();
+  const fast = segments[segments.length - 1] === 'fast';
+  if (fast) {
+    segments.pop();
+  }
 
   while (
     segments.length > 0 &&
@@ -146,10 +149,14 @@ function normalizeApproximateFastLabel(
   }
 
   return supportedResult(candidateModelId, {
-    fast: true,
+    fast,
     maxMode: resolveMaxMode(candidateModelId, rawMaxMode || forceMaxMode, modelsById, forceMaxMode),
     thinking: false,
     approximated: true,
-    rateMultiplier: model.variants?.fast ? 1 : DEFAULT_APPROXIMATE_FAST_MULTIPLIER,
+    rateMultiplier: fast
+      ? model.variants?.fast
+        ? 1
+        : DEFAULT_APPROXIMATE_FAST_MULTIPLIER
+      : undefined,
   });
 }
