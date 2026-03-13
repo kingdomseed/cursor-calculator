@@ -1,49 +1,72 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { buildCursorImportActions, CURSOR_IMPORT_READ_ERROR } from '../cursorImportActions';
+import { CURSOR_IMPORT_READ_ERROR, startCursorImport } from '../cursorImportActions';
 
-describe('buildCursorImportActions', () => {
-  it('returns no actions when no files were selected', async () => {
-    await expect(buildCursorImportActions(null)).resolves.toEqual([]);
+function createDeferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
   });
 
-  it('emits started and loaded actions for a successful file selection', async () => {
-    const readFiles = vi.fn().mockResolvedValue([
+  return { promise, resolve, reject };
+}
+
+describe('startCursorImport', () => {
+  it('returns no-op actions when no files were selected', async () => {
+    const flow = startCursorImport(null);
+
+    expect(flow.startedAction).toBeNull();
+    await expect(flow.completion).resolves.toBeNull();
+  });
+
+  it('returns started immediately while the file read is still pending', async () => {
+    const loadedFiles = [
       {
         name: 'cursor-usage.csv',
         text: 'csv-body',
       },
-    ]);
+    ];
+    const deferred = createDeferred<typeof loadedFiles>();
+    const readFiles = vi.fn().mockReturnValue(deferred.promise);
 
-    const actions = await buildCursorImportActions(
+    const flow = startCursorImport(
       [{ name: 'cursor-usage.csv', text: async () => 'csv-body' }],
       readFiles,
     );
 
     expect(readFiles).toHaveBeenCalledTimes(1);
-    expect(actions).toEqual([
-      { type: 'import_started' },
-      {
-        type: 'import_loaded',
-        files: [{ name: 'cursor-usage.csv', text: 'csv-body' }],
-      },
-    ]);
+    expect(flow.startedAction).toEqual({ type: 'import_started' });
+
+    let settled = false;
+    void flow.completion.then(() => {
+      settled = true;
+    });
+    await Promise.resolve();
+
+    expect(settled).toBe(false);
+
+    deferred.resolve(loadedFiles);
+
+    await expect(flow.completion).resolves.toEqual({
+      type: 'import_loaded',
+      files: loadedFiles,
+    });
   });
 
-  it('emits started and failed actions when file reading throws', async () => {
+  it('returns a failed completion action when file reading throws', async () => {
     const readFiles = vi.fn().mockRejectedValue(new Error('boom'));
 
-    const actions = await buildCursorImportActions(
+    const flow = startCursorImport(
       [{ name: 'cursor-usage.csv', text: async () => 'csv-body' }],
       readFiles,
     );
 
-    expect(actions).toEqual([
-      { type: 'import_started' },
-      {
-        type: 'import_failed',
-        error: CURSOR_IMPORT_READ_ERROR,
-      },
-    ]);
+    expect(flow.startedAction).toEqual({ type: 'import_started' });
+    await expect(flow.completion).resolves.toEqual({
+      type: 'import_failed',
+      error: CURSOR_IMPORT_READ_ERROR,
+    });
   });
 });

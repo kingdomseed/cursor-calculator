@@ -8,7 +8,7 @@ import type {
 } from '../domain/importReplay/types';
 import type { Recommendation } from '../domain/recommendation/types';
 import type { Model, PricingData } from '../domain/catalog/types';
-import { buildCursorImportActions } from './cursorImportActions';
+import { startCursorImport } from './cursorImportActions';
 import { calculatorReducer } from './calculatorReducer';
 import {
   createInitialCalculatorState,
@@ -135,9 +135,14 @@ export function useCalculatorController(
   }, [state.cursorImportOptions, updateCursorImportOptions]);
 
   const handleCursorImportFilesSelected = useCallback(async (files: FileList | null) => {
-    const actions = await buildCursorImportActions(files);
-    for (const action of actions) {
-      dispatch(action);
+    const flow = startCursorImport(files);
+    if (flow.startedAction) {
+      dispatch(flow.startedAction);
+    }
+
+    const completionAction = await flow.completion;
+    if (completionAction) {
+      dispatch(completionAction);
     }
   }, []);
 
