@@ -6,13 +6,14 @@ import type {
   CursorImportReport,
   ResolvedCursorImportOptions,
 } from '../domain/importReplay/types';
-import type { Recommendation } from '../domain/recommendation/types';
+import type { ExactTokenBreakdown, Recommendation } from '../domain/recommendation/types';
 import type { Model, PricingData } from '../domain/catalog/types';
 import { startCursorImport } from './cursorImportActions';
 import { calculatorReducer } from './calculatorReducer';
 import {
   createInitialCalculatorState,
   type CalculatorState,
+  type ManualTokenInputMode,
   type TokenSource,
 } from './calculatorState';
 import {
@@ -45,6 +46,9 @@ interface CalculatorController {
   setTokenSource: (tokenSource: TokenSource) => void;
   setBudget: (budget: number) => void;
   setTokens: (tokens: number) => void;
+  setManualTokenInputMode: (manualTokenInputMode: ManualTokenInputMode) => void;
+  setCacheReadShare: (cacheReadShare: number) => void;
+  setManualExactTokens: (manualExactTokens: ExactTokenBreakdown) => void;
   setInputRatio: (inputRatio: number) => void;
   setShowAdvanced: (showAdvanced: boolean) => void;
   setModelConfigs: (configs: CalculatorState['modelConfigs']) => void;
@@ -98,6 +102,18 @@ export function useCalculatorController(
 
   const setTokens = useCallback((tokens: number) => {
     dispatch({ type: 'set_tokens', tokens });
+  }, []);
+
+  const setManualTokenInputMode = useCallback((manualTokenInputMode: ManualTokenInputMode) => {
+    dispatch({ type: 'set_manual_token_input_mode', manualTokenInputMode });
+  }, []);
+
+  const setCacheReadShare = useCallback((cacheReadShare: number) => {
+    dispatch({ type: 'set_cache_read_share', cacheReadShare });
+  }, []);
+
+  const setManualExactTokens = useCallback((manualExactTokens: ExactTokenBreakdown) => {
+    dispatch({ type: 'set_manual_exact_tokens', manualExactTokens });
   }, []);
 
   const setInputRatio = useCallback((inputRatio: number) => {
@@ -160,6 +176,9 @@ export function useCalculatorController(
     setTokenSource,
     setBudget,
     setTokens,
+    setManualTokenInputMode,
+    setCacheReadShare,
+    setManualExactTokens,
     setInputRatio,
     setShowAdvanced,
     setModelConfigs,

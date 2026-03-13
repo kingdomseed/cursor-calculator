@@ -26,6 +26,15 @@ describe('createInitialCalculatorState', () => {
     expect(state.tokenSource).toBe('manual');
     expect(state.budget).toBe(60);
     expect(state.tokens).toBe(1_000_000);
+    expect(state.manualTokenInputMode).toBe('simple');
+    expect(state.cacheReadShare).toBe(0);
+    expect(state.manualExactTokens).toEqual({
+      inputWithCacheWrite: 0,
+      inputWithoutCacheWrite: 750_000,
+      cacheRead: 0,
+      output: 250_000,
+      total: 1_000_000,
+    });
     expect(state.inputRatio).toBe(3);
     expect(state.showAdvanced).toBe(false);
     expect(state.cursorImportFiles).toEqual([]);
@@ -61,6 +70,18 @@ describe('calculatorReducer', () => {
       { type: 'set_token_source', tokenSource: 'cursor_import' } as const,
       { type: 'set_budget', budget: 120 } as const,
       { type: 'set_tokens', tokens: 2_500_000 } as const,
+      { type: 'set_manual_token_input_mode', manualTokenInputMode: 'advanced' } as const,
+      { type: 'set_cache_read_share', cacheReadShare: 82 } as const,
+      {
+        type: 'set_manual_exact_tokens',
+        manualExactTokens: {
+          inputWithCacheWrite: 100_000,
+          inputWithoutCacheWrite: 200_000,
+          cacheRead: 300_000,
+          output: 400_000,
+          total: 0,
+        },
+      } as const,
       { type: 'set_input_ratio', inputRatio: 4 } as const,
       { type: 'set_show_advanced', showAdvanced: true } as const,
       { type: 'set_model_configs', modelConfigs: customConfigs } as const,
@@ -69,7 +90,16 @@ describe('calculatorReducer', () => {
     expect(state.mode).toBe('tokens');
     expect(state.tokenSource).toBe('cursor_import');
     expect(state.budget).toBe(120);
-    expect(state.tokens).toBe(2_500_000);
+    expect(state.tokens).toBe(1_000_000);
+    expect(state.manualTokenInputMode).toBe('advanced');
+    expect(state.cacheReadShare).toBe(82);
+    expect(state.manualExactTokens).toEqual({
+      inputWithCacheWrite: 100_000,
+      inputWithoutCacheWrite: 200_000,
+      cacheRead: 300_000,
+      output: 400_000,
+      total: 1_000_000,
+    });
     expect(state.inputRatio).toBe(4);
     expect(state.showAdvanced).toBe(true);
     expect(state.modelConfigs).toEqual(customConfigs);
@@ -182,7 +212,10 @@ describe('calculatorSelectors', () => {
   });
 
   it('selects a recommendation for both manual and import flows', () => {
-    const manualState = createInitialCalculatorState(manualModels);
+    const manualState = [
+      { type: 'set_mode', mode: 'tokens' } as const,
+      { type: 'set_cache_read_share', cacheReadShare: 80 } as const,
+    ].reduce(calculatorReducer, createInitialCalculatorState(manualModels));
     const manualRecommendation = selectRecommendation(manualState, {
       manualModels,
       importReplayModels,
@@ -191,6 +224,7 @@ describe('calculatorSelectors', () => {
     });
 
     expect(manualRecommendation?.best.plan).toBeTruthy();
+    expect(manualRecommendation?.best.perModel[0]?.exactTokens?.cacheRead).toBe(800_000);
 
     const importState = calculatorReducer(
       calculatorReducer(

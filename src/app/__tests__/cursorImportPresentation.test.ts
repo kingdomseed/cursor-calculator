@@ -4,6 +4,9 @@ import {
   buildDaysUsedNote,
   buildImportSummarySections,
   formatMonthYear,
+  getPricedApiCacheReadShare,
+  getPricedApiNonCacheTokens,
+  getTotalImportedTokens,
   getTokensPerUsedDay,
 } from '../cursorImportPresentation';
 import type { CursorImportReport } from '../../domain/importReplay/types';
@@ -11,7 +14,52 @@ import type { CursorImportReport } from '../../domain/importReplay/types';
 function createReport(overrides: Partial<CursorImportReport['summary']> = {}): CursorImportReport {
   return {
     files: ['cursor-usage.csv'],
-    pricedEntries: [],
+    pricedEntries: [
+      {
+        key: 'gpt-5.4',
+        modelId: 'gpt-5.4',
+        label: 'GPT-5.4',
+        provider: 'openai',
+        pool: 'api',
+        tokens: { total: 250_000, input: 240_000, output: 10_000 },
+        exactTokens: {
+          inputWithCacheWrite: 20_000,
+          inputWithoutCacheWrite: 30_000,
+          cacheRead: 190_000,
+          output: 10_000,
+          total: 250_000,
+        },
+        exactCost: { input: 1, output: 1, total: 2 },
+        maxMode: false,
+        fast: false,
+        thinking: false,
+        caching: true,
+        cacheHitRate: 0,
+        approximated: false,
+      },
+      {
+        key: 'claude-sonnet-4-6',
+        modelId: 'claude-sonnet-4-6',
+        label: 'Claude 4.6 Sonnet',
+        provider: 'anthropic',
+        pool: 'api',
+        tokens: { total: 60_000, input: 50_000, output: 10_000 },
+        exactTokens: {
+          inputWithCacheWrite: 5_000,
+          inputWithoutCacheWrite: 10_000,
+          cacheRead: 35_000,
+          output: 10_000,
+          total: 60_000,
+        },
+        exactCost: { input: 1, output: 1, total: 2 },
+        maxMode: false,
+        fast: false,
+        thinking: false,
+        caching: true,
+        cacheHitRate: 0,
+        approximated: false,
+      },
+    ],
     unsupported: [],
     excluded: [],
     nonApiIncluded: [],
@@ -38,6 +86,18 @@ describe('cursor import presentation', () => {
   it('computes tokens per used day from the replay summary', () => {
     expect(getTokensPerUsedDay(createReport())).toBe(155_000);
     expect(getTokensPerUsedDay(createReport({ activeDays: 0 }))).toBe(0);
+  });
+
+  it('computes total imported tokens plus priced-api cache composition helpers', () => {
+    const report = createReport({
+      unsupportedTokens: 3_000,
+      excludedTokens: 4_000,
+      includedNonApiTokens: 7_000,
+    });
+
+    expect(getTotalImportedTokens(report)).toBe(324_000);
+    expect(getPricedApiNonCacheTokens(report)).toBe(85_000);
+    expect(getPricedApiCacheReadShare(report)).toBeCloseTo(225_000 / 310_000, 6);
   });
 
   it('builds month and span day notes from the replay summary', () => {
@@ -69,17 +129,35 @@ describe('cursor import presentation', () => {
     expect(sections[0]?.stats.map((stat) => stat.label)).toEqual([
       'Days used',
       'API tokens / used day',
+      'Total imported tokens',
     ]);
 
     expect(sections[1]?.stats.map((stat) => stat.label)).toEqual([
       'API tokens priced',
+      'Cache-read share (priced API)',
+      'Non-cache priced tokens',
       'Priced via approximation',
       'Unsupported tokens',
       'Excluded tokens',
       'Included pool tokens',
     ]);
 
+    expect(sections[1]?.stats[0]).toMatchObject({
+      label: 'API tokens priced',
+      note: 'Use this as your simple-mode token total for the closest import match',
+    });
+
     expect(sections[1]?.stats[1]).toMatchObject({
+      label: 'Cache-read share (priced API)',
+      note: 'Then copy this percentage into the simple-mode cache slider',
+    });
+
+    expect(sections[1]?.stats[2]).toMatchObject({
+      label: 'Non-cache priced tokens',
+      note: 'Use this instead for a conservative no-cache baseline',
+    });
+
+    expect(sections[1]?.stats[3]).toMatchObject({
       label: 'Priced via approximation',
       note: 'Subset of API tokens priced',
       tone: 'amber',

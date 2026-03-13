@@ -21,6 +21,9 @@ function App() {
       tokenSource,
       budget,
       tokens,
+      manualTokenInputMode,
+      cacheReadShare,
+      manualExactTokens,
       inputRatio,
       showAdvanced,
       cursorImportError,
@@ -39,6 +42,9 @@ function App() {
     setTokenSource,
     setBudget,
     setTokens,
+    setManualTokenInputMode,
+    setCacheReadShare,
+    setManualExactTokens,
     setInputRatio,
     setShowAdvanced,
     setModelConfigs,
@@ -94,7 +100,16 @@ function App() {
           {mode === 'budget' ? (
             <BudgetInput value={budget} onChange={setBudget} />
           ) : tokenSource === 'manual' ? (
-            <TokenInput value={tokens} onChange={setTokens} />
+            <TokenInput
+              value={tokens}
+              onChange={setTokens}
+              manualTokenInputMode={manualTokenInputMode}
+              onManualTokenInputModeChange={setManualTokenInputMode}
+              cacheReadShare={cacheReadShare}
+              onCacheReadShareChange={setCacheReadShare}
+              exactTokens={manualExactTokens}
+              onExactTokensChange={setManualExactTokens}
+            />
           ) : (
             <CursorImportPanel
               report={cursorImportReport}
@@ -132,37 +147,41 @@ function App() {
               </div>
             )}
 
-            <div className="mt-4">
-              <button
-                onClick={() => setShowAdvanced(!showAdvanced)}
-                className="flex items-center gap-2 text-sm text-[#14120b]/60 hover:text-[#14120b]"
-              >
-                <svg className={`w-4 h-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-                Advanced options
-              </button>
-              {showAdvanced && (
-                <div className="mt-4 p-4 bg-white rounded-xl border border-[#e0e0d8]">
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="text-sm font-medium">Input : Output Ratio</label>
-                    <span className="text-sm font-semibold bg-[#f7f7f4] px-2 py-0.5 rounded">{inputRatio} : 1</span>
+            {(mode === 'budget' || (mode === 'tokens' && tokenSource === 'manual' && manualTokenInputMode === 'simple')) && (
+              <div className="mt-4">
+                <button
+                  onClick={() => setShowAdvanced(!showAdvanced)}
+                  className="flex items-center gap-2 text-sm text-[#14120b]/60 hover:text-[#14120b]"
+                >
+                  <svg className={`w-4 h-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                  Advanced options
+                </button>
+                {showAdvanced && (
+                  <div className="mt-4 p-4 bg-white rounded-xl border border-[#e0e0d8]">
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-sm font-medium">
+                        {mode === 'tokens' ? 'Non-cache Input : Output Ratio' : 'Input : Output Ratio'}
+                      </label>
+                      <span className="text-sm font-semibold bg-[#f7f7f4] px-2 py-0.5 rounded">{inputRatio} : 1</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="1"
+                      max="10"
+                      step="0.5"
+                      value={inputRatio}
+                      onChange={(event) => setInputRatio(Number(event.target.value))}
+                      className="w-full h-2 bg-[#e0e0d8] rounded-full appearance-none cursor-pointer accent-[#14120b]"
+                    />
+                    <div className="flex justify-between text-xs text-[#14120b]/40 mt-1">
+                      <span>1:1</span><span>3:1 typical</span><span>10:1</span>
+                    </div>
                   </div>
-                  <input
-                    type="range"
-                    min="1"
-                    max="10"
-                    step="0.5"
-                    value={inputRatio}
-                    onChange={(event) => setInputRatio(Number(event.target.value))}
-                    className="w-full h-2 bg-[#e0e0d8] rounded-full appearance-none cursor-pointer accent-[#14120b]"
-                  />
-                  <div className="flex justify-between text-xs text-[#14120b]/40 mt-1">
-                    <span>1:1</span><span>3:1 typical</span><span>10:1</span>
-                  </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </>
         )}
 

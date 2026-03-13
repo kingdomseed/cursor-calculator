@@ -9,15 +9,21 @@ Empirical tool for measuring Cursor token usage and cost. Manual calculator rate
 ## What it does
 
 - **Budget mode** — "I have $60/month, what do I get?" Finds the plan that maximizes tokens for your model mix.
-- **Token mode** — "I use 10M tokens/month, what does that cost?" Finds the cheapest plan for manual token entry.
+- **Token mode** — "I use 10M tokens/month, what does that cost?" Finds the cheapest plan for manual token entry, with both a quick estimate and exact token-bucket entry.
 - **Cursor CSV replay** — Import one exported monthly Cursor CSV, reuse the exact input/cache/output token columns, and replay that usage through the same plan recommendation math used by the token calculator.
 - **Weighted model mix** — Split usage across models (60% Sonnet, 40% Opus). Per-model weights, normalized to 100%.
 - **Variant toggles** — Max Mode (+20%), Fast, Thinking, Caching. Dedicated Max/1M model variants have long-context rates built in.
 - **Caching** — Anthropic models use `cache_write` + `cache_read` with re-read amortization. Everyone else uses `cache_read` only. Different systems, different math.
 - **Import replay controls** — `User API Key` rows are included by default for a “Cursor only” estimate, with strict vs best-effort label mapping and approximate rows called out explicitly.
 - **Imported Composer handling** — `composer-1` rows are API-priced during replay, while `composer-1.5` stays in the included Auto + Composer pool.
-- **Monthly usage summary** — Imported usage shows priced API tokens, approximate tokens, unsupported tokens, days used versus comparison days for the imported month or date span, and API tokens per used day.
+- **Monthly usage summary** — Imported usage shows priced API tokens, cache-read share within priced API rows, non-cache priced tokens, approximate tokens, unsupported tokens, days used versus comparison days for the imported month or date span, and API tokens per used day.
 - **29 models, 6 providers** — Anthropic, OpenAI, Google, xAI, Cursor, Moonshot.
+
+## Matching an imported CSV in manual mode
+
+- **Quick estimate** — Use `API tokens priced` from the imported summary as your manual token total, then copy `Cache-read share (priced API)` into the cache slider.
+- **Conservative baseline** — Use `Non-cache priced tokens` as your manual total if you want to see a no-cache starting point.
+- **Closest replay match** — Switch to `Exact token buckets` and copy the CSV-style buckets directly: `Input with cache write`, `Input without cache write`, `Cache reads`, and `Output`.
 
 ## Running it
 

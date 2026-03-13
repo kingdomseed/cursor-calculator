@@ -1,5 +1,6 @@
 import { parseCursorUsageFiles } from '../domain/importReplay/summary';
 import type { CursorImportReport } from '../domain/importReplay/types';
+import { buildSimpleExactTokenBreakdown, computeManualUsageRecommendation } from '../domain/recommendation/manualUsage';
 import { computeExactUsageRecommendation, computeRecommendation } from '../domain/recommendation/recommendation';
 import type { Recommendation } from '../domain/recommendation/types';
 import type { Model, PricingData } from '../domain/catalog/types';
@@ -75,6 +76,19 @@ export function selectRecommendation(
 
   if (state.modelConfigs.length === 0) {
     return null;
+  }
+
+  if (state.mode === 'tokens' && state.tokenSource === 'manual') {
+    const exactTokens = state.manualTokenInputMode === 'advanced'
+      ? state.manualExactTokens
+      : buildSimpleExactTokenBreakdown(state.tokens, state.cacheReadShare, state.inputRatio);
+
+    return computeManualUsageRecommendation(
+      exactTokens,
+      selectSelectedModels(state, inputs.manualModels),
+      state.modelConfigs,
+      inputs.plans,
+    );
   }
 
   return computeRecommendation(

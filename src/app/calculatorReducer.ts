@@ -1,14 +1,18 @@
 import { reconcileSelectedModelConfigs } from '../domain/modelConfig/defaults';
 import type { Model } from '../domain/catalog/types';
 import type { ResolvedCursorImportOptions } from '../domain/importReplay/types';
-import type { ModelConfig } from '../domain/recommendation/types';
-import type { CalculatorState, ImportedCsvFile, TokenSource } from './calculatorState';
+import { buildSimpleExactTokenBreakdown, normalizeExactTokenBreakdown } from '../domain/recommendation/manualUsage';
+import type { ExactTokenBreakdown, ModelConfig } from '../domain/recommendation/types';
+import type { CalculatorState, ImportedCsvFile, ManualTokenInputMode, TokenSource } from './calculatorState';
 
 export type CalculatorAction =
   | { type: 'set_mode'; mode: CalculatorState['mode'] }
   | { type: 'set_token_source'; tokenSource: TokenSource }
   | { type: 'set_budget'; budget: number }
   | { type: 'set_tokens'; tokens: number }
+  | { type: 'set_manual_token_input_mode'; manualTokenInputMode: ManualTokenInputMode }
+  | { type: 'set_cache_read_share'; cacheReadShare: number }
+  | { type: 'set_manual_exact_tokens'; manualExactTokens: ExactTokenBreakdown }
   | { type: 'set_input_ratio'; inputRatio: number }
   | { type: 'set_show_advanced'; showAdvanced: boolean }
   | { type: 'set_model_configs'; modelConfigs: ModelConfig[] }
@@ -26,10 +30,37 @@ export function calculatorReducer(state: CalculatorState, action: CalculatorActi
       return { ...state, tokenSource: action.tokenSource };
     case 'set_budget':
       return { ...state, budget: action.budget };
-    case 'set_tokens':
-      return { ...state, tokens: action.tokens };
-    case 'set_input_ratio':
-      return { ...state, inputRatio: action.inputRatio };
+    case 'set_tokens': {
+      const nextState = { ...state, tokens: action.tokens };
+      return nextState.manualTokenInputMode === 'simple'
+        ? syncSimpleManualExactTokens(nextState)
+        : nextState;
+    }
+    case 'set_manual_token_input_mode':
+      return { ...state, manualTokenInputMode: action.manualTokenInputMode };
+    case 'set_cache_read_share': {
+      const nextState = {
+        ...state,
+        cacheReadShare: Math.min(100, Math.max(0, action.cacheReadShare)),
+      };
+      return nextState.manualTokenInputMode === 'simple'
+        ? syncSimpleManualExactTokens(nextState)
+        : nextState;
+    }
+    case 'set_manual_exact_tokens': {
+      const manualExactTokens = normalizeExactTokenBreakdown(action.manualExactTokens);
+      return {
+        ...state,
+        manualExactTokens,
+        tokens: manualExactTokens.total,
+      };
+    }
+    case 'set_input_ratio': {
+      const nextState = { ...state, inputRatio: action.inputRatio };
+      return nextState.manualTokenInputMode === 'simple'
+        ? syncSimpleManualExactTokens(nextState)
+        : nextState;
+    }
     case 'set_show_advanced':
       return { ...state, showAdvanced: action.showAdvanced };
     case 'set_model_configs':
@@ -69,4 +100,15 @@ export function calculatorReducer(state: CalculatorState, action: CalculatorActi
       return exhaustiveCheck;
     }
   }
+}
+
+function syncSimpleManualExactTokens(state: CalculatorState): CalculatorState {
+  return {
+    ...state,
+    manualExactTokens: buildSimpleExactTokenBreakdown(
+      state.tokens,
+      state.cacheReadShare,
+      state.inputRatio,
+    ),
+  };
 }
