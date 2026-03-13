@@ -4,8 +4,9 @@ import { getManualApiModels, getPricingCatalog } from './domain/catalog/currentC
 import { getImportReplayModels } from './domain/importReplay/catalog';
 import { parseCursorUsageFiles } from './domain/importReplay/summary';
 import type { ApproximationMode, CursorImportOptions, CursorImportReport } from './domain/importReplay/types';
+import { createInitialModelConfigs, reconcileSelectedModelConfigs } from './domain/modelConfig/defaults';
 import { computeExactUsageRecommendation, computeRecommendation } from './domain/recommendation/recommendation';
-import type { Mode, Model, ModelConfig } from './lib/types';
+import type { Mode, ModelConfig } from './lib/types';
 import { ModeToggle } from './components/ModeToggle';
 import { BudgetInput } from './components/BudgetInput';
 import { TokenInput } from './components/TokenInput';
@@ -24,29 +25,6 @@ const IMPORT_REPLAY_MODELS = getImportReplayModels();
 type TokenSource = 'manual' | 'cursor_import';
 type ImportedCsvFile = { name: string; text: string };
 
-function createDefaultConfig(model: Model): ModelConfig {
-  return {
-    modelId: model.id,
-    weight: 0,
-    maxMode: model.auto_checks?.max_mode ?? false,
-    fast: model.auto_checks?.fast ?? false,
-    thinking: model.auto_checks?.thinking ?? false,
-    caching: false,
-    cacheHitRate: 75,
-  };
-}
-
-function redistributeWeights(configs: ModelConfig[]): ModelConfig[] {
-  if (configs.length === 0) return configs;
-  const evenWeight = Math.round(100 / configs.length);
-  return configs.map((config, index) => ({
-    ...config,
-    weight: index === configs.length - 1
-      ? 100 - evenWeight * (configs.length - 1)
-      : evenWeight,
-  }));
-}
-
 function App() {
   const [mode, setMode] = useState<Mode>('budget');
   const [tokenSource, setTokenSource] = useState<TokenSource>('manual');
@@ -62,10 +40,7 @@ function App() {
     includeUserApiKey: true,
     approximationMode: 'best_effort',
   });
-  const [modelConfigs, setModelConfigs] = useState<ModelConfig[]>(() => {
-    const defaultModel = API_MODELS.find((model) => model.id === 'claude-sonnet-4-6') ?? API_MODELS[0];
-    return defaultModel ? redistributeWeights([createDefaultConfig(defaultModel)]) : [];
-  });
+  const [modelConfigs, setModelConfigs] = useState<ModelConfig[]>(() => createInitialModelConfigs(API_MODELS));
 
   const selectedModelIds = useMemo(() => modelConfigs.map((config) => config.modelId), [modelConfigs]);
   const selectedModels = useMemo(
@@ -76,15 +51,7 @@ function App() {
   const showManualControls = mode === 'budget' || tokenSource === 'manual';
 
   const handleModelSelectionChange = useCallback((ids: string[]) => {
-    setModelConfigs((previous) => {
-      const kept = previous.filter((config) => ids.includes(config.modelId));
-      const newIds = ids.filter((id) => !previous.some((config) => config.modelId === id));
-      const added = newIds.map((id) => {
-        const model = API_MODELS.find((candidate) => candidate.id === id)!;
-        return createDefaultConfig(model);
-      });
-      return redistributeWeights([...kept, ...added]);
-    });
+    setModelConfigs((previous) => reconcileSelectedModelConfigs(previous, ids, API_MODELS));
   }, []);
 
   const recommendation = useMemo(() => {
