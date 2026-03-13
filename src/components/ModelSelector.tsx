@@ -14,13 +14,6 @@ export function ModelSelector({ options, selected, onChange, placeholder }: Prop
   const [search, setSearch] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (isOpen) {
-      // Small delay so the dropdown renders before focus
-      requestAnimationFrame(() => inputRef.current?.focus());
-    }
-  }, [isOpen]);
-
   function closeDropdown() {
     setIsOpen(false);
     setSearch('');
@@ -34,6 +27,13 @@ export function ModelSelector({ options, selected, onChange, placeholder }: Prop
 
     setIsOpen(true);
   }
+
+  useEffect(() => {
+    if (isOpen) {
+      // Small delay so the dropdown renders before focus
+      requestAnimationFrame(() => inputRef.current?.focus());
+    }
+  }, [isOpen]);
 
   const selectedModels = options.filter((m) => selected.includes(m.id));
   const unselectedModels = options.filter((m) => !selected.includes(m.id));

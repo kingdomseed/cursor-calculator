@@ -4,7 +4,13 @@ import { HandWaveIcon } from './Icons';
 const STORAGE_KEY = 'cursor-calc-welcome-dismissed';
 
 export function WelcomeModal() {
-  const [show, setShow] = useState(() => !localStorage.getItem(STORAGE_KEY));
+  const [show, setShow] = useState(() => {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+
+    return !localStorage.getItem(STORAGE_KEY);
+  });
 
   function dismiss() {
     localStorage.setItem(STORAGE_KEY, '1');

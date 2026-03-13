@@ -21,14 +21,6 @@ export function ModelConfigRow({ model, config, onChange }: Props) {
   const hasThinking = !!model.variants?.thinking;
   const hasCaching = model.rates.cache_read !== null;
 
-  function toggleMaxMode(checked: boolean) {
-    onChange({ ...config, maxMode: checked, fast: checked ? false : config.fast });
-  }
-
-  function toggleFast(checked: boolean) {
-    onChange({ ...config, fast: checked, maxMode: checked ? false : config.maxMode });
-  }
-
   // Summary of active variants for collapsed view
   const activeBadges: string[] = [];
   if (config.maxMode) activeBadges.push('Max');
@@ -73,7 +65,7 @@ export function ModelConfigRow({ model, config, onChange }: Props) {
             <div className="flex flex-wrap gap-4 text-sm">
               {hasMaxMode && (
                 <label className="flex items-center gap-1.5 cursor-pointer">
-                  <input type="checkbox" checked={config.maxMode} onChange={(e) => toggleMaxMode(e.target.checked)}
+                  <input type="checkbox" checked={config.maxMode} onChange={(e) => onChange({ ...config, maxMode: e.target.checked })}
                     className="w-4 h-4 rounded border-[#e0e0d8] text-[#14120b] focus:ring-[#14120b]" />
                   <span>Max Mode</span>
                   <span className="text-xs text-[#14120b]/40">(+20%)</span>
@@ -81,9 +73,10 @@ export function ModelConfigRow({ model, config, onChange }: Props) {
               )}
               {hasFast && (
                 <label className="flex items-center gap-1.5 cursor-pointer">
-                  <input type="checkbox" checked={config.fast} onChange={(e) => toggleFast(e.target.checked)}
+                  <input type="checkbox" checked={config.fast} onChange={(e) => onChange({ ...config, fast: e.target.checked })}
                     className="w-4 h-4 rounded border-[#e0e0d8] text-[#14120b] focus:ring-[#14120b]" />
                   <span>Fast</span>
+                  <span className="text-xs text-[#14120b]/40">(stacks with Max)</span>
                 </label>
               )}
             </div>

@@ -101,6 +101,22 @@ describe('computeEffectiveRates - Fast + Caching', () => {
     expect(rates.input).toBeCloseTo(22.75, 3);
     expect(rates.output).toBe(150);
   });
+
+  it('applies caching after fast and max layering when all are enabled', () => {
+    const config: ModelConfig = {
+      modelId: 'claude-4-6-opus', weight: 100,
+      maxMode: true, fast: true, thinking: false,
+      caching: true, cacheHitRate: 50,
+    };
+    const rates = computeEffectiveRates(opusModel, config);
+    // Fast rates first: input=30, cache_write=37.5, cache_read=3, output=150
+    // Max upcharge 1.2: input=36, cache_write=45, cache_read=3.6, output=180
+    // RE_READS=3, cachedRatio=0.5
+    // effective = (0.5*45 + 0.5*3.6*3 + 0.5*36*3) / 3
+    // = (22.5 + 5.4 + 54) / 3 = 81.9 / 3 = 27.3
+    expect(rates.input).toBeCloseTo(27.3, 3);
+    expect(rates.output).toBe(180);
+  });
 });
 
 // Test fixture: GPT-5.4 (no cache_write)

@@ -51,14 +51,16 @@ function applyCaching(
   config: ModelConfig,
   reReads: number = DEFAULT_RE_READS,
 ): number {
-  if (!config.caching || config.cacheHitRate <= 0 || !cacheRead) {
+  const clampedCacheHitRate = Math.min(100, Math.max(0, config.cacheHitRate));
+
+  if (!config.caching || clampedCacheHitRate <= 0 || cacheRead === null) {
     return inputRate;
   }
 
-  const cachedRatio = config.cacheHitRate / 100;
+  const cachedRatio = clampedCacheHitRate / 100;
   const uncachedRatio = 1 - cachedRatio;
 
-  if (cacheWrite) {
+  if (cacheWrite !== null) {
     // Anthropic: cache_write + cache_read with RE_READS amortization
     return (
       cachedRatio * cacheWrite +
