@@ -2,7 +2,7 @@ import { formatNumber } from '../domain/recommendation/formatters';
 import type {
   ApproximationMode,
   CursorImportReport,
-} from '../lib/cursorUsage';
+} from '../domain/importReplay/types';
 
 interface Props {
   report: CursorImportReport | null;
