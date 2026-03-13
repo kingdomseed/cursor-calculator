@@ -1,7 +1,8 @@
 import { reconcileSelectedModelConfigs } from '../domain/modelConfig/defaults';
 import type { Model } from '../domain/catalog/types';
+import type { ResolvedCursorImportOptions } from '../domain/importReplay/types';
 import type { ModelConfig } from '../domain/recommendation/types';
-import type { CalculatorState, ImportedCsvFile, ResolvedCursorImportOptions, TokenSource } from './calculatorState';
+import type { CalculatorState, ImportedCsvFile, TokenSource } from './calculatorState';
 
 export type CalculatorAction =
   | { type: 'set_mode'; mode: CalculatorState['mode'] }

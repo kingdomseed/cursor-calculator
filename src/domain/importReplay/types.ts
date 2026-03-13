@@ -10,6 +10,8 @@ export interface CursorImportOptions {
   approximationMode?: ApproximationMode;
 }
 
+export type ResolvedCursorImportOptions = Required<CursorImportOptions>;
+
 export interface CursorImportIssue {
   label: string;
   tokens: number;

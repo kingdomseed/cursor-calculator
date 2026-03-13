@@ -14,8 +14,8 @@ Empirical tool for measuring Cursor token usage and cost. Manual calculator rate
 - **Weighted model mix** — Split usage across models (60% Sonnet, 40% Opus). Per-model weights, normalized to 100%.
 - **Variant toggles** — Max Mode (+20%), Fast, Thinking, Caching. Dedicated Max/1M model variants have long-context rates built in.
 - **Caching** — Anthropic models use `cache_write` + `cache_read` with re-read amortization. Everyone else uses `cache_read` only. Different systems, different math.
-- **Import replay controls** — Toggle `User API Key` rows, choose strict vs best-effort label mapping, and see approximate rows called out explicitly.
-- **Monthly usage summary** — Imported usage shows priced API tokens, approximate tokens, unsupported tokens, days used in the imported month, and API tokens per used day.
+- **Import replay controls** — `User API Key` rows are included by default for a “Cursor only” estimate, with strict vs best-effort label mapping and approximate rows called out explicitly.
+- **Monthly usage summary** — Imported usage shows priced API tokens, approximate tokens, unsupported tokens, days used versus comparison days for the imported month or date span, and API tokens per used day.
 - **29 models, 6 providers** — Anthropic, OpenAI, Google, xAI, Cursor, Moonshot.
 
 ## Running it
@@ -49,12 +49,23 @@ npm run build
 
 React 19, TypeScript, Vite, Tailwind CSS 4, Vitest.
 
+## Architecture
+
+- App orchestration boundary: `src/app/`
+  - `calculatorState.ts` defines reducer-owned source state and defaults
+  - `calculatorReducer.ts` owns state transitions
+  - `calculatorSelectors.ts` derives replay reports and recommendations
+  - `cursorImportPresentation.ts` and `cursorImportActions.ts` own replay-summary presentation helpers and import-action wiring
+  - `useCalculatorController.ts` owns file-reading side effects and UI wiring
 - Current Cursor pricing catalog: `src/data/cursor-pricing.json`
-- Shared plan and pricing math: `src/lib/calculations.ts`
-- Cursor CSV parsing, normalization, and replay logic: `src/lib/cursorUsage.ts`
-- Import UI: `src/components/CursorImportPanel.tsx`
-- Import-only provider-backed replay rates for retired labels: `src/data/providerImportModels.ts`
-- Library tests: `src/lib/__tests__/`
+- Current catalog accessors: `src/domain/catalog/`
+- Model config defaults, reconciliation, and capability rules: `src/domain/modelConfig/`
+- Recommendation math and plan comparison: `src/domain/recommendation/`
+- Import replay catalog and CSV pipeline: `src/domain/importReplay/`
+- Import-only historical replay models: `src/data/importReplayHistoricalModels.ts`
+- Import replay label mappings and approximation rules: `src/data/importReplayLabelMappings.ts`
+- Presentational UI components: `src/components/`
+- Automated coverage: `src/domain/*/__tests__/` and `src/app/__tests__/`
 
 ## Not included
 

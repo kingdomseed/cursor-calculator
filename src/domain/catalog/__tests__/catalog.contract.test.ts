@@ -34,4 +34,33 @@ describe('current catalog contract', () => {
     expect(getModelById('claude-sonnet-4-6')?.id).toBe('claude-sonnet-4-6');
     expect(getModelById('missing-model-id')).toBeUndefined();
   });
+
+  it('returns defensive copies so callers cannot mutate current catalog truth', () => {
+    const catalog = getPricingCatalog();
+    const plans = getPlans();
+    const models = getCurrentModels();
+    const sonnet = getModelById('claude-sonnet-4-6');
+
+    catalog.meta.version = 'mutated-version';
+    plans.pro.api_pool = -1;
+    models[0]!.name = 'Mutated Model Name';
+    models.push({
+      id: 'mutated-model',
+      name: 'Mutated Model',
+      provider: 'cursor',
+      pool: 'api',
+      context: { default: 0, max: 0 },
+      rates: { input: 0, cache_write: null, cache_read: null, output: 0 },
+    });
+    if (sonnet) {
+      sonnet.name = 'Mutated Sonnet';
+    }
+
+    expect(getPricingCatalog()).toEqual(productionPricing);
+    expect(getPlans()).toEqual(productionPricing.plans);
+    expect(getCurrentModels()).toEqual(productionPricing.models);
+    expect(getModelById('claude-sonnet-4-6')?.name).toBe(
+      productionPricing.models.find((model) => model.id === 'claude-sonnet-4-6')?.name,
+    );
+  });
 });

@@ -33,15 +33,27 @@ export function selectSelectedFileName(state: CalculatorState): string | null {
   return state.cursorImportFiles[0]?.name ?? null;
 }
 
+export function deriveCursorImportReport(
+  cursorImportFiles: CalculatorState['cursorImportFiles'],
+  cursorImportOptions: CalculatorState['cursorImportOptions'],
+  importReplayModels: Model[],
+): CursorImportReport | null {
+  if (cursorImportFiles.length === 0) {
+    return null;
+  }
+
+  return parseCursorUsageFiles(cursorImportFiles, importReplayModels, cursorImportOptions);
+}
+
 export function selectCursorImportReport(
   state: CalculatorState,
   importReplayModels: Model[],
 ): CursorImportReport | null {
-  if (state.cursorImportFiles.length === 0) {
-    return null;
-  }
-
-  return parseCursorUsageFiles(state.cursorImportFiles, importReplayModels, state.cursorImportOptions);
+  return deriveCursorImportReport(
+    state.cursorImportFiles,
+    state.cursorImportOptions,
+    importReplayModels,
+  );
 }
 
 export function selectRecommendation(

@@ -1,11 +1,11 @@
 import { createInitialModelConfigs } from '../domain/modelConfig/defaults';
 import type { Model } from '../domain/catalog/types';
-import type { CursorImportOptions, CsvInputFile } from '../domain/importReplay/types';
+import { resolveCursorImportOptions } from '../domain/importReplay/options';
+import type { CsvInputFile, ResolvedCursorImportOptions } from '../domain/importReplay/types';
 import type { Mode, ModelConfig } from '../domain/recommendation/types';
 
 export type TokenSource = 'manual' | 'cursor_import';
 export type ImportedCsvFile = CsvInputFile;
-export type ResolvedCursorImportOptions = Required<CursorImportOptions>;
 
 export interface CalculatorState {
   mode: Mode;
@@ -21,11 +21,6 @@ export interface CalculatorState {
   modelConfigs: ModelConfig[];
 }
 
-export const DEFAULT_CURSOR_IMPORT_OPTIONS: ResolvedCursorImportOptions = {
-  includeUserApiKey: true,
-  approximationMode: 'best_effort',
-};
-
 export function createInitialCalculatorState(manualModels: Model[]): CalculatorState {
   return {
     mode: 'budget',
@@ -37,7 +32,7 @@ export function createInitialCalculatorState(manualModels: Model[]): CalculatorS
     cursorImportFiles: [],
     cursorImportError: null,
     isImporting: false,
-    cursorImportOptions: DEFAULT_CURSOR_IMPORT_OPTIONS,
+    cursorImportOptions: resolveCursorImportOptions(),
     modelConfigs: createInitialModelConfigs(manualModels),
   };
 }

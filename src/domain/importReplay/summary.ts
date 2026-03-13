@@ -3,20 +3,16 @@ import { addCostBreakdowns, addDisplayBreakdowns, addExactBreakdowns, buildUsage
 import { parseCursorCsvText } from './csvParser';
 import { getExclusionReason } from './filters';
 import { normalizeImportedModel } from './normalization';
+import { resolveCursorImportOptions } from './options';
 import { priceImportedRow } from './pricing';
 import type { CsvInputFile, CursorImportOptions, CursorImportReport } from './types';
-
-const DEFAULT_OPTIONS: Required<CursorImportOptions> = {
-  includeUserApiKey: true,
-  approximationMode: 'best_effort',
-};
 
 export function parseCursorUsageFiles(
   files: CsvInputFile[],
   models: import('../catalog/types').Model[],
   options: CursorImportOptions = {},
 ): CursorImportReport {
-  const resolvedOptions = { ...DEFAULT_OPTIONS, ...options };
+  const resolvedOptions = resolveCursorImportOptions(options);
   const modelsById = new Map(models.map((model) => [model.id, model]));
   const aggregate = new Map<string, UsageLineItemInput>();
   const unsupported = new Map<string, import('./types').CursorImportIssue>();

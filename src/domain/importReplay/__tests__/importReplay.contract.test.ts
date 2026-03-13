@@ -49,4 +49,30 @@ describe('import replay catalog contract', () => {
     expect(getApproximateFastReasoningSuffixes()).toEqual(['medium', 'high', 'xhigh']);
     expect(getDefaultApproximateFastMultiplier()).toBe(2);
   });
+
+  it('returns defensive copies so callers cannot mutate replay catalog truth', () => {
+    const replayModels = getImportReplayModels();
+    const historicalModels = getImportReplayHistoricalModels();
+    const exactMappings = getExactImportReplayLabelMappings();
+    const approximateMappings = getApproximateImportReplayLabelMappings();
+    const companions = getLongContextCompanions();
+    const resolved = getImportReplayModelById('provider-openai-o3');
+
+    replayModels[0]!.name = 'Mutated Replay Model';
+    replayModels.pop();
+    historicalModels[0]!.name = 'Mutated Historical Model';
+    exactMappings['gpt-5-fast']!.modelId = 'mutated-model-id';
+    approximateMappings.agent_review!.modelId = 'mutated-model-id';
+    companions['gpt-5.4'] = { maxId: 'mutated-model-id' };
+    if (resolved) {
+      resolved.name = 'Mutated Resolved Model';
+    }
+
+    expect(getImportReplayModelById('provider-openai-o3')?.name).toBe('o3');
+    expect(getExactImportReplayLabelMappings()['gpt-5-fast']?.modelId).toBe('gpt-5');
+    expect(getApproximateImportReplayLabelMappings().agent_review?.modelId).toBe('gpt-5');
+    expect(getLongContextCompanions()['gpt-5.4']?.maxId).toBe('gpt-5.4-max');
+    expect(getImportReplayHistoricalModels().find((model) => model.id === 'provider-openai-o3')?.name).toBe('o3');
+    expect(getImportReplayModels().some((model) => model.id === 'provider-openai-o3')).toBe(true);
+  });
 });

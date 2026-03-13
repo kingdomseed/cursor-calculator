@@ -1,19 +1,22 @@
 import { useCallback, useMemo, useReducer } from 'react';
 import { getManualApiModels, getPlans } from '../domain/catalog/currentCatalog';
 import { getImportReplayModels } from '../domain/importReplay/catalog';
-import type { ApproximationMode, CursorImportReport } from '../domain/importReplay/types';
+import type {
+  ApproximationMode,
+  CursorImportReport,
+  ResolvedCursorImportOptions,
+} from '../domain/importReplay/types';
 import type { Recommendation } from '../domain/recommendation/types';
 import type { Model, PricingData } from '../domain/catalog/types';
+import { buildCursorImportActions } from './cursorImportActions';
 import { calculatorReducer } from './calculatorReducer';
 import {
   createInitialCalculatorState,
   type CalculatorState,
-  type ImportedCsvFile,
-  type ResolvedCursorImportOptions,
   type TokenSource,
 } from './calculatorState';
 import {
-  selectCursorImportReport,
+  deriveCursorImportReport,
   selectIsImportMode,
   selectRecommendation,
   selectSelectedFileName,
@@ -21,10 +24,6 @@ import {
   selectSelectedModels,
   selectShowManualControls,
 } from './calculatorSelectors';
-
-const DEFAULT_MANUAL_MODELS = getManualApiModels();
-const DEFAULT_IMPORT_REPLAY_MODELS = getImportReplayModels();
-const DEFAULT_PLANS = getPlans();
 
 interface CalculatorControllerDependencies {
   manualModels?: Model[];
@@ -58,17 +57,27 @@ interface CalculatorController {
 export function useCalculatorController(
   dependencies: CalculatorControllerDependencies = {},
 ): CalculatorController {
-  const manualModels = dependencies.manualModels ?? DEFAULT_MANUAL_MODELS;
-  const importReplayModels = dependencies.importReplayModels ?? DEFAULT_IMPORT_REPLAY_MODELS;
-  const plans = dependencies.plans ?? DEFAULT_PLANS;
+  const manualModels = useMemo(
+    () => dependencies.manualModels ?? getManualApiModels(),
+    [dependencies.manualModels],
+  );
+  const importReplayModels = useMemo(
+    () => dependencies.importReplayModels ?? getImportReplayModels(),
+    [dependencies.importReplayModels],
+  );
+  const plans = useMemo(
+    () => dependencies.plans ?? getPlans(),
+    [dependencies.plans],
+  );
 
   const [state, dispatch] = useReducer(calculatorReducer, manualModels, createInitialCalculatorState);
+  const { cursorImportFiles, cursorImportOptions } = state;
 
   const selectedModelIds = useMemo(() => selectSelectedModelIds(state), [state]);
   const selectedModels = useMemo(() => selectSelectedModels(state, manualModels), [manualModels, state]);
   const cursorImportReport = useMemo(
-    () => selectCursorImportReport(state, importReplayModels),
-    [importReplayModels, state],
+    () => deriveCursorImportReport(cursorImportFiles, cursorImportOptions, importReplayModels),
+    [cursorImportFiles, cursorImportOptions, importReplayModels],
   );
   const recommendation = useMemo(
     () => selectRecommendation(state, { manualModels, importReplayModels, plans, cursorImportReport }),
@@ -126,25 +135,9 @@ export function useCalculatorController(
   }, [state.cursorImportOptions, updateCursorImportOptions]);
 
   const handleCursorImportFilesSelected = useCallback(async (files: FileList | null) => {
-    if (!files || files.length === 0) {
-      return;
-    }
-
-    dispatch({ type: 'import_started' });
-
-    try {
-      const selectedFile = files[0];
-      const loadedFiles: ImportedCsvFile[] = [{
-        name: selectedFile.name,
-        text: await selectedFile.text(),
-      }];
-
-      dispatch({ type: 'import_loaded', files: loadedFiles });
-    } catch {
-      dispatch({
-        type: 'import_failed',
-        error: 'Could not read the selected CSV files.',
-      });
+    const actions = await buildCursorImportActions(files);
+    for (const action of actions) {
+      dispatch(action);
     }
   }, []);
 
