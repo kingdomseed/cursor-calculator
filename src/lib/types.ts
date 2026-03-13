@@ -82,6 +82,43 @@ export interface TokenBreakdown {
   output: number;
 }
 
+export interface ExactTokenBreakdown {
+  inputWithCacheWrite: number;
+  inputWithoutCacheWrite: number;
+  cacheRead: number;
+  output: number;
+  total: number;
+}
+
+export interface ExactCostBreakdown {
+  input: number;
+  output: number;
+  total: number;
+}
+
+export interface UsageLineItemInput {
+  key: string;
+  modelId: string;
+  label: string;
+  provider: string;
+  pool: Model["pool"];
+  tokens: TokenBreakdown;
+  exactTokens?: ExactTokenBreakdown;
+  exactCost?: ExactCostBreakdown;
+  maxMode: boolean;
+  fast: boolean;
+  thinking: boolean;
+  caching: boolean;
+  cacheHitRate: number;
+  approximated: boolean;
+  sourceLabel?: string;
+}
+
+export interface PlanLineItem extends UsageLineItemInput {
+  effectiveRates: EffectiveRates;
+  apiCost: number;
+}
+
 export interface PlanResult {
   plan: PlanKey;
   subscription: number;
@@ -92,12 +129,7 @@ export interface PlanResult {
   unusedPool: number;
   totalCost: number;
   affordable: boolean;       // subscription <= budget (budget mode only)
-  perModel: Array<{
-    modelId: string;
-    tokens: TokenBreakdown;
-    effectiveRates: EffectiveRates;
-    apiCost: number;
-  }>;
+  perModel: PlanLineItem[];
 }
 
 export interface Recommendation {

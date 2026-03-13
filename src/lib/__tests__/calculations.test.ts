@@ -54,10 +54,10 @@ describe('computeEffectiveRates', () => {
     expect(rates.output).toBe(150);
   });
 
-  it('Fast mode ignores Max Mode even if both are true', () => {
+  it('applies Max Mode on top of Fast mode when both are true', () => {
     const rates = computeEffectiveRates(opusModel, { ...baseConfig, fast: true, maxMode: true });
-    expect(rates.input).toBe(30);
-    expect(rates.output).toBe(150);
+    expect(rates.input).toBe(36);
+    expect(rates.output).toBe(180);
   });
 
   it('applies caching blend for Anthropic models (has cache_write)', () => {
@@ -342,4 +342,3 @@ describe('formatters', () => {
     expect(formatRate(0.5)).toBe('$0.50');
   });
 });
-

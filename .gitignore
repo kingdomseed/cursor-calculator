@@ -35,3 +35,15 @@ lerna-debug.log*
 
 # TypeScript
 *.tsbuildinfo
+
+# Private local fixture data
+data/private/
+
+# Local git worktrees
+.worktrees/
+
+# Local planning scratch files
+task_plan.md
+findings.md
+progress.md
+docs/plans/

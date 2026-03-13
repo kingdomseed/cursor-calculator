@@ -18,10 +18,22 @@ export function ModelSelector({ options, selected, onChange, placeholder }: Prop
     if (isOpen) {
       // Small delay so the dropdown renders before focus
       requestAnimationFrame(() => inputRef.current?.focus());
-    } else {
-      setSearch('');
     }
   }, [isOpen]);
+
+  function closeDropdown() {
+    setIsOpen(false);
+    setSearch('');
+  }
+
+  function toggleDropdown() {
+    if (isOpen) {
+      closeDropdown();
+      return;
+    }
+
+    setIsOpen(true);
+  }
 
   const selectedModels = options.filter((m) => selected.includes(m.id));
   const unselectedModels = options.filter((m) => !selected.includes(m.id));
@@ -37,7 +49,7 @@ export function ModelSelector({ options, selected, onChange, placeholder }: Prop
   return (
     <div className="relative">
       <div
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={toggleDropdown}
         className="w-full bg-white border border-[#e0e0d8] rounded-xl px-4 py-3 flex items-center justify-between hover:border-[#14120b]/30 transition-colors cursor-pointer"
       >
         <div className="flex flex-wrap gap-2">
@@ -59,7 +71,7 @@ export function ModelSelector({ options, selected, onChange, placeholder }: Prop
 
       {isOpen && (
         <>
-          <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
+          <div className="fixed inset-0 z-10" onClick={closeDropdown} />
           <div className="absolute z-20 top-full left-0 right-0 mt-2 bg-white border border-[#e0e0d8] rounded-xl shadow-lg max-h-80 flex flex-col">
             <div className="p-2 border-b border-[#e0e0d8]">
               <input

@@ -1,16 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { HandWaveIcon } from './Icons';
 
 const STORAGE_KEY = 'cursor-calc-welcome-dismissed';
 
 export function WelcomeModal() {
-  const [show, setShow] = useState(false);
-
-  useEffect(() => {
-    if (!localStorage.getItem(STORAGE_KEY)) {
-      setShow(true);
-    }
-  }, []);
+  const [show, setShow] = useState(() => !localStorage.getItem(STORAGE_KEY));
 
   function dismiss() {
     localStorage.setItem(STORAGE_KEY, '1');

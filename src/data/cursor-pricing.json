@@ -145,7 +145,7 @@
       "id": "composer-1",
       "name": "Composer 1",
       "provider": "cursor",
-      "pool": "auto_composer",
+      "pool": "api",
       "context": { "default": 200000, "max": null },
       "rates": { "input": 1.25, "cache_write": null, "cache_read": 0.125, "output": 10.00 }
     },
