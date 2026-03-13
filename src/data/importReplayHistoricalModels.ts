@@ -2,7 +2,7 @@ import type { Model } from '../domain/catalog/types';
 
 // Provider-backed rates used only for CSV replay when Cursor export labels no
 // longer exist in the current Cursor pricing catalog.
-export const PROVIDER_IMPORT_MODELS: Model[] = [
+export const IMPORT_REPLAY_HISTORICAL_MODELS: Model[] = [
   {
     id: 'provider-openai-o3',
     name: 'o3',

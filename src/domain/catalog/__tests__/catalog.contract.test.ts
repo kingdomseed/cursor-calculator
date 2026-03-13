@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import pricingData from '../../../data/cursor-pricing.json';
-import { PROVIDER_IMPORT_MODELS } from '../../../data/providerImportModels';
+import { IMPORT_REPLAY_HISTORICAL_MODELS } from '../../../data/importReplayHistoricalModels';
 import type { PricingData } from '../../../lib/types';
 import {
   getCurrentModels,
@@ -26,7 +26,7 @@ describe('current catalog contract', () => {
     expect(manualModels.length).toBeGreaterThan(0);
     expect(manualModels.every((model) => model.pool === 'api')).toBe(true);
     expect(manualModels.map((model) => model.id)).not.toEqual(
-      expect.arrayContaining(PROVIDER_IMPORT_MODELS.map((model) => model.id)),
+      expect.arrayContaining(IMPORT_REPLAY_HISTORICAL_MODELS.map((model) => model.id)),
     );
   });
 

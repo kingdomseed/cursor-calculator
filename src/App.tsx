@@ -1,7 +1,7 @@
 import { startTransition, useCallback, useMemo, useState } from 'react';
 import { Analytics } from '@vercel/analytics/react';
-import { PROVIDER_IMPORT_MODELS } from './data/providerImportModels';
-import { getCurrentModels, getManualApiModels, getPricingCatalog } from './domain/catalog/currentCatalog';
+import { getManualApiModels, getPricingCatalog } from './domain/catalog/currentCatalog';
+import { getImportReplayModels } from './domain/importReplay/catalog';
 import type { ApproximationMode, CursorImportOptions, CursorImportReport } from './lib/cursorUsage';
 import { parseCursorUsageFiles } from './lib/cursorUsage';
 import type { Mode, Model, ModelConfig } from './lib/types';
@@ -18,9 +18,8 @@ import { WelcomeModal } from './components/WelcomeModal';
 import { CalculatorIcon, GitHubIcon, JHDIcon } from './components/Icons';
 
 const PRICING = getPricingCatalog();
-const CURRENT_MODELS = getCurrentModels();
 const API_MODELS = getManualApiModels();
-const IMPORT_REPLAY_MODELS = [...CURRENT_MODELS, ...PROVIDER_IMPORT_MODELS];
+const IMPORT_REPLAY_MODELS = getImportReplayModels();
 
 type TokenSource = 'manual' | 'cursor_import';
 type ImportedCsvFile = { name: string; text: string };
