@@ -16,7 +16,22 @@ describe('calculator semantics copy', () => {
       <BudgetInput value={200} onChange={() => undefined} />,
     );
     const tokenHtml = renderToStaticMarkup(
-      <TokenInput value={100_000_000} onChange={() => undefined} />,
+      <TokenInput
+        value={100_000_000}
+        onChange={() => undefined}
+        manualTokenInputMode="simple"
+        onManualTokenInputModeChange={() => undefined}
+        cacheReadShare={25}
+        onCacheReadShareChange={() => undefined}
+        exactTokens={{
+          inputWithCacheWrite: 0,
+          inputWithoutCacheWrite: 0,
+          cacheRead: 0,
+          output: 0,
+          total: 0,
+        }}
+        onExactTokensChange={() => undefined}
+      />,
     );
 
     expect(budgetHtml).toContain('What&#x27;s the most you want to spend per month?');

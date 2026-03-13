@@ -22,6 +22,43 @@ export function getTokensPerUsedDay(report: CursorImportReport): number {
   return report.summary.pricedApiTokens / report.summary.activeDays;
 }
 
+export function getTotalImportedTokens(report: CursorImportReport): number {
+  return (
+    report.summary.pricedApiTokens +
+    report.summary.unsupportedTokens +
+    report.summary.excludedTokens +
+    report.summary.includedNonApiTokens
+  );
+}
+
+export function getPricedApiNonCacheTokens(report: CursorImportReport): number {
+  return report.pricedEntries.reduce((sum, entry) => {
+    if (!entry.exactTokens) {
+      return sum + entry.tokens.total;
+    }
+
+    return sum + entry.exactTokens.inputWithCacheWrite + entry.exactTokens.inputWithoutCacheWrite + entry.exactTokens.output;
+  }, 0);
+}
+
+export function getPricedApiCacheReadShare(report: CursorImportReport): number {
+  const totals = report.pricedEntries.reduce((aggregate, entry) => {
+    const total = entry.exactTokens?.total ?? entry.tokens.total;
+    const cacheRead = entry.exactTokens?.cacheRead ?? 0;
+
+    return {
+      total: aggregate.total + total,
+      cacheRead: aggregate.cacheRead + cacheRead,
+    };
+  }, { total: 0, cacheRead: 0 });
+
+  if (totals.total <= 0) {
+    return 0;
+  }
+
+  return totals.cacheRead / totals.total;
+}
+
 export function buildDaysUsedNote(report: CursorImportReport): string {
   const { comparisonMode, firstActiveDate, lastActiveDate } = report.summary;
 
@@ -51,6 +88,13 @@ export function formatMonthYear(dayKey: string): string {
   });
 }
 
+function formatPercent(value: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'percent',
+    maximumFractionDigits: 1,
+  }).format(value);
+}
+
 export function buildImportSummarySections(report: CursorImportReport): ImportSummarySection[] {
   return [
     {
@@ -69,6 +113,11 @@ export function buildImportSummarySections(report: CursorImportReport): ImportSu
             ? 'Average across distinct usage days'
             : 'No usage days detected',
         },
+        {
+          label: 'Total imported tokens',
+          value: formatNumber(getTotalImportedTokens(report)),
+          note: 'All imported rows before pricing filters',
+        },
       ],
     },
     {
@@ -78,6 +127,17 @@ export function buildImportSummarySections(report: CursorImportReport): ImportSu
         {
           label: 'API tokens priced',
           value: formatNumber(report.summary.pricedApiTokens),
+          note: 'Use this as your simple-mode token total for the closest import match',
+        },
+        {
+          label: 'Cache-read share (priced API)',
+          value: formatPercent(getPricedApiCacheReadShare(report)),
+          note: 'Then copy this percentage into the simple-mode cache slider',
+        },
+        {
+          label: 'Non-cache priced tokens',
+          value: formatNumber(getPricedApiNonCacheTokens(report)),
+          note: 'Use this instead for a conservative no-cache baseline',
         },
         {
           label: 'Priced via approximation',
