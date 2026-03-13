@@ -172,7 +172,7 @@ function App() {
             <div className="mt-8">
               <BestPlanCard presentation={recommendationPresentation} />
             </div>
-            <PlanComparison results={recommendation.all} mode={mode} />
+            <PlanComparison presentation={recommendationPresentation} />
           </>
         )}
 
