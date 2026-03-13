@@ -8,9 +8,9 @@ Empirical tool for measuring Cursor token usage and cost. Manual calculator rate
 
 ## What it does
 
-- **Budget mode** — "I have $60/month, what do I get?" Finds the plan that maximizes tokens for your model mix.
-- **Token mode** — "I use 10M tokens/month, what does that cost?" Finds the cheapest plan for manual token entry.
-- **Cursor CSV replay** — Import one exported monthly Cursor CSV, reuse the exact input/cache/output token columns, and replay that usage through the same plan recommendation math used by the token calculator.
+- **Budget mode** — "I have $60/month, what do I get?" Finds the plan that fits your spend ceiling, then shows plan coverage, token yield, and estimated out-of-pocket spend.
+- **Token mode** — "I use 10M tokens/month, what does that cost?" Finds the cheapest plan for manual token entry and separates estimated usage cost from plan-adjusted out-of-pocket spend.
+- **Cursor CSV replay** — Import one exported monthly Cursor CSV, reuse the exact input/cache/output token columns, and replay that usage through the same plan recommendation math and cost-versus-coverage framing used by the token calculator.
 - **Weighted model mix** — Split usage across models (60% Sonnet, 40% Opus). Per-model weights, normalized to 100%.
 - **Variant toggles** — Max Mode (+20%), Fast, Thinking, Caching. Dedicated Max/1M model variants have long-context rates built in.
 - **Caching** — Anthropic models use `cache_write` + `cache_read` with re-read amortization. Everyone else uses `cache_read` only. Different systems, different math.
@@ -47,7 +47,8 @@ React 19, TypeScript, Vite, Tailwind CSS 4, Vitest.
 - App orchestration boundary: `src/app/`
   - `calculatorState.ts` defines reducer-owned source state and defaults
   - `calculatorReducer.ts` owns state transitions
-  - `calculatorSelectors.ts` derives replay reports and recommendations
+  - `calculatorSelectors.ts` derives replay reports, recommendations, and presentation-ready result view models
+  - `recommendationPresentation.ts` is the source of truth for result semantics shown in the UI
   - `cursorImportPresentation.ts` and `cursorImportActions.ts` own replay-summary presentation helpers and import-action wiring
   - `useCalculatorController.ts` coordinates UI wiring and import side-effect orchestration
 - Current Cursor pricing catalog: `src/data/cursor-pricing.json`
