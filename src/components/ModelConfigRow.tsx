@@ -99,10 +99,11 @@ export function ModelConfigRow({ model, config, onChange }: Props) {
               <label className="flex items-center gap-1.5 cursor-pointer text-sm">
                 <input type="checkbox" checked={config.caching} onChange={(e) => onChange({ ...config, caching: e.target.checked })}
                   className="w-4 h-4 rounded border-[#e0e0d8] text-[#14120b] focus:ring-[#14120b]" />
-                <span>Caching</span>
+                <span>Custom cache-read share</span>
               </label>
               {config.caching && (
                 <div className="mt-2 pl-6">
+                  <p className="text-xs text-[#14120b]/40 mb-2">Overrides the global cache-read share for this model</p>
                   <div className="flex items-center gap-2">
                     <input type="range" min="0" max="95" step="5" value={config.cacheHitRate}
                       onChange={(e) => onChange({ ...config, cacheHitRate: Number(e.target.value) })}

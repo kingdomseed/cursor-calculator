@@ -287,7 +287,7 @@ function buildModelDisplayRow(item: PlanLineItem, mode: Mode): RecommendationMod
   if (item.fast) badges.push('Fast');
   if (item.thinking) badges.push('Thinking');
   if (item.caching) {
-    badges.push(item.exactTokens ? 'Cache' : `Cache ${item.cacheHitRate}%`);
+    badges.push(item.cacheHitRate > 0 ? `Cache ${item.cacheHitRate}%` : 'Cache');
   }
   if (item.approximated) badges.push('Approx');
   if (item.sourceLabel) badges.push(item.sourceLabel);

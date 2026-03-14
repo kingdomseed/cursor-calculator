@@ -70,7 +70,7 @@ There is no routing layer or external state-management library. Keep `src/App.ts
 - `parseCursorUsageFiles()` — CSV parsing, billable row filtering, normalization, replay pricing, and summaries
 - `useCalculatorController()` — app orchestration for reducer state, selectors, and CSV-loading side effects
 
-Caching currently assumes a hardcoded 3x re-read pattern via `DEFAULT_RE_READS = 3`.
+Budget mode uses exact-token pricing with cache-read share via `dollarsToExactTokens()`. The legacy `DEFAULT_RE_READS = 3` pattern is only used by the per-model effective rate display in `ModelConfigRow`.
 
 ## Pricing Domain Rules
 

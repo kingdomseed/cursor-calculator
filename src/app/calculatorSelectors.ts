@@ -103,6 +103,7 @@ export function selectRecommendation(
     state.modelConfigs,
     inputs.plans,
     state.inputRatio,
+    state.cacheReadShare,
   );
 }
 

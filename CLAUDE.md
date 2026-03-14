@@ -64,13 +64,27 @@ Result semantics are centralized in `src/app/recommendationPresentation.ts`; UI 
 - `computeBillableRates()` / `computeEffectiveRates()` — Apply Cursor Max upcharge, fast variants, and caching math.
 - `parseCursorUsageFiles()` — Parses exported Cursor CSVs, filters billable rows, normalizes labels, computes exact replay costs, and produces monthly summary data.
 - `useCalculatorController()` — App-facing orchestration layer that wires reducer state, selectors, and CSV file-loading side effects together.
-- Caching still assumes a hardcoded 3x re-read pattern (`DEFAULT_RE_READS = 3`) for iterative coding workflows.
+- `dollarsToExactTokens()` — Converts a dollar budget into an `ExactTokenBreakdown` using cache-read share and input:output ratio.
+- Budget mode uses exact-token pricing with cache-read share via `dollarsToExactTokens()`. The legacy `DEFAULT_RE_READS` pattern is only used by the per-model effective rate display in `ModelConfigRow`.
 
 ### Testing reality
 
 - Vitest is configured and active.
 - Current automated coverage is domain-level plus app-orchestration-level and runs in the Node environment configured in `vite.config.ts`.
 - There is not yet a committed jsdom/browser integration suite for the import UI path, so browser verification still matters for file-upload behavior.
+
+### CSV import schema
+
+The CSV import expects Cursor's exact export format. Export from [cursor.com/dashboard/usage](https://cursor.com/dashboard/usage) → Export CSV button.
+
+Required columns:
+```
+Date,User,Kind,Model,Max Mode,Input (w/ Cache Write),Input (w/o Cache Write),Cache Read,Output Tokens,Total Tokens,Requests
+```
+
+- `Kind` values: `Included`, `On-Demand`, `User API Key`, `Free`, `Errored, No Charge`, `Aborted, Not Charged`
+- `Total Tokens` = CacheWrite + InputNoCacheWrite + CacheRead + Output (cache reads are a separate bucket, not a subset of input)
+- `Requests` column may be a number or `"Free"` — ignored by the parser
 
 ### Styling
 

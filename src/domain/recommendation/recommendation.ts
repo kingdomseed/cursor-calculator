@@ -1,7 +1,8 @@
 import type { Model, Plan, PlanKey, PricingData } from '../catalog/types';
-import { directBreakdownToDollars, dollarsToTokens, exactTokensToDollars, tokensToDollars } from './conversions';
+import { dollarsToExactTokens } from './budgetUsage';
+import { directBreakdownToDollars, exactTokensToDollars, tokensToDollars } from './conversions';
 import { computeBillableRates, computeEffectiveRates, effectiveRatesFromExactCost, effectiveRatesFromExactTokens } from './rates';
-import type { Mode, ModelConfig, PlanLineItem, PlanResult, Recommendation, UsageLineItemInput } from './types';
+import type { Mode, ModelConfig, PlanLineItem, PlanResult, Recommendation, TokenBreakdown, UsageLineItemInput } from './types';
 
 const PLAN_KEYS: PlanKey[] = ['pro', 'pro_plus', 'ultra'];
 
@@ -13,6 +14,7 @@ export function computeRecommendation(
   configs: ModelConfig[],
   plans: PricingData['plans'],
   inputOutputRatio: number,
+  cacheReadShare: number = 0,
 ): Recommendation {
   const weightSum = configs.reduce((sum, config) => sum + config.weight, 0);
   const normalizedConfigs = weightSum > 0
@@ -24,7 +26,7 @@ export function computeRecommendation(
     const affordable = mode === 'budget' ? plan.monthly_cost <= budget : true;
 
     if (mode === 'budget') {
-      return computeBudgetPlanResult(key, plan, budget, models, normalizedConfigs, inputOutputRatio, affordable);
+      return computeBudgetPlanResult(key, plan, budget, models, normalizedConfigs, inputOutputRatio, affordable, cacheReadShare);
     }
 
     return computeTokenPlanResult(key, plan, totalTokens, models, normalizedConfigs, inputOutputRatio);
@@ -87,6 +89,7 @@ function computeBudgetPlanResult(
   configs: ModelConfig[],
   ratio: number,
   affordable: boolean,
+  cacheReadShare: number = 0,
 ): PlanResult {
   const apiBudget = Math.max(plan.api_pool, budget);
 
@@ -95,9 +98,18 @@ function computeBudgetPlanResult(
       const model = models.find((candidate) => candidate.id === config.modelId);
       if (!model) return null;
 
-      const effectiveRates = computeEffectiveRates(model, config);
+      const billableRates = computeBillableRates(model, config);
       const modelDollars = apiBudget * (config.weight / 100);
-      const tokens = dollarsToTokens(modelDollars, effectiveRates, ratio);
+      const modelCacheShare = Math.min(100, Math.max(0, config.caching ? config.cacheHitRate : cacheReadShare));
+      const exactTokens = dollarsToExactTokens(modelDollars, billableRates, modelCacheShare, ratio);
+      const apiCost = exactTokensToDollars(exactTokens, billableRates);
+      const tokens: TokenBreakdown = {
+        total: exactTokens.total,
+        input: exactTokens.inputWithCacheWrite + exactTokens.inputWithoutCacheWrite + exactTokens.cacheRead,
+        output: exactTokens.output,
+      };
+
+      const effectiveRates = effectiveRatesFromExactTokens(exactTokens, billableRates);
 
       return buildPlanLineItem(
         {
@@ -107,15 +119,16 @@ function computeBudgetPlanResult(
           provider: model.provider,
           pool: model.pool,
           tokens,
+          exactTokens,
           maxMode: config.maxMode,
           fast: config.fast,
           thinking: config.thinking,
-          caching: config.caching,
-          cacheHitRate: config.cacheHitRate,
+          caching: modelCacheShare > 0,
+          cacheHitRate: modelCacheShare,
           approximated: false,
         },
         effectiveRates,
-        modelDollars,
+        apiCost,
       );
     })
     .filter((item): item is PlanLineItem => item !== null);

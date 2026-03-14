@@ -67,6 +67,17 @@ export function CursorImportPanel({
           <p className="text-sm text-[#14120b]/60">
             Uses the exact input, cache, and output token columns from Cursor exports, then prices the API-eligible rows with the existing plan math.
           </p>
+          <p className="text-xs text-[#14120b]/50 mt-1">
+            CSVs exported from{' '}
+            <a href="https://cursor.com/dashboard/usage" className="underline hover:text-[#14120b]" target="_blank" rel="noopener noreferrer">
+              Cursor's usage dashboard
+            </a>{' '}
+            work as-is.{' '}
+            <a href="/cursor-usage-template.csv" download className="underline hover:text-[#14120b]">
+              Download a template CSV
+            </a>{' '}
+            if you want to format data from another provider.
+          </p>
 
           <div className="rounded-xl border border-dashed border-[#e0e0d8] bg-[#f7f7f4] px-4 py-4">
             <label className="block text-sm font-medium text-[#14120b]/70 mb-2" htmlFor="cursor-csv-upload">
