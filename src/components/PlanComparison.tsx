@@ -71,10 +71,10 @@ export function PlanComparison({ presentation, defaultOpen = false }: Props) {
             </thead>
             {presentation.comparisonSections.map((section) => (
               <tbody key={section.kind} className="divide-y divide-[#e0e0d8]">
-                <tr className="bg-[#f7f7f4]/60">
+                <tr className="bg-[#f7f7f4]">
                   <th
                     colSpan={presentation.plans.length + 1}
-                    className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide text-[#14120b]/50"
+                    className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-[#14120b]/60 border-l-2 border-[#14120b]/15"
                   >
                     {section.title}
                   </th>
@@ -88,10 +88,10 @@ export function PlanComparison({ presentation, defaultOpen = false }: Props) {
                 ))}
                 {section.kind === 'usage_value_details' && hasModelContent && (
                   <>
-                    <tr className="bg-[#f7f7f4]/30">
+                    <tr className="bg-[#f7f7f4]/50">
                       <th
                         colSpan={presentation.plans.length + 1}
-                        className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide text-[#14120b]/40"
+                        className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-[#14120b]/50 border-l-2 border-[#14120b]/10"
                       >
                         Per-model details
                       </th>
