@@ -61,7 +61,32 @@ function App() {
       <SidebarLayout activeTarget={navigationTarget} onNavigate={navigate} pricingDate={PRICING.meta.retrieved_at}>
         <div>
           {mode === 'budget' ? (
-            <BudgetInput value={budget} onChange={setBudget} />
+            <>
+              <BudgetInput value={budget} onChange={setBudget} />
+              <div className="mt-6 p-4 bg-white rounded-xl border border-[#e0e0d8]">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium">Cache-read share</label>
+                  <span className="text-sm font-semibold bg-[#f7f7f4] px-2 py-0.5 rounded">
+                    {cacheReadShare}%
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="5"
+                  value={cacheReadShare}
+                  onChange={(e) => setCacheReadShare(Number(e.target.value))}
+                  className="w-full h-2 bg-[#e0e0d8] rounded-full appearance-none cursor-pointer accent-[#14120b]"
+                />
+                <div className="flex justify-between text-xs text-[#14120b]/40 mt-1">
+                  <span>0%</span><span>No caching</span><span>100%</span>
+                </div>
+                <p className="text-xs text-[#14120b]/50 mt-2">
+                  Cache reads are 90% cheaper than input tokens. Higher cache share means more tokens per dollar.
+                </p>
+              </div>
+            </>
           ) : tokenSource === 'manual' ? (
             <TokenInput
               value={tokens}
