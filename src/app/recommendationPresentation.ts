@@ -28,6 +28,7 @@ export interface RecommendationPlanDerivedValues {
 
 export interface RecommendationModelDisplayRow {
   key: string;
+  modelId: string;
   label: string;
   provider: string;
   badges: string[];
@@ -287,6 +288,7 @@ function buildModelDisplayRow(item: PlanLineItem, mode: Mode): RecommendationMod
 
   return {
     key: item.key,
+    modelId: item.modelId,
     label: item.label,
     provider: item.provider,
     badges,
