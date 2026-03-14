@@ -186,6 +186,24 @@ describe('BestPlanCard', () => {
     expect(html).toContain('Plan coverage');
   });
 
+  it('renders collapsed model groups with variant count when modelGroups is present', () => {
+    const presentation = buildPresentation({
+      mode: 'tokens',
+      tokenSource: 'cursor_import',
+      recommendation: createRecommendation(createPlanResult({
+        plan: 'ultra',
+        perModel: [
+          createLineItem({ key: 'co46-base', modelId: 'claude-opus-4-6', label: 'Claude 4.6 Opus', apiCost: 50, tokens: { total: 5_000_000, input: 3_750_000, output: 1_250_000 } }),
+          createLineItem({ key: 'co46-max', modelId: 'claude-opus-4-6-max', label: 'Claude 4.6 Opus Max', apiCost: 70, tokens: { total: 3_000_000, input: 2_250_000, output: 750_000 } }),
+        ],
+      })),
+    });
+
+    const html = renderCardFromPresentation(presentation);
+    // Should show the grouped family (highest-cost child label after sort)
+    expect(html).toContain('2 variants');
+  });
+
   it('selects grouped breakdown values and model details from the recommended plan in multi-plan data', () => {
     const firstPlan = createPlanResult({
       plan: 'pro',

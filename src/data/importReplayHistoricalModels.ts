@@ -36,4 +36,18 @@ export const IMPORT_REPLAY_HISTORICAL_MODELS: Model[] = [
       thinking: true,
     },
   },
+  {
+    // Historical 2x long-context rates for Opus-class models. Used as a companion
+    // for claude-4-5-opus CSV replay — Claude 4.5 Opus still has the 2x surcharge
+    // even though Claude 4.6 Opus no longer does.
+    id: 'historical-opus-max-2x',
+    name: 'Opus Max (2x historical)',
+    provider: 'anthropic',
+    pool: 'api',
+    context: { default: 1000000, max: null },
+    rates: { input: 10, cache_write: 12.50, cache_read: 1.00, output: 50 },
+    variants: {
+      thinking: true,
+    },
+  },
 ];

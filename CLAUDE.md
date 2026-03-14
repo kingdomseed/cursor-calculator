@@ -78,7 +78,7 @@ Tailwind utility classes inline (no component library). Design palette uses `#14
 
 ## Cursor Pricing Domain Model (source of truth)
 
-All facts below sourced from https://cursor.com/docs/models-and-pricing and individual model pages. Last verified 2026-03-12.
+All facts below sourced from https://cursor.com/docs/models-and-pricing and individual model pages. Last verified 2026-03-14.
 
 ### Empirical boundary
 
@@ -101,10 +101,11 @@ All facts below sourced from https://cursor.com/docs/models-and-pricing and indi
 Max Mode extends context to a model's maximum (e.g. 200k → 1M for Claude). Two cost layers stack:
 1. **Cursor upcharge**: +20% on individual plans
 2. **Provider long context rates** (when input exceeds default context window):
-   - Claude models: 2x standard rate when input >200k
+   - Claude 4.6 Opus: **no long-context surcharge** — same per-token rates at 1M context as shorter context (confirmed 2026-03-14)
+   - Other Claude models: 2x standard rate when input >200k
    - GPT-5.4: input 2x, output 1.5x when input >272k
 
-These are cumulative — Max Mode with long context can mean 2.4x input cost, not just +20%.
+For models with provider surcharges, these are cumulative with the Cursor upcharge — Max Mode with long context can mean 2.4x input cost, not just +20%. Claude 4.6 Opus is the exception: Max Mode only adds the Cursor upcharge.
 
 ### Fast mode
 

@@ -172,6 +172,32 @@ describe('calculatorReducer', () => {
   });
 });
 
+describe('navigate action', () => {
+  it('navigates to budget mode and resets tokenSource', () => {
+    const initial = createInitialCalculatorState(manualModels);
+    // Start from csv_import so tokenSource is cursor_import
+    const fromImport = calculatorReducer(initial, { type: 'navigate', target: 'csv_import' });
+    expect(fromImport.tokenSource).toBe('cursor_import');
+    const state = calculatorReducer(fromImport, { type: 'navigate', target: 'budget' });
+    expect(state.mode).toBe('budget');
+    expect(state.tokenSource).toBe('manual');
+  });
+
+  it('navigates to manual usage mode', () => {
+    const initial = createInitialCalculatorState(manualModels);
+    const state = calculatorReducer(initial, { type: 'navigate', target: 'manual_usage' });
+    expect(state.mode).toBe('tokens');
+    expect(state.tokenSource).toBe('manual');
+  });
+
+  it('navigates to csv import mode', () => {
+    const initial = createInitialCalculatorState(manualModels);
+    const state = calculatorReducer(initial, { type: 'navigate', target: 'csv_import' });
+    expect(state.mode).toBe('tokens');
+    expect(state.tokenSource).toBe('cursor_import');
+  });
+});
+
 describe('calculatorSelectors', () => {
   it('derives the current UI mode flags and file name', () => {
     const initial = createInitialCalculatorState(manualModels);

@@ -7,6 +7,7 @@ import type { ExactTokenBreakdown, Mode, ModelConfig } from '../domain/recommend
 
 export type TokenSource = 'manual' | 'cursor_import';
 export type ManualTokenInputMode = 'simple' | 'advanced';
+export type NavigationTarget = 'budget' | 'manual_usage' | 'csv_import';
 export type ImportedCsvFile = CsvInputFile;
 
 export interface CalculatorState {

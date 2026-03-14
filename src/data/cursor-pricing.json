@@ -2,7 +2,7 @@
   "meta": {
     "version": "2.0.0",
     "source_url": "https://cursor.com/docs/models-and-pricing",
-    "retrieved_at": "2026-03-12"
+    "retrieved_at": "2026-03-14"
   },
   "plans": {
     "pro": {
@@ -119,8 +119,11 @@
       "provider": "anthropic",
       "pool": "api",
       "context": { "default": 1000000, "max": null },
-      "rates": { "input": 10.00, "cache_write": 12.50, "cache_read": 1.00, "output": 50.00 },
+      "rates": { "input": 5.00, "cache_write": 6.25, "cache_read": 0.50, "output": 25.00 },
       "variants": {
+        "max_mode": {
+          "cursor_upcharge": 0.20
+        },
         "thinking": true
       },
       "auto_checks": {

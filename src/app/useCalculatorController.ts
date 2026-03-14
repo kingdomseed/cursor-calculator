@@ -14,6 +14,7 @@ import {
   createInitialCalculatorState,
   type CalculatorState,
   type ManualTokenInputMode,
+  type NavigationTarget,
   type TokenSource,
 } from './calculatorState';
 import {
@@ -45,6 +46,8 @@ interface CalculatorController {
   cursorImportReport: CursorImportReport | null;
   recommendation: Recommendation | null;
   recommendationPresentation: RecommendationPresentation | null;
+  navigationTarget: NavigationTarget;
+  navigate: (target: NavigationTarget) => void;
   setMode: (mode: CalculatorState['mode']) => void;
   setTokenSource: (tokenSource: TokenSource) => void;
   setBudget: (budget: number) => void;
@@ -98,6 +101,16 @@ export function useCalculatorController(
     () => selectRecommendationPresentation(state, recommendation, includedPoolModels),
     [includedPoolModels, recommendation, state],
   );
+
+  const navigationTarget: NavigationTarget = useMemo(() => {
+    if (state.mode === 'budget') return 'budget';
+    if (state.tokenSource === 'cursor_import') return 'csv_import';
+    return 'manual_usage';
+  }, [state.mode, state.tokenSource]);
+
+  const navigate = useCallback((target: NavigationTarget) => {
+    dispatch({ type: 'navigate', target });
+  }, []);
 
   const setMode = useCallback((mode: CalculatorState['mode']) => {
     dispatch({ type: 'set_mode', mode });
@@ -184,6 +197,8 @@ export function useCalculatorController(
     cursorImportReport,
     recommendation,
     recommendationPresentation,
+    navigationTarget,
+    navigate,
     setMode,
     setTokenSource,
     setBudget,

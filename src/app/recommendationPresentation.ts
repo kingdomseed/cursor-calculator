@@ -2,6 +2,10 @@ import type { PlanKey } from '../domain/catalog/types';
 import { formatCurrency, formatNumber, formatRate } from '../domain/recommendation/formatters';
 import type { Mode, PlanLineItem, PlanResult, Recommendation } from '../domain/recommendation/types';
 import type { TokenSource } from './calculatorState';
+import { buildModelGroups } from './modelGrouping';
+import type { RecommendationModelGroup } from './modelGrouping';
+
+export type { RecommendationModelGroup } from './modelGrouping';
 
 export interface RecommendationMetric {
   label: string;
@@ -28,6 +32,7 @@ export interface RecommendationPlanDerivedValues {
 
 export interface RecommendationModelDisplayRow {
   key: string;
+  modelId: string;
   label: string;
   provider: string;
   badges: string[];
@@ -89,6 +94,7 @@ export interface RecommendationPresentation {
   plans: RecommendationPlanPresentation[];
   comparisonSections: RecommendationComparisonSection[];
   includedPoolItems: IncludedPoolItem[];
+  modelGroups: RecommendationModelGroup[] | null;
 }
 
 export interface IncludedPoolModelInput {
@@ -131,6 +137,7 @@ export function buildRecommendationPresentation({
     plans,
     comparisonSections: buildComparisonSections(plans, mode, budgetCeiling),
     includedPoolItems: buildIncludedPoolItems(includedPoolModels),
+    modelGroups: buildModelGroups(bestPlan.modelRows, tokenSource),
   };
 }
 
@@ -287,6 +294,7 @@ function buildModelDisplayRow(item: PlanLineItem, mode: Mode): RecommendationMod
 
   return {
     key: item.key,
+    modelId: item.modelId,
     label: item.label,
     provider: item.provider,
     badges,

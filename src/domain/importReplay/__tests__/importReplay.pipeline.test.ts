@@ -98,7 +98,9 @@ describe('priceImportedRow', () => {
     );
 
     expect(priced.approximated).toBe(false);
-    expect(priced.exactCost.total).toBeCloseTo(6, 4);
+    // Opus 4.6 no longer has a long-context surcharge — same per-token rates at 1M context.
+    // Cost = 250k input × $6/M (base $5 + 20% Cursor upcharge) + 50k output × $30/M = $3.00
+    expect(priced.exactCost.total).toBeCloseTo(3, 4);
   });
 });
 
@@ -209,7 +211,8 @@ describe('parseCursorUsageFiles', () => {
 
     expect(importedMax.modelId).toBe('claude-opus-4-6');
     expect(importedMax.maxMode).toBe(true);
-    expect(importedMax.exactCost?.total).toBeCloseTo(6, 4);
+    // Opus 4.6 no longer has a long-context surcharge — companion rates now match base.
+    expect(importedMax.exactCost?.total).toBeCloseTo(3, 4);
     expect(report.summary.activeDays).toBe(1);
     expect(report.summary.pricedApiDays).toBe(1);
     expect(report.summary.firstActiveDate).toBe('2026-02-19');

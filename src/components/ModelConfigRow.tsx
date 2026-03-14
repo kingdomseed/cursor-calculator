@@ -4,6 +4,7 @@ import type { Model, ModelConfig } from '../lib/types';
 import { formatRate } from '../domain/recommendation/formatters';
 import { computeEffectiveRates } from '../domain/recommendation/rates';
 import { PROVIDER_COLORS } from '../lib/constants';
+import { Collapsible } from './Collapsible';
 
 interface Props {
   model: Model;
@@ -56,7 +57,7 @@ export function ModelConfigRow({ model, config, onChange }: Props) {
       </button>
 
       {/* Expandable details */}
-      {expanded && (
+      <Collapsible open={expanded}>
         <div className="mt-3 space-y-3">
           {/* Variant checkboxes: pricing variants */}
           {(hasMaxMode || hasFast) && (
@@ -118,7 +119,7 @@ export function ModelConfigRow({ model, config, onChange }: Props) {
             effective: {formatRate(effectiveRates.input)} in / {formatRate(effectiveRates.output)} out per M
           </div>
         </div>
-      )}
+      </Collapsible>
     </div>
   );
 }
