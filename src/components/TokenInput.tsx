@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import type { ManualTokenInputMode } from '../app/calculatorState';
 import type { ExactTokenBreakdown } from '../domain/recommendation/types';
+import { Collapsible } from './Collapsible';
 
 interface TokenInputProps {
   value: number;
@@ -113,13 +115,52 @@ export function TokenInput({
           </div>
         </>
       ) : (
-        <div className="p-5 bg-white rounded-2xl border border-[#e0e0d8] text-left space-y-4">
-          <div>
-            <p className="text-sm font-medium">Exact token buckets</p>
-            <p className="text-sm text-[#14120b]/60 mt-1">
-              Match the token columns in an imported Cursor CSV. Total tokens update automatically.
+        <ExactTokenBucketsCard exactTokens={exactTokens} onExactTokensChange={onExactTokensChange} />
+      )}
+    </div>
+  );
+}
+
+function ExactTokenBucketsCard({
+  exactTokens,
+  onExactTokensChange,
+}: {
+  exactTokens: ExactTokenBreakdown;
+  onExactTokensChange: (tokens: ExactTokenBreakdown) => void;
+}) {
+  const [expanded, setExpanded] = useState(true);
+
+  return (
+    <div className="bg-white rounded-2xl border border-[#e0e0d8] text-left">
+      <button
+        type="button"
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center justify-between p-5"
+      >
+        <div>
+          <p className="text-sm font-medium">Exact token buckets</p>
+          {!expanded && exactTokens.total > 0 && (
+            <p className="text-sm text-[#14120b]/50 mt-1">
+              {exactTokens.total.toLocaleString()} tokens
+              {exactTokens.total >= 1_000 && ` · ${formatTokenScale(exactTokens.total)}`}
             </p>
-          </div>
+          )}
+        </div>
+        <svg
+          className={`w-5 h-5 text-[#14120b]/40 transition-transform flex-shrink-0 ${expanded ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      <Collapsible open={expanded}>
+        <div className="px-5 pb-5 space-y-4">
+          <p className="text-sm text-[#14120b]/60">
+            Match the token columns in an imported Cursor CSV. Total tokens update automatically.
+          </p>
 
           <ExactTokenBucketField
             label="Input with cache write"
@@ -150,7 +191,7 @@ export function TokenInput({
             )}
           </div>
         </div>
-      )}
+      </Collapsible>
     </div>
   );
 }
