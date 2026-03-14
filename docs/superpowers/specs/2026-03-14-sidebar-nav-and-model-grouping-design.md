@@ -62,7 +62,7 @@ The `WelcomeModal` remains as a disclaimer overlay, independent of navigation. T
 ### Content area
 
 Shows mode-specific content:
-- **Budget mode:** Budget input slider, model selector, model configs, advanced options, recommendation results.
+- **Budget mode:** Budget input slider, cache-read share control (affects tokens-per-dollar since cached tokens are cheaper), model selector, model configs, advanced options, recommendation results.
 - **Manual usage mode:** Token input with inline "Quick estimate / Exact token buckets" toggle, cache-read share, model selector, model configs, advanced options, recommendation results.
 - **CSV import mode:** CursorImportPanel (file picker, options, summary), recommendation results.
 
