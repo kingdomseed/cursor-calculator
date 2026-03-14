@@ -1,5 +1,5 @@
 import type { NavigationTarget } from '../app/calculatorState';
-import { CalculatorIcon, GitHubIcon, JHDIcon } from './Icons';
+import { CalculatorIcon, ChartLineIcon, FileCsvIcon, GitHubIcon, JHDIcon, WalletIcon } from './Icons';
 
 interface SidebarProps {
   activeTarget: NavigationTarget;
@@ -7,10 +7,10 @@ interface SidebarProps {
   pricingDate: string;
 }
 
-const NAV_ITEMS: { target: NavigationTarget; label: string }[] = [
-  { target: 'budget', label: 'I have a budget' },
-  { target: 'manual_usage', label: 'I know my usage' },
-  { target: 'csv_import', label: 'I have a CSV' },
+const NAV_ITEMS: { target: NavigationTarget; label: string; icon: typeof WalletIcon }[] = [
+  { target: 'budget', label: 'I have a budget', icon: WalletIcon },
+  { target: 'manual_usage', label: 'I know my usage', icon: ChartLineIcon },
+  { target: 'csv_import', label: 'I have a CSV', icon: FileCsvIcon },
 ];
 
 export function Sidebar({ activeTarget, onNavigate, pricingDate }: SidebarProps) {
@@ -28,16 +28,17 @@ export function Sidebar({ activeTarget, onNavigate, pricingDate }: SidebarProps)
 
       {/* Navigation */}
       <nav className="flex flex-col gap-1">
-        {NAV_ITEMS.map(({ target, label }) => (
+        {NAV_ITEMS.map(({ target, label, icon: Icon }) => (
           <button
             key={target}
             onClick={() => onNavigate(target)}
-            className={
+            className={`flex items-center gap-2.5 text-left px-3 py-2.5 rounded-lg text-sm transition-colors ${
               target === activeTarget
-                ? 'text-left px-3 py-2 rounded text-sm bg-white/12 text-white font-medium'
-                : 'text-left px-3 py-2 rounded text-sm text-white/50 hover:text-white/70 hover:bg-white/5'
-            }
+                ? 'bg-white/12 text-white font-medium'
+                : 'text-white/50 hover:text-white/70 hover:bg-white/5'
+            }`}
           >
+            <Icon className="w-4 h-4 flex-shrink-0" />
             {label}
           </button>
         ))}
