@@ -1,7 +1,12 @@
+import { useState } from 'react';
+
 import type {
   RecommendationComparisonSection,
+  RecommendationModelDisplayRow,
+  RecommendationModelGroup,
   RecommendationPresentation,
 } from '../app/recommendationPresentation';
+import { formatCurrency, formatNumber } from '../domain/recommendation/formatters';
 import { PROVIDER_COLORS } from '../lib/constants';
 import { CircleCheckIcon } from './Icons';
 
@@ -63,45 +68,129 @@ export function BestPlanCard({ presentation }: Props) {
         ))}
       </div>
 
-      <div className="mt-6 pt-4 border-t border-white/20">
-        <p className="text-sm text-white/60 mb-3">Model details</p>
-        <div className="space-y-3">
-          {presentation.includedPoolItems.map((item) => (
-            <div key={item.key} className="flex items-start justify-between gap-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className={`w-2 h-2 rounded-full ${PROVIDER_COLORS[item.provider] || 'bg-gray-400'}`} />
-                <span className="font-medium text-sm">{item.label}</span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-white/60">Included</span>
-              </div>
-              <span className="text-sm text-white/50">{item.poolLabel}</span>
+      <ModelDetailsSection presentation={presentation} />
+    </div>
+  );
+}
+
+function ModelDetailsSection({ presentation }: Props) {
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const { bestPlan, modelGroups } = presentation;
+
+  function toggleGroup(groupKey: string) {
+    setExpandedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(groupKey)) {
+        next.delete(groupKey);
+      } else {
+        next.add(groupKey);
+      }
+      return next;
+    });
+  }
+
+  return (
+    <div className="mt-6 pt-4 border-t border-white/20">
+      <p className="text-sm text-white/60 mb-3">Model details</p>
+      <div className="space-y-3">
+        {presentation.includedPoolItems.map((item) => (
+          <div key={item.key} className="flex items-start justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className={`w-2 h-2 rounded-full ${PROVIDER_COLORS[item.provider] || 'bg-gray-400'}`} />
+              <span className="font-medium text-sm">{item.label}</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-white/60">Included</span>
             </div>
-          ))}
-          {bestPlan.modelRows.map((item) => (
-            <div key={item.key} className="flex items-start justify-between gap-3">
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className={`w-2 h-2 rounded-full ${PROVIDER_COLORS[item.provider] || 'bg-gray-400'}`} />
-                  <span className="font-medium text-sm">{item.label}</span>
-                  {item.badges.map((badge) => (
-                    <span key={badge} className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-white/60">
-                      {badge}
-                    </span>
-                  ))}
-                </div>
-                <p className="text-xs text-white/40 ml-4">{item.rateLabel}</p>
-                {item.secondaryMetric && (
-                  <p className="text-xs text-white/40 ml-4 mt-1">
-                    {item.secondaryMetric.label}: {item.secondaryMetric.formattedValue}
-                  </p>
-                )}
-              </div>
-              <div className="text-right">
-                <p className="text-xs text-white/60">{item.primaryMetric.label}</p>
-                <span className="font-semibold">{item.primaryMetric.formattedValue}</span>
-              </div>
-            </div>
+            <span className="text-sm text-white/50">{item.poolLabel}</span>
+          </div>
+        ))}
+        {modelGroups != null
+          ? modelGroups.map((group) => (
+              <ModelGroupRow
+                key={group.groupKey}
+                group={group}
+                expanded={expandedGroups.has(group.groupKey)}
+                onToggle={() => toggleGroup(group.groupKey)}
+              />
+            ))
+          : bestPlan.modelRows.map((item) => (
+              <ModelRow key={item.key} item={item} />
+            ))
+        }
+      </div>
+    </div>
+  );
+}
+
+function ModelGroupRow({
+  group,
+  expanded,
+  onToggle,
+}: {
+  group: RecommendationModelGroup;
+  expanded: boolean;
+  onToggle: () => void;
+}) {
+  const isSingleton = group.variantCount === 1;
+
+  return (
+    <div>
+      <div
+        className={`flex items-center justify-between gap-3 ${isSingleton ? '' : 'cursor-pointer'}`}
+        onClick={isSingleton ? undefined : onToggle}
+      >
+        <div className="flex flex-wrap items-center gap-2">
+          <span className={`w-2 h-2 rounded-full ${PROVIDER_COLORS[group.provider] || 'bg-gray-400'}`} />
+          <span className="font-medium text-sm">{group.familyLabel}</span>
+          {!isSingleton && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-white/60">
+              {group.variantCount} variants
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="text-right text-sm">
+            <span className="text-white/60">{formatNumber(group.totalTokens)} tokens</span>
+            <span className="ml-2 font-semibold">{formatCurrency(group.totalCost)}</span>
+          </div>
+          {!isSingleton && (
+            <span className="text-white/40 text-xs">{expanded ? '▲' : '▼'}</span>
+          )}
+        </div>
+      </div>
+      {expanded && (
+        <div className="ml-4 mt-2 space-y-3">
+          {group.children.map((item) => (
+            <ModelRow key={item.key} item={item} />
           ))}
         </div>
+      )}
+    </div>
+  );
+}
+
+function ModelRow({ item }: { item: RecommendationModelDisplayRow }) {
+  return (
+    <div className="flex items-start justify-between gap-3">
+      <div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className={`w-2 h-2 rounded-full ${PROVIDER_COLORS[item.provider] || 'bg-gray-400'}`} />
+          <span className="font-medium text-sm">{item.label}</span>
+          {item.badges.map((badge) => (
+            <span key={badge} className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-white/60">
+              {badge}
+            </span>
+          ))}
+        </div>
+        <p className="text-xs text-white/40 ml-4">{item.rateLabel}</p>
+        {item.secondaryMetric && (
+          <p className="text-xs text-white/40 ml-4 mt-1">
+            {item.secondaryMetric.label}: {item.secondaryMetric.formattedValue}
+          </p>
+        )}
+      </div>
+      <div className="text-right">
+        <p className="text-xs text-white/60">{item.primaryMetric.label}</p>
+        <span className="font-semibold">{item.primaryMetric.formattedValue}</span>
       </div>
     </div>
   );
