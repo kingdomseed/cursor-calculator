@@ -37,7 +37,7 @@ export function SidebarLayout({ activeTarget, onNavigate, pricingDate, children 
   }, [mobileOpen]);
 
   return (
-    <div className="min-h-screen bg-[#f7f7f4] text-[#14120b]">
+    <div className="min-h-screen bg-[#f7f7f4] text-[#14120b] contour-bg">
       {/* Desktop sidebar */}
       <div
         className={`hidden md:block fixed top-0 left-0 h-screen z-30 transition-all duration-200 ${

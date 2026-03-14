@@ -6,6 +6,14 @@ body {
   min-height: 100vh;
 }
 
+/* Topographic contour line background */
+.contour-bg {
+  background-image: url('/contours.svg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
 /* Scrollbar styling — light theme for content, dark for sidebar */
 * {
   scrollbar-width: thin;
