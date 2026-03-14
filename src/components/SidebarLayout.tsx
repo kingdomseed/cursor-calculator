@@ -40,6 +40,15 @@ export function SidebarLayout({ activeTarget, onNavigate, pricingDate, children 
       >
         {collapsed ? (
           <div className="h-full bg-[#14120b] flex flex-col items-center py-4 gap-1">
+            <button
+              onClick={() => setCollapsed(false)}
+              className="p-2 mb-2 text-white/40 hover:text-white/70 rounded-lg hover:bg-white/10"
+              aria-label="Expand navigation"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+              </svg>
+            </button>
             {([
               { target: 'budget' as const, label: 'I have a budget', icon: WalletIcon },
               { target: 'manual_usage' as const, label: 'I know my usage', icon: ChartLineIcon },
@@ -59,15 +68,6 @@ export function SidebarLayout({ activeTarget, onNavigate, pricingDate, children 
                 <Icon className="w-5 h-5" />
               </button>
             ))}
-            <button
-              onClick={() => setCollapsed(false)}
-              className="mt-auto p-2 text-white/40 hover:text-white/70 rounded-lg hover:bg-white/10"
-              aria-label="Expand navigation"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-              </svg>
-            </button>
           </div>
         ) : (
           <div className="h-full relative">
