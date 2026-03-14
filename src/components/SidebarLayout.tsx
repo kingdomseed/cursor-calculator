@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import type { NavigationTarget } from '../app/calculatorState';
+import { ChartLineIcon, FileCsvIcon, WalletIcon } from './Icons';
 import { Sidebar } from './Sidebar';
 
 interface Props {
@@ -38,13 +39,32 @@ export function SidebarLayout({ activeTarget, onNavigate, pricingDate, children 
         }`}
       >
         {collapsed ? (
-          <div className="h-full bg-[#14120b] flex flex-col items-center py-4">
+          <div className="h-full bg-[#14120b] flex flex-col items-center py-4 gap-1">
+            {([
+              { target: 'budget' as const, label: 'I have a budget', icon: WalletIcon },
+              { target: 'manual_usage' as const, label: 'I know my usage', icon: ChartLineIcon },
+              { target: 'csv_import' as const, label: 'I have a CSV', icon: FileCsvIcon },
+            ] as const).map(({ target, label, icon: Icon }) => (
+              <button
+                key={target}
+                onClick={() => handleNavigate(target)}
+                className={`p-2.5 rounded-lg transition-colors ${
+                  activeTarget === target
+                    ? 'text-white bg-white/12'
+                    : 'text-white/50 hover:text-white hover:bg-white/10'
+                }`}
+                aria-label={label}
+                title={label}
+              >
+                <Icon className="w-5 h-5" />
+              </button>
+            ))}
             <button
               onClick={() => setCollapsed(false)}
-              className="p-2 text-white/60 hover:text-white rounded-lg hover:bg-white/10"
+              className="mt-auto p-2 text-white/40 hover:text-white/70 rounded-lg hover:bg-white/10"
               aria-label="Expand navigation"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
               </svg>
             </button>
