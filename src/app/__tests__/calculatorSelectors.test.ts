@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
 import type { PlanLineItem, PlanResult, Recommendation } from '../../domain/recommendation/types';
-import { getManualApiModels } from '../../domain/catalog/currentCatalog';
+import { getManualApiModels, getPlans } from '../../domain/catalog/currentCatalog';
 import { createInitialCalculatorState } from '../calculatorState';
-import { selectRecommendationPresentation } from '../calculatorSelectors';
+import { selectRecommendation, selectRecommendationPresentation } from '../calculatorSelectors';
 
 function createLineItem(overrides: Partial<PlanLineItem> = {}): PlanLineItem {
   return {
@@ -118,5 +118,39 @@ describe('selectRecommendationPresentation', () => {
     const state = createInitialCalculatorState(manualModels);
 
     expect(selectRecommendationPresentation(state, null)).toBeNull();
+  });
+});
+
+describe('selectRecommendation', () => {
+  it('budget mode with cacheReadShare > 0 produces more tokens than cacheReadShare: 0', () => {
+    const plans = getPlans();
+    const inputs = { manualModels, importReplayModels: [], plans };
+
+    const baseState = {
+      ...createInitialCalculatorState(manualModels),
+      mode: 'budget' as const,
+      budget: 130,
+    };
+
+    const noCacheResult = selectRecommendation(
+      { ...baseState, cacheReadShare: 0 },
+      inputs,
+    );
+    const highCacheResult = selectRecommendation(
+      { ...baseState, cacheReadShare: 80 },
+      inputs,
+    );
+
+    expect(noCacheResult).not.toBeNull();
+    expect(highCacheResult).not.toBeNull();
+
+    const noCacheTokens = noCacheResult!.best.perModel.reduce(
+      (sum, item) => sum + item.tokens.total, 0,
+    );
+    const highCacheTokens = highCacheResult!.best.perModel.reduce(
+      (sum, item) => sum + item.tokens.total, 0,
+    );
+
+    expect(highCacheTokens).toBeGreaterThan(noCacheTokens);
   });
 });
