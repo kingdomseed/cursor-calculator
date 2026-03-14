@@ -66,6 +66,16 @@ export function BestPlanCard({ presentation }: Props) {
       <div className="mt-6 pt-4 border-t border-white/20">
         <p className="text-sm text-white/60 mb-3">Model details</p>
         <div className="space-y-3">
+          {presentation.includedPoolItems.map((item) => (
+            <div key={item.key} className="flex items-start justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={`w-2 h-2 rounded-full ${PROVIDER_COLORS[item.provider] || 'bg-gray-400'}`} />
+                <span className="font-medium text-sm">{item.label}</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-white/60">Included</span>
+              </div>
+              <span className="text-sm text-white/50">{item.poolLabel}</span>
+            </div>
+          ))}
           {bestPlan.modelRows.map((item) => (
             <div key={item.key} className="flex items-start justify-between gap-3">
               <div>

@@ -218,6 +218,61 @@ describe('recommendation presentation', () => {
     })).toThrow('Recommendation best plan "ultra" was not found in recommendation.all');
   });
 
+  it('includes included-pool models in the presentation when provided', () => {
+    const presentation = buildRecommendationPresentation({
+      mode: 'tokens',
+      tokenSource: 'manual',
+      recommendation: createRecommendation(createPlanResult()),
+      includedPoolModels: [
+        { id: 'auto', name: 'Auto', provider: 'cursor' },
+        { id: 'composer-1.5', name: 'Composer 1.5', provider: 'cursor' },
+      ],
+    });
+
+    expect(presentation.includedPoolItems).toEqual([
+      { key: 'auto', label: 'Auto', provider: 'cursor', poolLabel: 'Included in all plans' },
+      { key: 'composer-1.5', label: 'Composer 1.5', provider: 'cursor', poolLabel: 'Included in all plans' },
+    ]);
+  });
+
+  it('defaults to an empty included-pool list when none are provided', () => {
+    const presentation = buildRecommendationPresentation({
+      mode: 'tokens',
+      tokenSource: 'manual',
+      recommendation: createRecommendation(createPlanResult()),
+    });
+
+    expect(presentation.includedPoolItems).toEqual([]);
+  });
+
+  it('formats negative budget headroom with the sign before the dollar symbol', () => {
+    const best = createPlanResult({
+      plan: 'ultra',
+      subscription: 200,
+      apiPool: 400,
+      apiBudget: 400,
+      apiUsage: 400,
+      overage: 0,
+      totalCost: 200,
+    });
+
+    const presentation = buildRecommendationPresentation({
+      mode: 'budget',
+      tokenSource: 'manual',
+      budgetCeiling: 60,
+      recommendation: createRecommendation(best),
+    });
+
+    const headroomRow = presentation.comparisonSections
+      .flatMap((section) => section.rows)
+      .find((row) => row.key === 'budgetHeadroom');
+    const ultraValue = headroomRow?.values.find((v) => v.plan === 'ultra');
+
+    expect(ultraValue?.value).toBe(-140);
+    expect(ultraValue?.formattedValue).toBe('-$140.00');
+    expect(presentation.hero.context).toContain('exceeds your $60.00 budget by $140.00');
+  });
+
   it('assigns unique comparison row keys across all sections', () => {
     const presentation = buildRecommendationPresentation({
       mode: 'tokens',

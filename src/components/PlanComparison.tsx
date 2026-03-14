@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type {
+  IncludedPoolItem,
   RecommendationComparisonRow,
   RecommendationModelDisplayRow,
   RecommendationPlanPresentation,
@@ -78,7 +79,7 @@ export function PlanComparison({ presentation, defaultOpen = false }: Props) {
                     row={row}
                   />
                 ))}
-                {section.kind === 'usage_value_details' && modelRows.length > 0 && (
+                {section.kind === 'usage_value_details' && (modelRows.length > 0 || presentation.includedPoolItems.length > 0) && (
                   <>
                     <tr className="bg-[#f7f7f4]/30">
                       <th
@@ -88,6 +89,13 @@ export function PlanComparison({ presentation, defaultOpen = false }: Props) {
                         Per-model details
                       </th>
                     </tr>
+                    {presentation.includedPoolItems.map((item) => (
+                      <IncludedPoolRow
+                        key={item.key}
+                        item={item}
+                        planCount={presentation.plans.length}
+                      />
+                    ))}
                     {modelRows.map((row) => (
                       <ModelRow
                         key={row.key}
@@ -176,6 +184,36 @@ function ModelRow({
               {value.secondaryMetric.label}: {value.secondaryMetric.formattedValue}
             </p>
           )}
+        </td>
+      ))}
+    </tr>
+  );
+}
+
+function IncludedPoolRow({
+  item,
+  planCount,
+}: {
+  item: IncludedPoolItem;
+  planCount: number;
+}) {
+  return (
+    <tr>
+      <td className="px-4 py-2 align-top">
+        <div className="flex items-start gap-2">
+          <span className={`w-2 h-2 rounded-full mt-1 ${PROVIDER_COLORS[item.provider] || 'bg-gray-400'}`} />
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs">{item.label}</span>
+              <span className="text-[10px] text-[#14120b]/40">Included</span>
+            </div>
+            <p className="text-[10px] text-[#14120b]/40">{item.poolLabel}</p>
+          </div>
+        </div>
+      </td>
+      {Array.from({ length: planCount }, (_, i) => (
+        <td key={i} className="px-4 py-2 text-right align-top text-xs text-[#14120b]/40">
+          Included
         </td>
       ))}
     </tr>

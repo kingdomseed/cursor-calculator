@@ -362,6 +362,11 @@ describe('formatters', () => {
     expect(formatCurrency(0)).toBe('$0.00');
   });
 
+  it('formats negative currency with the sign before the dollar symbol', () => {
+    expect(formatCurrency(-140)).toBe('-$140.00');
+    expect(formatCurrency(-0.5)).toBe('-$0.50');
+  });
+
   it('formats per-million rates', () => {
     expect(formatRate(5)).toBe('$5.00');
     expect(formatRate(0.5)).toBe('$0.50');

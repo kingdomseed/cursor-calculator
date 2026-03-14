@@ -60,6 +60,7 @@ function buildPresentation(options: {
   tokenSource: 'manual' | 'cursor_import';
   budgetCeiling?: number;
   recommendation: Recommendation;
+  includedPoolModels?: Array<{ id: string; name: string; provider: string }>;
 }) {
   return buildRecommendationPresentation(options);
 }
@@ -69,6 +70,7 @@ function renderCard(options: {
   tokenSource: 'manual' | 'cursor_import';
   budgetCeiling?: number;
   recommendation: Recommendation;
+  includedPoolModels?: Array<{ id: string; name: string; provider: string }>;
 }) {
   const presentation = buildPresentation(options);
 
@@ -141,6 +143,28 @@ describe('BestPlanCard', () => {
     });
 
     expect(html).toContain('Best plan for this imported month');
+  });
+
+  it('renders included-pool models with their pool label before API-pool model rows', () => {
+    const presentation = buildPresentation({
+      mode: 'tokens',
+      tokenSource: 'manual',
+      recommendation: createRecommendation(createPlanResult()),
+      includedPoolModels: [
+        { id: 'auto', name: 'Auto', provider: 'cursor' },
+        { id: 'composer-1.5', name: 'Composer 1.5', provider: 'cursor' },
+      ],
+    });
+
+    const html = renderCardFromPresentation(presentation);
+
+    expect(html).toContain('Auto');
+    expect(html).toContain('Composer 1.5');
+    expect(html).toContain('Included');
+    expect(html).toContain('Included in all plans');
+    const autoIndex = html.indexOf('Auto');
+    const modelIndex = html.indexOf('Model 1');
+    expect(autoIndex).toBeLessThan(modelIndex);
   });
 
   it('ignores the primary-answer section using section semantics rather than display title copy', () => {

@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useReducer } from 'react';
-import { getManualApiModels, getPlans } from '../domain/catalog/currentCatalog';
+import { getIncludedPoolModels, getManualApiModels, getPlans } from '../domain/catalog/currentCatalog';
 import { getImportReplayModels } from '../domain/importReplay/catalog';
 import type {
   ApproximationMode,
@@ -76,6 +76,10 @@ export function useCalculatorController(
     () => dependencies.plans ?? getPlans(),
     [dependencies.plans],
   );
+  const includedPoolModels = useMemo(
+    () => getIncludedPoolModels(),
+    [],
+  );
 
   const [state, dispatch] = useReducer(calculatorReducer, manualModels, createInitialCalculatorState);
   const { cursorImportFiles, cursorImportOptions } = state;
@@ -91,8 +95,8 @@ export function useCalculatorController(
     [cursorImportReport, importReplayModels, manualModels, plans, state],
   );
   const recommendationPresentation = useMemo(
-    () => selectRecommendationPresentation(state, recommendation),
-    [recommendation, state],
+    () => selectRecommendationPresentation(state, recommendation, includedPoolModels),
+    [includedPoolModels, recommendation, state],
   );
 
   const setMode = useCallback((mode: CalculatorState['mode']) => {

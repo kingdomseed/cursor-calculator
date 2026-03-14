@@ -109,6 +109,7 @@ export function selectRecommendation(
 export function selectRecommendationPresentation(
   state: CalculatorState,
   recommendation: Recommendation | null,
+  includedPoolModels: Model[] = [],
 ): RecommendationPresentation | null {
   if (!recommendation) {
     return null;
@@ -119,5 +120,6 @@ export function selectRecommendationPresentation(
     tokenSource: state.tokenSource,
     budgetCeiling: state.mode === 'budget' ? state.budget : undefined,
     recommendation,
+    includedPoolModels,
   });
 }

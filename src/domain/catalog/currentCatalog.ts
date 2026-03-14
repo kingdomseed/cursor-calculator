@@ -5,6 +5,7 @@ import type { Model, PricingData } from './types';
 const CURRENT_CATALOG = clonePricingData(pricingData as PricingData);
 const CURRENT_MODEL_BY_ID = new Map(CURRENT_CATALOG.models.map((model) => [model.id, model]));
 const MANUAL_API_MODELS = CURRENT_CATALOG.models.filter((model) => model.pool === 'api');
+const INCLUDED_POOL_MODELS = CURRENT_CATALOG.models.filter((model) => model.pool === 'auto_composer');
 
 export function getPricingCatalog(): PricingData {
   return clonePricingData(CURRENT_CATALOG);
@@ -20,6 +21,10 @@ export function getCurrentModels(): Model[] {
 
 export function getManualApiModels(): Model[] {
   return cloneModels(MANUAL_API_MODELS);
+}
+
+export function getIncludedPoolModels(): Model[] {
+  return cloneModels(INCLUDED_POOL_MODELS);
 }
 
 export function getModelById(id: string): Model | undefined {

@@ -60,6 +60,7 @@ function buildPresentation(options: {
   tokenSource: 'manual' | 'cursor_import';
   budgetCeiling?: number;
   recommendation: Recommendation;
+  includedPoolModels?: Array<{ id: string; name: string; provider: string }>;
 }) {
   return buildRecommendationPresentation(options);
 }
@@ -69,6 +70,7 @@ function renderComparison(options: {
   tokenSource: 'manual' | 'cursor_import';
   budgetCeiling?: number;
   recommendation: Recommendation;
+  includedPoolModels?: Array<{ id: string; name: string; provider: string }>;
   defaultOpen?: boolean;
 }) {
   const presentation = buildPresentation(options);
@@ -238,6 +240,46 @@ describe('PlanComparison', () => {
     expect(closedHtml).toContain('Compare all plans');
     expect(closedHtml).not.toContain('Primary answer');
     expect(openHtml).toContain('Primary answer');
+  });
+
+  it('renders included-pool models with "Included" in every plan column', () => {
+    const pro = createPlanResult({
+      plan: 'pro',
+      subscription: 20,
+      apiPool: 20,
+      apiBudget: 20,
+      apiUsage: 20,
+      overage: 0,
+      totalCost: 20,
+      perModel: [createLineItem({ key: 'model-a', modelId: 'model-a', label: 'Model A', apiCost: 20 })],
+    });
+    const proPlusPlan = createPlanResult({
+      plan: 'pro_plus',
+      subscription: 60,
+      apiPool: 70,
+      apiBudget: 70,
+      apiUsage: 20,
+      overage: 0,
+      totalCost: 60,
+      perModel: [createLineItem({ key: 'model-a', modelId: 'model-a', label: 'Model A', apiCost: 20 })],
+    });
+
+    const html = renderComparison({
+      mode: 'tokens',
+      tokenSource: 'manual',
+      recommendation: createRecommendation(proPlusPlan, [pro, proPlusPlan]),
+      includedPoolModels: [
+        { id: 'auto', name: 'Auto', provider: 'cursor' },
+        { id: 'composer-1.5', name: 'Composer 1.5', provider: 'cursor' },
+      ],
+      defaultOpen: true,
+    });
+
+    expect(html).toContain('Auto');
+    expect(html).toContain('Composer 1.5');
+    expect(html).toContain('Included in all plans');
+    const includedMatches = html.match(/Included<\/td>/g) ?? [];
+    expect(includedMatches.length).toBe(4);
   });
 
   it('keeps per-model cells aligned to plan columns when a model is missing from another plan', () => {

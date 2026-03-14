@@ -73,6 +73,13 @@ export interface RecommendationComparisonSection {
   rows: RecommendationComparisonRow[];
 }
 
+export interface IncludedPoolItem {
+  key: string;
+  label: string;
+  provider: string;
+  poolLabel: string;
+}
+
 export interface RecommendationPresentation {
   mode: Mode;
   tokenSource: TokenSource;
@@ -81,6 +88,13 @@ export interface RecommendationPresentation {
   bestPlan: RecommendationPlanPresentation;
   plans: RecommendationPlanPresentation[];
   comparisonSections: RecommendationComparisonSection[];
+  includedPoolItems: IncludedPoolItem[];
+}
+
+export interface IncludedPoolModelInput {
+  id: string;
+  name: string;
+  provider: string;
 }
 
 interface BuildRecommendationPresentationInput {
@@ -88,6 +102,7 @@ interface BuildRecommendationPresentationInput {
   tokenSource: TokenSource;
   budgetCeiling?: number;
   recommendation: Recommendation;
+  includedPoolModels?: IncludedPoolModelInput[];
 }
 
 export function buildRecommendationPresentation({
@@ -95,6 +110,7 @@ export function buildRecommendationPresentation({
   tokenSource,
   budgetCeiling,
   recommendation,
+  includedPoolModels = [],
 }: BuildRecommendationPresentationInput): RecommendationPresentation {
   const plans = recommendation.all.map((result) =>
     buildPlanPresentation(result, mode, budgetCeiling),
@@ -114,6 +130,7 @@ export function buildRecommendationPresentation({
     bestPlan,
     plans,
     comparisonSections: buildComparisonSections(plans, mode, budgetCeiling),
+    includedPoolItems: buildIncludedPoolItems(includedPoolModels),
   };
 }
 
@@ -337,6 +354,15 @@ function formatPlanLabel(plan: PlanKey): string {
   if (plan === 'pro_plus') return 'Pro Plus';
   if (plan === 'ultra') return 'Ultra';
   return 'Pro';
+}
+
+function buildIncludedPoolItems(models: IncludedPoolModelInput[]): IncludedPoolItem[] {
+  return models.map((model) => ({
+    key: model.id,
+    label: model.name,
+    provider: model.provider,
+    poolLabel: 'Included in all plans',
+  }));
 }
 
 function formatTokens(value: number): string {
