@@ -238,7 +238,8 @@ describe('PlanComparison', () => {
     const openHtml = renderComparisonFromPresentation(presentation, true);
 
     expect(closedHtml).toContain('Compare all plans');
-    expect(closedHtml).not.toContain('Primary answer');
+    expect(closedHtml).toContain('grid-rows-[0fr]');
+    expect(openHtml).toContain('grid-rows-[1fr]');
     expect(openHtml).toContain('Primary answer');
   });
 

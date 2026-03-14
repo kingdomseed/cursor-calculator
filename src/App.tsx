@@ -9,6 +9,7 @@ import { ModelConfigList } from './components/ModelConfigList';
 import { BestPlanCard } from './components/BestPlanCard';
 import { PlanComparison } from './components/PlanComparison';
 import { CursorImportPanel } from './components/CursorImportPanel';
+import { Collapsible } from './components/Collapsible';
 import { WelcomeModal } from './components/WelcomeModal';
 
 const PRICING = getPricingCatalog();
@@ -120,7 +121,7 @@ function App() {
                   </svg>
                   Advanced options
                 </button>
-                {showAdvanced && (
+                <Collapsible open={showAdvanced}>
                   <div className="mt-4 p-4 bg-white rounded-xl border border-[#e0e0d8]">
                     <div className="flex items-center justify-between mb-2">
                       <label className="text-sm font-medium">
@@ -141,7 +142,7 @@ function App() {
                       <span>1:1</span><span>3:1 typical</span><span>10:1</span>
                     </div>
                   </div>
-                )}
+                </Collapsible>
               </div>
             )}
           </>

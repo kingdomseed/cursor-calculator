@@ -10,6 +10,7 @@ import type {
 import { getBaseModelId } from '../app/modelGrouping';
 import { formatCurrency } from '../domain/recommendation/formatters';
 import { PROVIDER_COLORS } from '../lib/constants';
+import { Collapsible } from './Collapsible';
 
 interface Props {
   presentation: RecommendationPresentation;
@@ -50,7 +51,7 @@ export function PlanComparison({ presentation, defaultOpen = false }: Props) {
         Compare all plans
       </button>
 
-      {isOpen && (
+      <Collapsible open={isOpen} duration={300}>
         <div className="mt-4 bg-white border border-[#e0e0d8] rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-[#f7f7f4]">
@@ -123,7 +124,7 @@ export function PlanComparison({ presentation, defaultOpen = false }: Props) {
             ))}
           </table>
         </div>
-      )}
+      </Collapsible>
     </div>
   );
 }
@@ -396,13 +397,23 @@ function GroupSection({
       </tr>
 
       {/* Expanded child rows */}
-      {isExpanded && childRows.map((row) => (
-        <ModelRow
-          key={row.key}
-          presentation={presentation}
-          row={row}
-        />
-      ))}
+      <tr>
+        <td colSpan={plans.length + 1} className="p-0 border-0">
+          <Collapsible open={isExpanded}>
+            <table className="w-full text-sm">
+              <tbody>
+                {childRows.map((row) => (
+                  <ModelRow
+                    key={row.key}
+                    presentation={presentation}
+                    row={row}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </Collapsible>
+        </td>
+      </tr>
     </>
   );
 }

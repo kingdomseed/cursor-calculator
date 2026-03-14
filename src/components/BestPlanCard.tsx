@@ -8,6 +8,7 @@ import type {
 } from '../app/recommendationPresentation';
 import { formatCurrency, formatNumber } from '../domain/recommendation/formatters';
 import { PROVIDER_COLORS } from '../lib/constants';
+import { Collapsible } from './Collapsible';
 import { CircleCheckIcon } from './Icons';
 
 interface Props {
@@ -159,12 +160,14 @@ function ModelGroupRow({
           </div>
         </button>
       )}
-      {expanded && (
-        <div className="ml-4 mt-2 space-y-3">
-          {group.children.map((item) => (
-            <ModelRow key={item.key} item={item} />
-          ))}
-        </div>
+      {!isSingleton && (
+        <Collapsible open={expanded}>
+          <div className="ml-4 mt-2 space-y-3">
+            {group.children.map((item) => (
+              <ModelRow key={item.key} item={item} />
+            ))}
+          </div>
+        </Collapsible>
       )}
     </div>
   );
