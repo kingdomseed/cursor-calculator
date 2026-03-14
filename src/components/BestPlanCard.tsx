@@ -56,7 +56,7 @@ export function BestPlanCard({ presentation }: Props) {
       <div className="space-y-4 border-t border-white/20 pt-4">
         {breakdownSections.map((section) => (
           <div key={section.title}>
-            <p className="text-sm text-white/60 mb-2">{section.title}</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-white/70 mb-2 pl-3 border-l-2 border-white/30">{section.title}</p>
             <div className="space-y-2 text-sm">
               {section.rows.map((row) => (
                 <div key={row.key} className="flex justify-between gap-3">

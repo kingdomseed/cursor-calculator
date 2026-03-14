@@ -52,16 +52,16 @@ export function PlanComparison({ presentation, defaultOpen = false }: Props) {
       </button>
 
       <Collapsible open={isOpen} duration={300}>
-        <div className="mt-4 bg-white border border-[#e0e0d8] rounded-xl overflow-hidden">
+        <div className="mt-4 bg-white border border-[#e0e0d8] rounded-xl overflow-hidden shadow-sm">
           <table className="w-full text-sm">
-            <thead className="bg-[#f7f7f4]">
-              <tr>
-                <th className="text-left px-4 py-3 font-medium text-[#14120b]/60"></th>
+            <thead>
+              <tr className="bg-[#14120b]">
+                <th className="text-left px-5 py-3 font-medium text-white/60 text-xs uppercase tracking-wide"></th>
                 {presentation.plans.map((plan) => (
                   <th
                     key={plan.plan}
-                    className={`text-right px-4 py-3 font-medium ${
-                      shouldDimPlan(plan, presentation) ? 'text-[#14120b]/30' : 'text-[#14120b]/60'
+                    className={`text-right px-5 py-3 text-xs font-semibold uppercase tracking-wide ${
+                      shouldDimPlan(plan, presentation) ? 'text-white/25' : 'text-white/80'
                     }`}
                   >
                     {plan.planLabel}
@@ -70,28 +70,30 @@ export function PlanComparison({ presentation, defaultOpen = false }: Props) {
               </tr>
             </thead>
             {presentation.comparisonSections.map((section) => (
-              <tbody key={section.kind} className="divide-y divide-[#e0e0d8]">
-                <tr className="bg-[#f7f7f4]">
+              <tbody key={section.kind}>
+                <tr className="bg-[#f0efe8]">
                   <th
                     colSpan={presentation.plans.length + 1}
-                    className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-[#14120b]/60 border-l-2 border-[#14120b]/15"
+                    className="px-5 py-2 text-left text-[10px] font-bold uppercase tracking-[0.15em] text-[#14120b]/50"
                   >
                     {section.title}
                   </th>
                 </tr>
-                {section.rows.map((row) => (
+                {section.rows.map((row, rowIndex) => (
                   <ComparisonRow
                     key={row.key}
                     presentation={presentation}
                     row={row}
+                    isEven={rowIndex % 2 === 0}
+                    isTotal={row.key === 'totalOutOfPocket' || row.key === 'estimatedMonthlyCost' || row.key === 'primaryEstimatedOutOfPocket'}
                   />
                 ))}
                 {section.kind === 'usage_value_details' && hasModelContent && (
                   <>
-                    <tr className="bg-[#f7f7f4]/50">
+                    <tr className="bg-[#f0efe8]">
                       <th
                         colSpan={presentation.plans.length + 1}
-                        className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-[#14120b]/50 border-l-2 border-[#14120b]/10"
+                        className="px-5 py-2 text-left text-[10px] font-bold uppercase tracking-[0.15em] text-[#14120b]/50"
                       >
                         Per-model details
                       </th>
@@ -132,20 +134,30 @@ export function PlanComparison({ presentation, defaultOpen = false }: Props) {
 function ComparisonRow({
   presentation,
   row,
+  isEven,
+  isTotal,
 }: {
   presentation: RecommendationPresentation;
   row: RecommendationComparisonRow;
+  isEven: boolean;
+  isTotal: boolean;
 }) {
+  const rowBg = isTotal ? 'bg-[#f7f7f4]' : isEven ? 'bg-white' : 'bg-[#fafaf8]';
+
   return (
-    <tr>
-      <td className="px-4 py-2">{row.label}</td>
+    <tr className={`${rowBg} ${isTotal ? 'border-t border-[#e0e0d8]' : ''}`}>
+      <td className={`px-5 py-2.5 ${isTotal ? 'font-semibold text-[#14120b]' : 'text-[#14120b]/70'}`}>
+        {row.label}
+      </td>
       {row.values.map((value) => (
         <td
           key={value.plan}
-          className={`px-4 py-2 text-right ${
+          className={`px-5 py-2.5 text-right tabular-nums ${
+            isTotal ? 'font-semibold' : ''
+          } ${
             shouldDimAffordableValue(value.affordable, presentation)
-              ? 'text-[#14120b]/30'
-              : ''
+              ? 'text-[#14120b]/25'
+              : isTotal ? 'text-[#14120b]' : 'text-[#14120b]/80'
           }`}
         >
           {value.formattedValue}
@@ -163,39 +175,39 @@ function ModelRow({
   row: ComparisonModelRow;
 }) {
   return (
-    <tr>
-      <td className="px-4 py-2 align-top">
+    <tr className="border-t border-[#e0e0d8]/50">
+      <td className="px-5 py-2.5 align-top">
         <div className="flex items-start gap-2">
           <span className={`w-2 h-2 rounded-full mt-1 ${PROVIDER_COLORS[row.provider] || 'bg-gray-400'}`} />
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs">{row.label}</span>
+              <span className="text-xs font-medium text-[#14120b]/70">{row.label}</span>
               {row.badges.map((badge) => (
-                <span key={badge} className="text-[10px] text-[#14120b]/40">
+                <span key={badge} className="text-[10px] text-[#14120b]/35">
                   {badge}
                 </span>
               ))}
             </div>
-            <p className="text-[10px] text-[#14120b]/40">{row.rateLabel}</p>
+            <p className="text-[10px] text-[#14120b]/35">{row.rateLabel}</p>
           </div>
         </div>
       </td>
       {row.values.map((value) => (
         <td
           key={value.plan}
-          className={`px-4 py-2 text-right align-top ${
+          className={`px-5 py-2.5 text-right align-top ${
             shouldDimAffordableValue(value.affordable, presentation)
-              ? 'text-[#14120b]/30'
+              ? 'text-[#14120b]/25'
               : ''
           }`}
         >
           {value.primaryMetric ? (
             <p className="font-semibold text-xs">{value.primaryMetric.formattedValue}</p>
           ) : (
-            <p className="font-semibold text-xs">—</p>
+            <p className="font-semibold text-xs text-[#14120b]/25">—</p>
           )}
           {value.secondaryMetric && (
-            <p className="text-[10px] text-[#14120b]/40 mt-1">
+            <p className="text-[10px] text-[#14120b]/35 mt-1">
               {value.secondaryMetric.label}: {value.secondaryMetric.formattedValue}
             </p>
           )}
@@ -213,21 +225,21 @@ function IncludedPoolRow({
   planCount: number;
 }) {
   return (
-    <tr>
-      <td className="px-4 py-2 align-top">
+    <tr className="border-t border-[#e0e0d8]/50">
+      <td className="px-5 py-2.5 align-top">
         <div className="flex items-start gap-2">
           <span className={`w-2 h-2 rounded-full mt-1 ${PROVIDER_COLORS[item.provider] || 'bg-gray-400'}`} />
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs">{item.label}</span>
-              <span className="text-[10px] text-[#14120b]/40">Included</span>
+              <span className="text-xs font-medium text-[#14120b]/70">{item.label}</span>
+              <span className="text-[10px] text-[#14120b]/35">Included</span>
             </div>
-            <p className="text-[10px] text-[#14120b]/40">{item.poolLabel}</p>
+            <p className="text-[10px] text-[#14120b]/35">{item.poolLabel}</p>
           </div>
         </div>
       </td>
       {Array.from({ length: planCount }, (_, i) => (
-        <td key={i} className="px-4 py-2 text-right align-top text-xs text-[#14120b]/40">
+        <td key={i} className="px-5 py-2.5 text-right align-top text-xs text-[#14120b]/35">
           Included
         </td>
       ))}
