@@ -286,4 +286,37 @@ describe('recommendation presentation', () => {
 
     expect(new Set(rowKeys).size).toBe(rowKeys.length);
   });
+
+  it('populates modelGroups for csv import mode', () => {
+    const presentation = buildRecommendationPresentation({
+      mode: 'tokens',
+      tokenSource: 'cursor_import',
+      recommendation: createRecommendation(createPlanResult()),
+    });
+
+    expect(presentation.modelGroups).not.toBeNull();
+    expect(presentation.modelGroups!.length).toBeGreaterThan(0);
+    expect(presentation.modelGroups![0].groupKey).toBe('model-1');
+  });
+
+  it('returns null modelGroups for manual token mode', () => {
+    const presentation = buildRecommendationPresentation({
+      mode: 'tokens',
+      tokenSource: 'manual',
+      recommendation: createRecommendation(createPlanResult()),
+    });
+
+    expect(presentation.modelGroups).toBeNull();
+  });
+
+  it('returns null modelGroups for budget mode', () => {
+    const presentation = buildRecommendationPresentation({
+      mode: 'budget',
+      tokenSource: 'manual',
+      budgetCeiling: 200,
+      recommendation: createRecommendation(createPlanResult()),
+    });
+
+    expect(presentation.modelGroups).toBeNull();
+  });
 });
