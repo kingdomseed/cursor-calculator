@@ -78,7 +78,7 @@ Tailwind utility classes inline (no component library). Design palette uses `#14
 
 ## Cursor Pricing Domain Model (source of truth)
 
-All facts below sourced from https://cursor.com/docs/models-and-pricing and individual model pages. Last verified 2026-03-12.
+All facts below sourced from https://cursor.com/docs/models-and-pricing and individual model pages. Last verified 2026-03-14.
 
 ### Empirical boundary
 

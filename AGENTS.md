@@ -100,10 +100,11 @@ Max Mode extends context to the model maximum and stacks two cost layers:
 
 Current documented examples:
 
-- Claude models: `2x` standard rate when input exceeds `200k`
+- Claude 4.6 Opus: **no long-context surcharge** — same per-token rates at 1M context
+- Other Claude models: `2x` standard rate when input exceeds `200k`
 - GPT-5.4: input `2x` and output `1.5x` when input exceeds `272k`
 
-These effects are cumulative.
+For models with provider surcharges, these are cumulative with the Cursor upcharge. Claude 4.6 Opus is the exception: Max Mode only adds the Cursor upcharge.
 
 ### Fast mode
 
