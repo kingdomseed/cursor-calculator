@@ -67,6 +67,12 @@ export function Sidebar({ activeTarget, onNavigate, pricingDate }: SidebarProps)
           affiliated with Cursor.
         </p>
 
+        <p className="text-[10px] text-white/30 mb-1">
+          Source:{' '}
+          <a href="https://cursor.com/docs/models-and-pricing" className="underline hover:text-white/50" target="_blank" rel="noopener noreferrer">
+            cursor.com/docs/models-and-pricing
+          </a>
+        </p>
         <p className="text-[10px] text-white/30 mb-3">Last updated {pricingDate}</p>
 
         <div className="flex items-center gap-3">
