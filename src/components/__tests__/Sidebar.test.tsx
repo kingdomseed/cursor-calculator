@@ -30,10 +30,11 @@ describe('Sidebar', () => {
     expect(html).toContain('GitHub');
   });
 
-  it('includes navigation role', () => {
+  it('includes navigation landmark with accessible label', () => {
     const html = renderToStaticMarkup(
       <Sidebar activeTarget="budget" onNavigate={vi.fn()} pricingDate="2026-03-12" />,
     );
-    expect(html).toContain('role="navigation"');
+    // <nav> is an implicit navigation landmark; aria-label is on the <nav> element
+    expect(html).toContain('<nav aria-label="Calculator mode"');
   });
 });

@@ -16,8 +16,6 @@ const NAV_ITEMS: { target: NavigationTarget; label: string; icon: typeof WalletI
 export function Sidebar({ activeTarget, onNavigate, pricingDate }: SidebarProps) {
   return (
     <aside
-      role="navigation"
-      aria-label="Calculator mode"
       className="flex flex-col h-full overflow-y-auto bg-[#14120b] text-white p-5"
     >
       {/* Branding */}
@@ -27,7 +25,7 @@ export function Sidebar({ activeTarget, onNavigate, pricingDate }: SidebarProps)
       </div>
 
       {/* Navigation */}
-      <nav className="flex flex-col gap-1">
+      <nav aria-label="Calculator mode" className="flex flex-col gap-1">
         {NAV_ITEMS.map(({ target, label, icon: Icon }) => (
           <button
             key={target}

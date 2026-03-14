@@ -10,6 +10,9 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="canonical" href="https://cursor-cost-calculator.com/" />
+    <link rel="preconnect" href="https://va.vercel-scripts.com" />
+
+    <meta name="theme-color" content="#14120b" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
@@ -17,11 +20,15 @@
     <meta property="og:description" content="Estimate your Cursor IDE costs. Compare plans, model mixes, and variants — all rates from Cursor's official docs." />
     <meta property="og:url" content="https://cursor-cost-calculator.com/" />
     <meta property="og:site_name" content="Cursor Cost Calculator" />
+    <meta property="og:image" content="https://cursor-cost-calculator.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
 
     <!-- Twitter -->
-    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Cursor Cost Calculator" />
     <meta name="twitter:description" content="Estimate your Cursor IDE costs. Compare plans, model mixes, and variants — all rates from Cursor's official docs." />
+    <meta name="twitter:image" content="https://cursor-cost-calculator.com/og-image.png" />
 
     <!-- Structured Data -->
     <script type="application/ld+json">
@@ -37,12 +44,15 @@
         "@type": "Offer",
         "price": "0",
         "priceCurrency": "USD"
-      }
+      },
+      "author": {"@type": "Person", "name": "Jason Holt"},
+      "dateModified": "2026-03-14"
     }
     </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript><p style="text-align:center;padding:2rem;">This calculator requires JavaScript. Please enable JavaScript in your browser.</p></noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

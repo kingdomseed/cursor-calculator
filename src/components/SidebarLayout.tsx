@@ -129,6 +129,7 @@ export function SidebarLayout({ activeTarget, onNavigate, pricingDate, children 
 
       {/* Content area */}
       <main className={`pt-14 md:pt-0 transition-all duration-200 ${collapsed ? 'md:ml-12' : 'md:ml-64'}`}>
+        <h1 className="sr-only">Cursor Cost Calculator — Estimate Your AI Coding Costs</h1>
         <div className="max-w-2xl mx-auto px-4 py-8 sm:py-12">
           {children}
         </div>
