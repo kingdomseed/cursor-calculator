@@ -135,16 +135,7 @@ function ModelGroupRow({
   return (
     <div>
       {isSingleton ? (
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className={`w-2 h-2 rounded-full ${PROVIDER_COLORS[group.provider] || 'bg-gray-400'}`} />
-            <span className="font-medium text-sm">{group.familyLabel}</span>
-          </div>
-          <div className="text-right text-sm">
-            <span className="text-white/60">{formatNumber(group.totalTokens)} tokens</span>
-            <span className="ml-2 font-semibold">{formatCurrency(group.totalCost)}</span>
-          </div>
-        </div>
+        <ModelRow item={group.children[0]} />
       ) : (
         <button
           type="button"

@@ -343,40 +343,43 @@ function GroupSection({
     };
   });
 
+  if (isSingleton && childRows.length === 1) {
+    return (
+      <ModelRow
+        key={childRows[0].key}
+        presentation={presentation}
+        row={childRows[0]}
+      />
+    );
+  }
+
   return (
     <>
       {/* Group header row */}
-      <tr className={isSingleton ? '' : 'hover:bg-[#f7f7f4]/40'}>
+      <tr className="hover:bg-[#f7f7f4]/40">
         <td className="px-4 py-2 align-top">
-          {isSingleton ? (
-            <div className="flex items-start gap-2">
-              <span className={`w-2 h-2 rounded-full mt-1 ${PROVIDER_COLORS[group.provider] || 'bg-gray-400'}`} />
+          <button
+            type="button"
+            className="flex items-start gap-2 cursor-pointer text-left w-full"
+            onClick={onToggle}
+            aria-expanded={isExpanded}
+          >
+            <span className={`w-2 h-2 rounded-full mt-1 ${PROVIDER_COLORS[group.provider] || 'bg-gray-400'}`} />
+            <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs">{group.familyLabel}</span>
+              <span className="text-[10px] text-[#14120b]/40">
+                {group.variantCount} variants
+              </span>
+              <svg
+                className={`w-3 h-3 text-[#14120b]/40 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
             </div>
-          ) : (
-            <button
-              type="button"
-              className="flex items-start gap-2 cursor-pointer text-left w-full"
-              onClick={onToggle}
-              aria-expanded={isExpanded}
-            >
-              <span className={`w-2 h-2 rounded-full mt-1 ${PROVIDER_COLORS[group.provider] || 'bg-gray-400'}`} />
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-xs">{group.familyLabel}</span>
-                <span className="text-[10px] text-[#14120b]/40">
-                  {group.variantCount} variants
-                </span>
-                <svg
-                  className={`w-3 h-3 text-[#14120b]/40 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </button>
-          )}
+          </button>
         </td>
         {planAggregates.map((agg) => (
           <td
