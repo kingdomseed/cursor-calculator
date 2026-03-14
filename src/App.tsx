@@ -83,7 +83,7 @@ function App() {
                   <span>0%</span><span>95%</span>
                 </div>
                 <p className="text-xs text-[#14120b]/50 mt-2">
-                  Cache reads are up to 90% cheaper than input tokens. Higher cache share means more tokens per dollar.
+                  Estimate what share of your tokens will be cache reads. Cache reads cost a fraction of regular input tokens, so higher cache share stretches your budget further.
                 </p>
               </div>
             </>

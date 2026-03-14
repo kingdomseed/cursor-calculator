@@ -45,7 +45,7 @@ describe('createInitialCalculatorState', () => {
       approximationMode: 'best_effort',
     });
     expect(state.modelConfigs).toHaveLength(1);
-    expect(state.modelConfigs[0]?.modelId).toBe('claude-sonnet-4-6');
+    expect(state.modelConfigs[0]?.modelId).toBe('gpt-5.3-codex');
     expect(state.modelConfigs[0]?.weight).toBe(100);
   });
 });
@@ -213,7 +213,7 @@ describe('calculatorSelectors', () => {
     expect(selectIsImportMode(loaded)).toBe(true);
     expect(selectShowManualControls(loaded)).toBe(false);
     expect(selectSelectedFileName(loaded)).toBe('cursor-usage.csv');
-    expect(selectSelectedModelIds(loaded)).toEqual(['claude-sonnet-4-6']);
+    expect(selectSelectedModelIds(loaded)).toEqual(['gpt-5.3-codex']);
   });
 
   it('derives an import replay report from loaded CSV text', () => {

@@ -63,6 +63,12 @@ export function Sidebar({ activeTarget, onNavigate, pricingDate }: SidebarProps)
           exception with no additional surcharge at 1M context.
         </p>
 
+        <p className="text-xs text-white/45 mb-2 font-medium">Caching</p>
+        <p className="text-xs text-white/45 mb-3">
+          Cache reads are up to 90% cheaper than regular input tokens for most models. Cursor bills
+          cache reads as a separate token category alongside input and output.
+        </p>
+
         <p className="text-xs text-white/45 mb-2 font-medium">Disclaimer</p>
         <p className="text-xs text-white/45 mb-3">
           All figures are estimates based on publicly available pricing data. Actual costs depend on

@@ -16,23 +16,13 @@ import {
 } from '../capabilities';
 
 const preferredModel: Model = {
-  id: 'claude-sonnet-4-6',
-  name: 'Claude Sonnet 4.6',
-  provider: 'anthropic',
+  id: 'gpt-5.3-codex',
+  name: 'GPT-5.3 Codex',
+  provider: 'openai',
   pool: 'api',
-  context: { default: 200000, max: 1000000 },
-  rates: { input: 3, cache_write: 3.75, cache_read: 0.3, output: 15 },
+  context: { default: 272000, max: null },
+  rates: { input: 1.75, cache_write: null, cache_read: 0.175, output: 14 },
   variants: {
-    max_mode: { cursor_upcharge: 0.2 },
-    fast: {
-      model_id: 'claude-sonnet-4-6-fast',
-      rates: { input: 6, cache_write: 7.5, cache_read: 0.6, output: 30 },
-    },
-    thinking: true,
-  },
-  auto_checks: {
-    max_mode: true,
-    fast: false,
     thinking: true,
   },
 };
@@ -52,24 +42,24 @@ const secondaryModel: Model = {
 describe('defaults', () => {
   it('creates a default config from model auto-checks', () => {
     expect(createDefaultModelConfig(preferredModel)).toEqual({
-      modelId: 'claude-sonnet-4-6',
+      modelId: 'gpt-5.3-codex',
       weight: 0,
-      maxMode: true,
+      maxMode: false,
       fast: false,
-      thinking: true,
+      thinking: false,
       caching: false,
       cacheHitRate: 75,
     });
   });
 
-  it('prefers Claude Sonnet 4.6 for the initial config when available', () => {
+  it('prefers GPT-5.3 Codex for the initial config when available', () => {
     expect(createInitialModelConfigs([secondaryModel, preferredModel])).toEqual([
       {
-        modelId: 'claude-sonnet-4-6',
+        modelId: 'gpt-5.3-codex',
         weight: 100,
-        maxMode: true,
+        maxMode: false,
         fast: false,
-        thinking: true,
+        thinking: false,
         caching: false,
         cacheHitRate: 75,
       },
@@ -104,7 +94,7 @@ describe('defaults', () => {
     ];
 
     expect(
-      reconcileSelectedModelConfigs(previous, ['gpt-5', 'claude-sonnet-4-6'], [secondaryModel, preferredModel]),
+      reconcileSelectedModelConfigs(previous, ['gpt-5', 'gpt-5.3-codex'], [secondaryModel, preferredModel]),
     ).toEqual([
       {
         modelId: 'gpt-5',
@@ -116,11 +106,11 @@ describe('defaults', () => {
         cacheHitRate: 50,
       },
       {
-        modelId: 'claude-sonnet-4-6',
+        modelId: 'gpt-5.3-codex',
         weight: 50,
-        maxMode: true,
+        maxMode: false,
         fast: false,
-        thinking: true,
+        thinking: false,
         caching: false,
         cacheHitRate: 75,
       },
@@ -155,8 +145,8 @@ describe('weights', () => {
 describe('capabilities', () => {
   it('derives per-model config capabilities from the catalog model', () => {
     expect(getModelConfigCapabilities(preferredModel)).toEqual({
-      hasMaxMode: true,
-      hasFast: true,
+      hasMaxMode: false,
+      hasFast: false,
       hasThinking: true,
       hasCaching: true,
     });

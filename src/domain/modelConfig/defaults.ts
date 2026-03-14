@@ -3,7 +3,7 @@ import type { ModelConfig } from '../recommendation/types';
 import { redistributeWeights } from './weights';
 
 const DEFAULT_CACHE_HIT_RATE = 75;
-const PREFERRED_DEFAULT_MODEL_ID = 'claude-sonnet-4-6';
+const PREFERRED_DEFAULT_MODEL_ID = 'gpt-5.3-codex';
 
 export function createDefaultModelConfig(model: Model): ModelConfig {
   return {
