@@ -100,7 +100,7 @@ function computeBudgetPlanResult(
 
       const billableRates = computeBillableRates(model, config);
       const modelDollars = apiBudget * (config.weight / 100);
-      const modelCacheShare = config.caching ? config.cacheHitRate : cacheReadShare;
+      const modelCacheShare = Math.min(100, Math.max(0, config.caching ? config.cacheHitRate : cacheReadShare));
       const exactTokens = dollarsToExactTokens(modelDollars, billableRates, modelCacheShare, ratio);
       const apiCost = exactTokensToDollars(exactTokens, billableRates);
       const tokens: TokenBreakdown = {

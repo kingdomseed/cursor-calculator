@@ -73,17 +73,17 @@ function App() {
                 <input
                   type="range"
                   min="0"
-                  max="100"
+                  max="95"
                   step="5"
                   value={cacheReadShare}
                   onChange={(e) => setCacheReadShare(Number(e.target.value))}
                   className="w-full h-2 bg-[#e0e0d8] rounded-full appearance-none cursor-pointer accent-[#14120b]"
                 />
                 <div className="flex justify-between text-xs text-[#14120b]/40 mt-1">
-                  <span>0%</span><span>No caching</span><span>100%</span>
+                  <span>0%</span><span>95%</span>
                 </div>
                 <p className="text-xs text-[#14120b]/50 mt-2">
-                  Cache reads are 90% cheaper than input tokens. Higher cache share means more tokens per dollar.
+                  Cache reads are up to 90% cheaper than input tokens. Higher cache share means more tokens per dollar.
                 </p>
               </div>
             </>
