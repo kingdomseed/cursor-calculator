@@ -3,9 +3,12 @@ import type {
   IncludedPoolItem,
   RecommendationComparisonRow,
   RecommendationModelDisplayRow,
+  RecommendationModelGroup,
   RecommendationPlanPresentation,
   RecommendationPresentation,
 } from '../app/recommendationPresentation';
+import { getBaseModelId } from '../app/modelGrouping';
+import { formatCurrency } from '../domain/recommendation/formatters';
 import { PROVIDER_COLORS } from '../lib/constants';
 
 interface Props {
@@ -29,7 +32,10 @@ interface ComparisonModelRow {
 
 export function PlanComparison({ presentation, defaultOpen = false }: Props) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
-  const modelRows = buildModelRows(presentation.plans);
+  const modelRows = presentation.modelGroups ? [] : buildModelRows(presentation.plans);
+  const hasModelContent = modelRows.length > 0
+    || presentation.includedPoolItems.length > 0
+    || (presentation.modelGroups && presentation.modelGroups.length > 0);
 
   return (
     <div className="mt-6">
@@ -79,7 +85,7 @@ export function PlanComparison({ presentation, defaultOpen = false }: Props) {
                     row={row}
                   />
                 ))}
-                {section.kind === 'usage_value_details' && (modelRows.length > 0 || presentation.includedPoolItems.length > 0) && (
+                {section.kind === 'usage_value_details' && hasModelContent && (
                   <>
                     <tr className="bg-[#f7f7f4]/30">
                       <th
@@ -96,13 +102,21 @@ export function PlanComparison({ presentation, defaultOpen = false }: Props) {
                         planCount={presentation.plans.length}
                       />
                     ))}
-                    {modelRows.map((row) => (
-                      <ModelRow
-                        key={row.key}
+                    {presentation.modelGroups ? (
+                      <GroupedModelRows
+                        modelGroups={presentation.modelGroups}
+                        plans={presentation.plans}
                         presentation={presentation}
-                        row={row}
                       />
-                    ))}
+                    ) : (
+                      modelRows.map((row) => (
+                        <ModelRow
+                          key={row.key}
+                          presentation={presentation}
+                          row={row}
+                        />
+                      ))
+                    )}
                   </>
                 )}
               </tbody>
@@ -217,6 +231,171 @@ function IncludedPoolRow({
         </td>
       ))}
     </tr>
+  );
+}
+
+function GroupedModelRows({
+  modelGroups,
+  plans,
+  presentation,
+}: {
+  modelGroups: RecommendationModelGroup[];
+  plans: RecommendationPlanPresentation[];
+  presentation: RecommendationPresentation;
+}) {
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+
+  const toggleGroup = (groupKey: string) => {
+    setExpandedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(groupKey)) {
+        next.delete(groupKey);
+      } else {
+        next.add(groupKey);
+      }
+      return next;
+    });
+  };
+
+  return (
+    <>
+      {modelGroups.map((group) => {
+        const isExpanded = expandedGroups.has(group.groupKey);
+        const isSingleton = group.variantCount === 1;
+
+        return (
+          <GroupSection
+            key={group.groupKey}
+            group={group}
+            plans={plans}
+            presentation={presentation}
+            isExpanded={isExpanded}
+            isSingleton={isSingleton}
+            onToggle={() => toggleGroup(group.groupKey)}
+          />
+        );
+      })}
+    </>
+  );
+}
+
+function GroupSection({
+  group,
+  plans,
+  presentation,
+  isExpanded,
+  isSingleton,
+  onToggle,
+}: {
+  group: RecommendationModelGroup;
+  plans: RecommendationPlanPresentation[];
+  presentation: RecommendationPresentation;
+  isExpanded: boolean;
+  isSingleton: boolean;
+  onToggle: () => void;
+}) {
+  // Compute per-plan aggregate values for this group
+  const planAggregates = plans.map((plan) => {
+    const total = plan.modelRows
+      .filter((row) => getBaseModelId(row.modelId) === group.groupKey)
+      .reduce((sum, row) => sum + (row.primaryMetric.value ?? 0), 0);
+    return {
+      plan: plan.plan,
+      affordable: plan.affordable,
+      total,
+    };
+  });
+
+  // Build child model rows for expanded view
+  const childKeys = group.children.map((child) => child.key);
+  const childRows: ComparisonModelRow[] = childKeys.map((childKey) => {
+    // Find the first plan that has this child row to get label/provider/badges/rateLabel
+    let label = '';
+    let provider = '';
+    let badges: string[] = [];
+    let rateLabel = '';
+    for (const plan of plans) {
+      const found = plan.modelRows.find((r) => r.key === childKey);
+      if (found) {
+        label = found.label;
+        provider = found.provider;
+        badges = found.badges;
+        rateLabel = found.rateLabel;
+        break;
+      }
+    }
+
+    return {
+      key: childKey,
+      label,
+      provider,
+      badges,
+      rateLabel,
+      values: plans.map((plan) => {
+        const found = plan.modelRows.find((r) => r.key === childKey);
+        return {
+          plan: plan.plan,
+          affordable: plan.affordable,
+          primaryMetric: found?.primaryMetric ?? null,
+          secondaryMetric: found?.secondaryMetric ?? null,
+        };
+      }),
+    };
+  });
+
+  return (
+    <>
+      {/* Group header row */}
+      <tr
+        className={isSingleton ? '' : 'cursor-pointer hover:bg-[#f7f7f4]/40'}
+        onClick={isSingleton ? undefined : onToggle}
+      >
+        <td className="px-4 py-2 align-top">
+          <div className="flex items-start gap-2">
+            <span className={`w-2 h-2 rounded-full mt-1 ${PROVIDER_COLORS[group.provider] || 'bg-gray-400'}`} />
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs">{group.familyLabel}</span>
+              {!isSingleton && (
+                <span className="text-[10px] text-[#14120b]/40">
+                  {group.variantCount} variants
+                </span>
+              )}
+              {!isSingleton && (
+                <svg
+                  className={`w-3 h-3 text-[#14120b]/40 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              )}
+            </div>
+          </div>
+        </td>
+        {planAggregates.map((agg) => (
+          <td
+            key={agg.plan}
+            className={`px-4 py-2 text-right align-top ${
+              shouldDimAffordableValue(agg.affordable, presentation)
+                ? 'text-[#14120b]/30'
+                : ''
+            }`}
+          >
+            <p className="font-semibold text-xs">{formatCurrency(agg.total)}</p>
+          </td>
+        ))}
+      </tr>
+
+      {/* Expanded child rows */}
+      {isExpanded && childRows.map((row) => (
+        <ModelRow
+          key={row.key}
+          presentation={presentation}
+          row={row}
+        />
+      ))}
+    </>
   );
 }
 

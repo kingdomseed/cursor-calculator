@@ -343,4 +343,32 @@ describe('PlanComparison', () => {
     expect(missingPlanRow).toContain('$222.00');
     expect(missingPlanRow.indexOf('—')).toBeLessThan(missingPlanRow.indexOf('$222.00'));
   });
+
+  it('renders collapsed model groups with per-plan aggregate values for CSV import', () => {
+    const pro = createPlanResult({
+      plan: 'pro',
+      subscription: 20, apiPool: 20, apiBudget: 20, apiUsage: 100, overage: 80, totalCost: 100,
+      perModel: [
+        createLineItem({ key: 'co46-base', modelId: 'claude-opus-4-6', label: 'Claude 4.6 Opus', apiCost: 60 }),
+        createLineItem({ key: 'co46-max', modelId: 'claude-opus-4-6-max', label: 'Claude 4.6 Opus Max', apiCost: 40 }),
+      ],
+    });
+    const ultra = createPlanResult({
+      plan: 'ultra',
+      subscription: 200, apiPool: 400, apiBudget: 400, apiUsage: 100, overage: 0, totalCost: 200,
+      perModel: [
+        createLineItem({ key: 'co46-base', modelId: 'claude-opus-4-6', label: 'Claude 4.6 Opus', apiCost: 60 }),
+        createLineItem({ key: 'co46-max', modelId: 'claude-opus-4-6-max', label: 'Claude 4.6 Opus Max', apiCost: 40 }),
+      ],
+    });
+
+    const html = renderComparison({
+      mode: 'tokens',
+      tokenSource: 'cursor_import',
+      recommendation: createRecommendation(ultra, [pro, ultra]),
+      defaultOpen: true,
+    });
+
+    expect(html).toContain('2 variants');
+  });
 });
