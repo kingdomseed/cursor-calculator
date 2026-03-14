@@ -62,7 +62,7 @@ The `WelcomeModal` remains as a disclaimer overlay, independent of navigation. T
 ### Content area
 
 Shows mode-specific content:
-- **Budget mode:** Budget input slider, cache-read share control (affects tokens-per-dollar since cached tokens are cheaper), model selector, model configs, advanced options, recommendation results.
+- **Budget mode:** Budget input slider, model selector, model configs, advanced options, recommendation results.
 - **Manual usage mode:** Token input with inline "Quick estimate / Exact token buckets" toggle, cache-read share, model selector, model configs, advanced options, recommendation results.
 - **CSV import mode:** CursorImportPanel (file picker, options, summary), recommendation results.
 
@@ -202,3 +202,4 @@ The only shared concern is that the sidebar's "I have a CSV" nav item sets `toke
 - Adding Bedrock/BYOK rate comparison (noted for future consideration).
 - Changing the import replay label mapping logic.
 - Adding new models to the catalog.
+- Adding cache-read share to budget mode (planned follow-up — requires modifying the budget pricing path to account for cache-read rates in the tokens-per-dollar conversion).
