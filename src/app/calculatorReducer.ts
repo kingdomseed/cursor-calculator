@@ -3,7 +3,7 @@ import type { Model } from '../domain/catalog/types';
 import type { ResolvedCursorImportOptions } from '../domain/importReplay/types';
 import { buildSimpleExactTokenBreakdown, normalizeExactTokenBreakdown } from '../domain/recommendation/manualUsage';
 import type { ExactTokenBreakdown, ModelConfig } from '../domain/recommendation/types';
-import type { CalculatorState, ImportedCsvFile, ManualTokenInputMode, TokenSource } from './calculatorState';
+import type { CalculatorState, ImportedCsvFile, ManualTokenInputMode, NavigationTarget, TokenSource } from './calculatorState';
 
 export type CalculatorAction =
   | { type: 'set_mode'; mode: CalculatorState['mode'] }
@@ -20,7 +20,8 @@ export type CalculatorAction =
   | { type: 'set_cursor_import_options'; cursorImportOptions: ResolvedCursorImportOptions }
   | { type: 'import_started' }
   | { type: 'import_loaded'; files: ImportedCsvFile[] }
-  | { type: 'import_failed'; error: string };
+  | { type: 'import_failed'; error: string }
+  | { type: 'navigate'; target: NavigationTarget };
 
 export function calculatorReducer(state: CalculatorState, action: CalculatorAction): CalculatorState {
   switch (action.type) {
@@ -95,6 +96,20 @@ export function calculatorReducer(state: CalculatorState, action: CalculatorActi
         cursorImportError: action.error,
         isImporting: false,
       };
+    case 'navigate': {
+      switch (action.target) {
+        case 'budget':
+          return { ...state, mode: 'budget' };
+        case 'manual_usage':
+          return { ...state, mode: 'tokens', tokenSource: 'manual' };
+        case 'csv_import':
+          return { ...state, mode: 'tokens', tokenSource: 'cursor_import' };
+        default: {
+          const _exhaustive: never = action.target;
+          return _exhaustive;
+        }
+      }
+    }
     default: {
       const exhaustiveCheck: never = action;
       return exhaustiveCheck;
