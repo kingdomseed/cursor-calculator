@@ -70,15 +70,15 @@ export function Sidebar({ activeTarget, onNavigate, pricingDate }: SidebarProps)
           affiliated with Cursor.
         </p>
 
-        <p className="text-xs text-white/45 mb-1">
-          Source:{' '}
-          <a href="https://cursor.com/docs/models-and-pricing" className="underline hover:text-white/70" target="_blank" rel="noopener noreferrer">
-            cursor.com/docs/models-and-pricing
+        <div className="flex items-center gap-3 mb-3">
+          <a
+            href="https://cursor.com/docs/models-and-pricing"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-white/45 underline hover:text-white/70"
+          >
+            Cursor&apos;s Pricing Page
           </a>
-        </p>
-        <p className="text-xs text-white/45 mb-3">Last updated {pricingDate}</p>
-
-        <div className="flex items-center gap-3">
           <a
             href="https://github.com/kingdomseed/cursor-calculator"
             target="_blank"
@@ -98,6 +98,8 @@ export function Sidebar({ activeTarget, onNavigate, pricingDate }: SidebarProps)
             JHD
           </a>
         </div>
+
+        <p className="text-xs text-white/30 mt-3">Last updated {pricingDate}</p>
       </div>
     </aside>
   );
