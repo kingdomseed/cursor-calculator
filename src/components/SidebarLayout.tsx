@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import type { NavigationTarget } from '../app/calculatorState';
 import { ChartLineIcon, FileCsvIcon, WalletIcon } from './Icons';
 import { Sidebar } from './Sidebar';
@@ -13,6 +13,7 @@ interface Props {
 export function SidebarLayout({ activeTarget, onNavigate, pricingDate, children }: Props) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const mobileDialogRef = useRef<HTMLDivElement>(null);
 
   const handleNavigate = useCallback((target: NavigationTarget) => {
     onNavigate(target);
@@ -27,6 +28,11 @@ export function SidebarLayout({ activeTarget, onNavigate, pricingDate, children 
     };
 
     document.addEventListener('keydown', handleEscape);
+
+    // Focus the first nav button when the overlay opens
+    const firstButton = mobileDialogRef.current?.querySelector('button');
+    if (firstButton) firstButton.focus();
+
     return () => document.removeEventListener('keydown', handleEscape);
   }, [mobileOpen]);
 
@@ -41,6 +47,7 @@ export function SidebarLayout({ activeTarget, onNavigate, pricingDate, children 
         {collapsed ? (
           <div className="h-full bg-[#14120b] flex flex-col items-center py-4 gap-1">
             <button
+              type="button"
               onClick={() => setCollapsed(false)}
               className="p-2 mb-2 text-white/40 hover:text-white/70 rounded-lg hover:bg-white/10"
               aria-label="Expand navigation"
@@ -56,6 +63,7 @@ export function SidebarLayout({ activeTarget, onNavigate, pricingDate, children 
             ] as const).map(({ target, label, icon: Icon }) => (
               <button
                 key={target}
+                type="button"
                 onClick={() => handleNavigate(target)}
                 className={`p-2.5 rounded-lg transition-colors ${
                   activeTarget === target
@@ -73,6 +81,7 @@ export function SidebarLayout({ activeTarget, onNavigate, pricingDate, children 
           <div className="h-full relative">
             <Sidebar activeTarget={activeTarget} onNavigate={handleNavigate} pricingDate={pricingDate} />
             <button
+              type="button"
               onClick={() => setCollapsed(true)}
               className="absolute top-4 right-3 p-1 text-white/40 hover:text-white/70 rounded"
               aria-label="Collapse navigation"
@@ -88,6 +97,7 @@ export function SidebarLayout({ activeTarget, onNavigate, pricingDate, children 
       {/* Mobile hamburger */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-20 bg-white border-b border-[#e0e0d8] px-4 py-3">
         <button
+          type="button"
           onClick={() => setMobileOpen(true)}
           className="p-1"
           aria-label="Open navigation"
@@ -106,9 +116,11 @@ export function SidebarLayout({ activeTarget, onNavigate, pricingDate, children 
             onClick={() => setMobileOpen(false)}
           />
           <div
+            ref={mobileDialogRef}
             className="relative w-64 h-full"
             role="dialog"
             aria-modal="true"
+            aria-label="Navigation"
           >
             <Sidebar activeTarget={activeTarget} onNavigate={handleNavigate} pricingDate={pricingDate} />
           </div>

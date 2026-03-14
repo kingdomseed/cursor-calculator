@@ -72,7 +72,8 @@ export function buildModelGroups(
     // Sort children by primaryMetric.value descending (cost)
     children.sort((a, b) => (b.primaryMetric.value ?? 0) - (a.primaryMetric.value ?? 0));
 
-    const familyLabel = children[0].label;
+    const baseChild = children.find((child) => child.modelId === groupKey);
+    const familyLabel = baseChild?.label ?? children[0].label;
     const provider = children[0].provider;
     const totalCost = children.reduce((sum, row) => sum + (row.primaryMetric.value ?? 0), 0);
     const totalTokens = children.reduce((sum, row) => sum + (row.secondaryMetric?.value ?? 0), 0);

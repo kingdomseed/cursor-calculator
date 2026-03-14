@@ -159,14 +159,14 @@ describe('buildModelGroups', () => {
     expect(groups[0].children[1].modelId).toBe('claude-opus-4-6-fast');
   });
 
-  it('uses highest-cost child label as familyLabel after sort', () => {
+  it('uses the base model label as familyLabel when available', () => {
     const rows = [
       createRow({
-        key: 'claude-opus-4-6-fast:base:fast:plain:cursor',
-        modelId: 'claude-opus-4-6-fast',
-        label: 'Claude 4.6 Opus Fast',
+        key: 'claude-opus-4-6-max:max:standard:plain:cursor',
+        modelId: 'claude-opus-4-6-max',
+        label: 'Claude 4.6 Opus Max',
         provider: 'anthropic',
-        primaryMetric: { label: 'Usage cost', value: 10, formattedValue: '$10.00' },
+        primaryMetric: { label: 'Usage cost', value: 80, formattedValue: '$80.00' },
       }),
       createRow({
         key: 'claude-opus-4-6:base:standard:plain:cursor',
@@ -178,7 +178,7 @@ describe('buildModelGroups', () => {
     ];
 
     const groups = buildModelGroups(rows, 'cursor_import')!;
-    expect(groups[0].familyLabel).toBe('Claude 4.6 Opus');
+    expect(groups[0].familyLabel).toBe('Claude 4.6 Opus'); // base model label, not max variant
   });
 
   it('creates singleton groups with variantCount 1', () => {

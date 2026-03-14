@@ -134,29 +134,40 @@ function ModelGroupRow({
 
   return (
     <div>
-      <div
-        className={`flex items-center justify-between gap-3 ${isSingleton ? '' : 'cursor-pointer'}`}
-        onClick={isSingleton ? undefined : onToggle}
-      >
-        <div className="flex flex-wrap items-center gap-2">
-          <span className={`w-2 h-2 rounded-full ${PROVIDER_COLORS[group.provider] || 'bg-gray-400'}`} />
-          <span className="font-medium text-sm">{group.familyLabel}</span>
-          {!isSingleton && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-white/60">
-              {group.variantCount} variants
-            </span>
-          )}
-        </div>
-        <div className="flex items-center gap-3">
+      {isSingleton ? (
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className={`w-2 h-2 rounded-full ${PROVIDER_COLORS[group.provider] || 'bg-gray-400'}`} />
+            <span className="font-medium text-sm">{group.familyLabel}</span>
+          </div>
           <div className="text-right text-sm">
             <span className="text-white/60">{formatNumber(group.totalTokens)} tokens</span>
             <span className="ml-2 font-semibold">{formatCurrency(group.totalCost)}</span>
           </div>
-          {!isSingleton && (
-            <span className="text-white/40 text-xs">{expanded ? '▲' : '▼'}</span>
-          )}
         </div>
-      </div>
+      ) : (
+        <button
+          type="button"
+          className="flex items-center justify-between gap-3 w-full cursor-pointer text-left"
+          onClick={onToggle}
+          aria-expanded={expanded}
+        >
+          <div className="flex flex-wrap items-center gap-2">
+            <span className={`w-2 h-2 rounded-full ${PROVIDER_COLORS[group.provider] || 'bg-gray-400'}`} />
+            <span className="font-medium text-sm">{group.familyLabel}</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-white/60">
+              {group.variantCount} variants
+            </span>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="text-right text-sm">
+              <span className="text-white/60">{formatNumber(group.totalTokens)} tokens</span>
+              <span className="ml-2 font-semibold">{formatCurrency(group.totalCost)}</span>
+            </div>
+            <span className="text-white/40 text-xs">{expanded ? '▲' : '▼'}</span>
+          </div>
+        </button>
+      )}
       {expanded && (
         <div className="ml-4 mt-2 space-y-3">
           {group.children.map((item) => (

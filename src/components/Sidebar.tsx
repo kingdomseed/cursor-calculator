@@ -18,7 +18,7 @@ export function Sidebar({ activeTarget, onNavigate, pricingDate }: SidebarProps)
     <aside
       role="navigation"
       aria-label="Calculator mode"
-      className="flex flex-col h-full bg-[#14120b] text-white p-5"
+      className="flex flex-col h-full overflow-y-auto bg-[#14120b] text-white p-5"
     >
       {/* Branding */}
       <div className="flex items-center gap-2 mb-6">
@@ -31,6 +31,7 @@ export function Sidebar({ activeTarget, onNavigate, pricingDate }: SidebarProps)
         {NAV_ITEMS.map(({ target, label, icon: Icon }) => (
           <button
             key={target}
+            type="button"
             onClick={() => onNavigate(target)}
             className={`flex items-center gap-2.5 text-left px-3 py-2.5 rounded-lg text-sm transition-colors ${
               target === activeTarget

@@ -99,7 +99,7 @@ export function calculatorReducer(state: CalculatorState, action: CalculatorActi
     case 'navigate': {
       switch (action.target) {
         case 'budget':
-          return { ...state, mode: 'budget' };
+          return { ...state, mode: 'budget', tokenSource: 'manual' };
         case 'manual_usage':
           return { ...state, mode: 'tokens', tokenSource: 'manual' };
         case 'csv_import':
