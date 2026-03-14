@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useReducer } from 'react';
-import { getManualApiModels, getPlans } from '../domain/catalog/currentCatalog';
+import { getIncludedPoolModels, getManualApiModels, getPlans } from '../domain/catalog/currentCatalog';
 import { getImportReplayModels } from '../domain/importReplay/catalog';
 import type {
   ApproximationMode,
@@ -20,11 +20,13 @@ import {
   deriveCursorImportReport,
   selectIsImportMode,
   selectRecommendation,
+  selectRecommendationPresentation,
   selectSelectedFileName,
   selectSelectedModelIds,
   selectSelectedModels,
   selectShowManualControls,
 } from './calculatorSelectors';
+import type { RecommendationPresentation } from './recommendationPresentation';
 
 interface CalculatorControllerDependencies {
   manualModels?: Model[];
@@ -42,6 +44,7 @@ interface CalculatorController {
   selectedFileName: string | null;
   cursorImportReport: CursorImportReport | null;
   recommendation: Recommendation | null;
+  recommendationPresentation: RecommendationPresentation | null;
   setMode: (mode: CalculatorState['mode']) => void;
   setTokenSource: (tokenSource: TokenSource) => void;
   setBudget: (budget: number) => void;
@@ -73,6 +76,10 @@ export function useCalculatorController(
     () => dependencies.plans ?? getPlans(),
     [dependencies.plans],
   );
+  const includedPoolModels = useMemo(
+    () => getIncludedPoolModels(),
+    [],
+  );
 
   const [state, dispatch] = useReducer(calculatorReducer, manualModels, createInitialCalculatorState);
   const { cursorImportFiles, cursorImportOptions } = state;
@@ -86,6 +93,10 @@ export function useCalculatorController(
   const recommendation = useMemo(
     () => selectRecommendation(state, { manualModels, importReplayModels, plans, cursorImportReport }),
     [cursorImportReport, importReplayModels, manualModels, plans, state],
+  );
+  const recommendationPresentation = useMemo(
+    () => selectRecommendationPresentation(state, recommendation, includedPoolModels),
+    [includedPoolModels, recommendation, state],
   );
 
   const setMode = useCallback((mode: CalculatorState['mode']) => {
@@ -172,6 +183,7 @@ export function useCalculatorController(
     selectedFileName: selectSelectedFileName(state),
     cursorImportReport,
     recommendation,
+    recommendationPresentation,
     setMode,
     setTokenSource,
     setBudget,

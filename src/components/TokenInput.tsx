@@ -26,6 +26,7 @@ export function TokenInput({
 
   return (
     <div className="text-center">
+      <p className="text-[#14120b]/60 mb-4">How many tokens will you use this month?</p>
       <div className="inline-flex bg-white rounded-full p-1 shadow-sm border border-[#e0e0d8] mb-6">
         <button
           onClick={() => onManualTokenInputModeChange('simple')}

@@ -1,25 +1,41 @@
 import { useState } from 'react';
-import type { Mode, PlanLineItem, PlanResult } from '../lib/types';
-import { formatCurrency, formatNumber } from '../domain/recommendation/formatters';
+import type {
+  IncludedPoolItem,
+  RecommendationComparisonRow,
+  RecommendationModelDisplayRow,
+  RecommendationPlanPresentation,
+  RecommendationPresentation,
+} from '../app/recommendationPresentation';
 import { PROVIDER_COLORS } from '../lib/constants';
 
 interface Props {
-  results: PlanResult[];
-  mode: Mode;
+  presentation: RecommendationPresentation;
+  defaultOpen?: boolean;
 }
 
-export function PlanComparison({ results, mode }: Props) {
-  const [isOpen, setIsOpen] = useState(false);
+interface ComparisonModelRow {
+  key: string;
+  label: string;
+  provider: string;
+  badges: string[];
+  rateLabel: string;
+  values: Array<{
+    plan: RecommendationPlanPresentation['plan'];
+    affordable: boolean;
+    primaryMetric: RecommendationModelDisplayRow['primaryMetric'] | null;
+    secondaryMetric: RecommendationModelDisplayRow['secondaryMetric'];
+  }>;
+}
 
-  const lineItems = results[0]?.perModel ?? [];
-  const apiUsageLabel = mode === 'budget' ? 'API value unlocked' : 'Your API usage';
-  const overageLabel = mode === 'budget' ? 'Additional API billed' : 'Overage';
-  const totalCostLabel = mode === 'budget' ? 'Total cash cost' : 'Total cost';
+export function PlanComparison({ presentation, defaultOpen = false }: Props) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  const modelRows = buildModelRows(presentation.plans);
 
   return (
     <div className="mt-6">
       <button
         onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
         className="flex items-center gap-2 text-sm text-[#14120b]/60 hover:text-[#14120b]"
       >
         <svg className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -34,43 +50,63 @@ export function PlanComparison({ results, mode }: Props) {
             <thead className="bg-[#f7f7f4]">
               <tr>
                 <th className="text-left px-4 py-3 font-medium text-[#14120b]/60"></th>
-                {results.map((result) => (
+                {presentation.plans.map((plan) => (
                   <th
-                    key={result.plan}
+                    key={plan.plan}
                     className={`text-right px-4 py-3 font-medium ${
-                      mode === 'budget' && !result.affordable ? 'text-[#14120b]/30' : 'text-[#14120b]/60'
+                      shouldDimPlan(plan, presentation) ? 'text-[#14120b]/30' : 'text-[#14120b]/60'
                     }`}
                   >
-                    {result.plan === 'pro_plus' ? 'Pro Plus' : result.plan === 'ultra' ? 'Ultra' : 'Pro'}
+                    {plan.planLabel}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#e0e0d8]">
-              <Row label="Subscription" values={results.map((result) => `$${result.subscription}/mo`)} results={results} mode={mode} />
-              <Row label="↳ includes pool" values={results.map((result) => `$${result.apiPool}`)} results={results} mode={mode} subdued />
-              <Row label={apiUsageLabel} values={results.map((result) => formatCurrency(result.apiUsage))} results={results} mode={mode} />
-              <Row label={overageLabel} values={results.map((result) => result.overage > 0 ? formatCurrency(result.overage) : '—')} results={results} mode={mode} />
-              <Row label={totalCostLabel} values={results.map((result) => formatCurrency(result.totalCost))} results={results} mode={mode} bold />
-              <Row label="Unused pool" values={results.map((result) => result.unusedPool > 0 ? formatCurrency(result.unusedPool) : '—')} results={results} mode={mode} />
-              {lineItems.map((lineItem) => (
-                <tr key={lineItem.key}>
-                  <td className="px-4 py-2">
-                    <LineItemLabel item={lineItem} />
-                  </td>
-                  {results.map((result) => {
-                    const item = result.perModel.find((candidate) => candidate.key === lineItem.key);
-                    const dimmed = mode === 'budget' && !result.affordable;
-
-                    return (
-                      <td key={result.plan} className={`px-4 py-2 text-right text-xs font-semibold ${dimmed ? 'text-[#14120b]/30' : ''}`}>
-                        {item ? (mode === 'budget' ? `${formatNumber(item.tokens.total)} tokens` : formatCurrency(item.apiCost)) : '—'}
-                      </td>
-                    );
-                  })}
+            {presentation.comparisonSections.map((section) => (
+              <tbody key={section.kind} className="divide-y divide-[#e0e0d8]">
+                <tr className="bg-[#f7f7f4]/60">
+                  <th
+                    colSpan={presentation.plans.length + 1}
+                    className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide text-[#14120b]/50"
+                  >
+                    {section.title}
+                  </th>
                 </tr>
-              ))}
-            </tbody>
+                {section.rows.map((row) => (
+                  <ComparisonRow
+                    key={row.key}
+                    presentation={presentation}
+                    row={row}
+                  />
+                ))}
+                {section.kind === 'usage_value_details' && (modelRows.length > 0 || presentation.includedPoolItems.length > 0) && (
+                  <>
+                    <tr className="bg-[#f7f7f4]/30">
+                      <th
+                        colSpan={presentation.plans.length + 1}
+                        className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide text-[#14120b]/40"
+                      >
+                        Per-model details
+                      </th>
+                    </tr>
+                    {presentation.includedPoolItems.map((item) => (
+                      <IncludedPoolRow
+                        key={item.key}
+                        item={item}
+                        planCount={presentation.plans.length}
+                      />
+                    ))}
+                    {modelRows.map((row) => (
+                      <ModelRow
+                        key={row.key}
+                        presentation={presentation}
+                        row={row}
+                      />
+                    ))}
+                  </>
+                )}
+              </tbody>
+            ))}
           </table>
         </div>
       )}
@@ -78,41 +114,170 @@ export function PlanComparison({ results, mode }: Props) {
   );
 }
 
-function LineItemLabel({ item }: { item: PlanLineItem }) {
-  return (
-    <div className="flex items-center gap-2">
-      <span className={`w-2 h-2 rounded-full ${PROVIDER_COLORS[item.provider] || 'bg-gray-400'}`} />
-      <span className="text-xs">{item.label}</span>
-      {item.fast && <span className="text-[10px] text-[#14120b]/40">Fast</span>}
-      {item.maxMode && <span className="text-[10px] text-[#14120b]/40">Max</span>}
-      {item.approximated && <span className="text-[10px] text-amber-600">Approx</span>}
-      {item.sourceLabel && <span className="text-[10px] text-[#14120b]/40">{item.sourceLabel}</span>}
-    </div>
-  );
-}
-
-function Row({ label, values, results, mode, bold, subdued }: {
-  label: string;
-  values: string[];
-  results: PlanResult[];
-  mode: Mode;
-  bold?: boolean;
-  subdued?: boolean;
+function ComparisonRow({
+  presentation,
+  row,
+}: {
+  presentation: RecommendationPresentation;
+  row: RecommendationComparisonRow;
 }) {
   return (
     <tr>
-      <td className={`px-4 py-2 ${bold ? 'font-bold' : ''} ${subdued ? 'text-[#14120b]/40 text-xs' : ''}`}>{label}</td>
-      {values.map((value, index) => {
-        const dimmed = mode === 'budget' && !results[index].affordable;
-        return (
-          <td
-            key={index}
-            className={`px-4 py-2 text-right ${bold ? 'font-bold' : ''} ${dimmed ? 'text-[#14120b]/30' : ''} ${subdued ? 'text-[#14120b]/40 text-xs' : ''}`}
-          >
-            {value}
-          </td>
-        );
-      })}
+      <td className="px-4 py-2">{row.label}</td>
+      {row.values.map((value) => (
+        <td
+          key={value.plan}
+          className={`px-4 py-2 text-right ${
+            shouldDimAffordableValue(value.affordable, presentation)
+              ? 'text-[#14120b]/30'
+              : ''
+          }`}
+        >
+          {value.formattedValue}
+        </td>
+      ))}
     </tr>
   );
+}
+
+function ModelRow({
+  presentation,
+  row,
+}: {
+  presentation: RecommendationPresentation;
+  row: ComparisonModelRow;
+}) {
+  return (
+    <tr>
+      <td className="px-4 py-2 align-top">
+        <div className="flex items-start gap-2">
+          <span className={`w-2 h-2 rounded-full mt-1 ${PROVIDER_COLORS[row.provider] || 'bg-gray-400'}`} />
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs">{row.label}</span>
+              {row.badges.map((badge) => (
+                <span key={badge} className="text-[10px] text-[#14120b]/40">
+                  {badge}
+                </span>
+              ))}
+            </div>
+            <p className="text-[10px] text-[#14120b]/40">{row.rateLabel}</p>
+          </div>
+        </div>
+      </td>
+      {row.values.map((value) => (
+        <td
+          key={value.plan}
+          className={`px-4 py-2 text-right align-top ${
+            shouldDimAffordableValue(value.affordable, presentation)
+              ? 'text-[#14120b]/30'
+              : ''
+          }`}
+        >
+          {value.primaryMetric ? (
+            <p className="font-semibold text-xs">{value.primaryMetric.formattedValue}</p>
+          ) : (
+            <p className="font-semibold text-xs">—</p>
+          )}
+          {value.secondaryMetric && (
+            <p className="text-[10px] text-[#14120b]/40 mt-1">
+              {value.secondaryMetric.label}: {value.secondaryMetric.formattedValue}
+            </p>
+          )}
+        </td>
+      ))}
+    </tr>
+  );
+}
+
+function IncludedPoolRow({
+  item,
+  planCount,
+}: {
+  item: IncludedPoolItem;
+  planCount: number;
+}) {
+  return (
+    <tr>
+      <td className="px-4 py-2 align-top">
+        <div className="flex items-start gap-2">
+          <span className={`w-2 h-2 rounded-full mt-1 ${PROVIDER_COLORS[item.provider] || 'bg-gray-400'}`} />
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs">{item.label}</span>
+              <span className="text-[10px] text-[#14120b]/40">Included</span>
+            </div>
+            <p className="text-[10px] text-[#14120b]/40">{item.poolLabel}</p>
+          </div>
+        </div>
+      </td>
+      {Array.from({ length: planCount }, (_, i) => (
+        <td key={i} className="px-4 py-2 text-right align-top text-xs text-[#14120b]/40">
+          Included
+        </td>
+      ))}
+    </tr>
+  );
+}
+
+function buildModelRows(plans: RecommendationPlanPresentation[]): ComparisonModelRow[] {
+  const rows = new Map<string, {
+    key: string;
+    label: string;
+    provider: string;
+    badges: string[];
+    rateLabel: string;
+    byPlan: Map<RecommendationPlanPresentation['plan'], RecommendationModelDisplayRow>;
+  }>();
+
+  for (const plan of plans) {
+    for (const modelRow of plan.modelRows) {
+      const existing = rows.get(modelRow.key);
+
+      if (!existing) {
+        rows.set(modelRow.key, {
+          key: modelRow.key,
+          label: modelRow.label,
+          provider: modelRow.provider,
+          badges: modelRow.badges,
+          rateLabel: modelRow.rateLabel,
+          byPlan: new Map(),
+        });
+      }
+
+      rows.get(modelRow.key)?.byPlan.set(plan.plan, modelRow);
+    }
+  }
+
+  return Array.from(rows.values()).map((row) => ({
+    key: row.key,
+    label: row.label,
+    provider: row.provider,
+    badges: row.badges,
+    rateLabel: row.rateLabel,
+    values: plans.map((plan) => {
+      const value = row.byPlan.get(plan.plan);
+
+      return {
+        plan: plan.plan,
+        affordable: plan.affordable,
+        primaryMetric: value?.primaryMetric ?? null,
+        secondaryMetric: value?.secondaryMetric ?? null,
+      };
+    }),
+  }));
+}
+
+function shouldDimPlan(
+  plan: RecommendationPlanPresentation,
+  presentation: RecommendationPresentation,
+) {
+  return presentation.mode === 'budget' && !plan.affordable;
+}
+
+function shouldDimAffordableValue(
+  affordable: boolean,
+  presentation: RecommendationPresentation,
+) {
+  return presentation.mode === 'budget' && !affordable;
 }

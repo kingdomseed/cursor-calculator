@@ -5,6 +5,7 @@ export function formatNumber(num: number): string {
 }
 
 export function formatCurrency(num: number): string {
+  if (num < 0) return `-$${Math.abs(num).toFixed(2)}`;
   return `$${num.toFixed(2)}`;
 }
 

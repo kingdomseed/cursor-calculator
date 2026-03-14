@@ -34,7 +34,8 @@ Single-page React + TypeScript app deployed to Vercel.
 - `src/App.tsx` — Composition root and page layout. Consumes the calculator controller and renders the UI.
 - `src/app/calculatorState.ts` — Reducer-owned source state and initial defaults.
 - `src/app/calculatorReducer.ts` — Calculator state transitions.
-- `src/app/calculatorSelectors.ts` — Derived app view data, including replay reports and recommendations.
+- `src/app/calculatorSelectors.ts` — Derived app view data, including replay reports, recommendations, and result presentation models.
+- `src/app/recommendationPresentation.ts` — Source of truth for result semantics and plan comparison presentation shown by the UI.
 - `src/app/cursorImportActions.ts` — Pure app-layer import action sequencing for selected CSV files.
 - `src/app/cursorImportPresentation.ts` — Replay-summary presentation helpers for UI-facing note/value formatting.
 - `src/app/useCalculatorController.ts` — App-layer controller for reducer wiring, file reading, and UI-facing callbacks.
@@ -52,6 +53,7 @@ Single-page React + TypeScript app deployed to Vercel.
 - `data/private/raw/cursor/` — Optional local-only fixture location for copied Cursor monthly exports. `data/private/` is gitignored.
 
 There is no routing or external state management library. `App.tsx` is now composition-only; calculator session behavior lives in `src/app/*` and domain behavior lives in `src/domain/*`.
+Result semantics are centralized in `src/app/recommendationPresentation.ts`; UI components should render that view model instead of reinterpreting raw `PlanResult` fields.
 
 ### Core calculation logic
 

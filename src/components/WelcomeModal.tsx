@@ -27,7 +27,7 @@ export function WelcomeModal() {
           <h2 className="text-xl font-bold">Welcome to Cursor Cost Calculator</h2>
         </div>
         <p className="text-sm text-[#14120b]/70 mb-4">
-          This tool helps you estimate what your Cursor usage costs based on the models and settings you use. Pick a budget or token count, choose your models, and see which plan fits.
+          Budget mode estimates what a monthly spend ceiling gets you. Usage mode estimates total usage cost and out-of-pocket spend after plan coverage.
         </p>
         <p className="text-xs text-[#14120b]/50 mb-6">
           All rates come from Cursor's public docs, but this is an estimate — not a guarantee. Pricing can change at any time, and actual costs depend on your usage patterns. This tool is not affiliated with Cursor and is not responsible for any financial decisions.

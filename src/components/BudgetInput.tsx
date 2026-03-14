@@ -1,7 +1,7 @@
 export function BudgetInput({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (
     <div className="text-center">
-      <p className="text-[#14120b]/60 mb-4">What's your monthly budget?</p>
+      <p className="text-[#14120b]/60 mb-4">What&apos;s the most you want to spend per month?</p>
       <div className="inline-flex items-baseline gap-1">
         <span className="text-2xl font-medium text-[#14120b]/40">$</span>
         <input
