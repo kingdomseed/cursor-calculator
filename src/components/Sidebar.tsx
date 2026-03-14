@@ -46,6 +46,15 @@ export function Sidebar({ activeTarget, onNavigate, pricingDate }: SidebarProps)
       {/* Footer */}
       <div className="mt-auto pt-6">
         <p className="text-xs text-white/45 mb-2 font-medium uppercase tracking-wide">
+          About this tool
+        </p>
+        <p className="text-xs text-white/45 mb-4">
+          Budget mode estimates what a monthly spend ceiling gets you. Usage mode estimates total
+          usage cost and out-of-pocket spend after plan coverage. Import a Cursor CSV to replay
+          exact token columns from a real month.
+        </p>
+
+        <p className="text-xs text-white/45 mb-2 font-medium uppercase tracking-wide">
           How plans work
         </p>
         <p className="text-xs text-white/45 mb-3">
