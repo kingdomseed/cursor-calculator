@@ -229,7 +229,7 @@ export const APPROXIMATE_IMPORT_REPLAY_LABEL_MAPPINGS: Record<string, ImportRepl
 
 export const IMPORT_REPLAY_LONG_CONTEXT_COMPANIONS: Record<string, ImportReplayLongContextCompanion> = {
   'claude-4-sonnet': { maxId: 'claude-4-sonnet-1m' },
-  'claude-4-5-opus': { maxId: 'claude-opus-4-6-max', approximated: true },
+  'claude-4-5-opus': { maxId: 'historical-opus-max-2x', approximated: true },
   'claude-4-5-sonnet': { maxId: 'claude-4-sonnet-1m', approximated: true },
   'claude-opus-4-6': { maxId: 'claude-opus-4-6-max' },
   'claude-sonnet-4-6': { maxId: 'claude-4-sonnet-1m', approximated: true },

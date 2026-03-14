@@ -51,15 +51,16 @@ export function Sidebar({ activeTarget, onNavigate, pricingDate }: SidebarProps)
           How plans work
         </p>
         <p className="text-xs text-white/45 mb-3">
-          Every plan includes two usage pools. Auto and Composer are usage-based and included in
-          every subscription — they don&apos;t draw from the API pool. The API pool covers all other
-          models. Once exhausted, you pay overage at the same per-token rates.
+          Every plan includes two usage pools: usage-based and API-based. Auto and Composer draw
+          from the usage-based pool and are included in every subscription. The API pool covers all
+          other models. Once exhausted, you pay overage at the same per-token rates.
         </p>
 
         <p className="text-xs text-white/45 mb-2 font-medium">Max Mode</p>
         <p className="text-xs text-white/45 mb-3">
-          Adds 20% Cursor upcharge. For extended context (1M), use the dedicated Max/1M model
-          variants which have long-context pricing built into their rates.
+          Extends context to a model&apos;s maximum (up to 1M tokens). Adds a 20% Cursor upcharge.
+          Some models also have provider-level long-context rates — Claude 4.6 Opus is the
+          exception with no additional surcharge at 1M context.
         </p>
 
         <p className="text-xs text-white/45 mb-2 font-medium">Disclaimer</p>
