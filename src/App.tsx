@@ -1,4 +1,5 @@
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { getPricingCatalog } from './domain/catalog/currentCatalog';
 import { useCalculatorController } from './app/useCalculatorController';
 import { SidebarLayout } from './components/SidebarLayout';
@@ -183,6 +184,7 @@ function App() {
         )}
       </SidebarLayout>
       <Analytics />
+      <SpeedInsights />
     </>
   );
 }
