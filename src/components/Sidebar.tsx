@@ -70,7 +70,7 @@ export function Sidebar({ activeTarget, onNavigate, pricingDate }: SidebarProps)
           affiliated with Cursor.
         </p>
 
-        <div className="flex items-center gap-3 mb-3">
+        <p className="mb-3">
           <a
             href="https://cursor.com/docs/models-and-pricing"
             target="_blank"
@@ -79,6 +79,9 @@ export function Sidebar({ activeTarget, onNavigate, pricingDate }: SidebarProps)
           >
             Cursor&apos;s Pricing Page
           </a>
+        </p>
+
+        <div className="flex items-center gap-3 mb-3">
           <a
             href="https://github.com/kingdomseed/cursor-calculator"
             target="_blank"
