@@ -119,7 +119,7 @@
       "provider": "anthropic",
       "pool": "api",
       "context": { "default": 1000000, "max": null },
-      "rates": { "input": 10.00, "cache_write": 12.50, "cache_read": 1.00, "output": 50.00 },
+      "rates": { "input": 5.00, "cache_write": 6.25, "cache_read": 0.50, "output": 25.00 },
       "variants": {
         "thinking": true
       },
