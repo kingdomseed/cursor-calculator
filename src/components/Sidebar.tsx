@@ -18,7 +18,7 @@ export function Sidebar({ activeTarget, onNavigate, pricingDate }: SidebarProps)
     <aside
       role="navigation"
       aria-label="Calculator mode"
-      className="flex flex-col h-full bg-[#14120b] text-white p-4"
+      className="flex flex-col h-full bg-[#14120b] text-white p-5"
     >
       {/* Branding */}
       <div className="flex items-center gap-2 mb-6">
@@ -45,42 +45,42 @@ export function Sidebar({ activeTarget, onNavigate, pricingDate }: SidebarProps)
 
       {/* Footer */}
       <div className="mt-auto pt-6">
-        <p className="text-[10px] text-white/30 mb-2 font-medium uppercase tracking-wide">
+        <p className="text-xs text-white/45 mb-2 font-medium uppercase tracking-wide">
           How plans work
         </p>
-        <p className="text-[10px] text-white/30 mb-3">
+        <p className="text-xs text-white/45 mb-3">
           Every plan includes two usage pools. Auto and Composer are usage-based and included in
           every subscription — they don&apos;t draw from the API pool. The API pool covers all other
           models. Once exhausted, you pay overage at the same per-token rates.
         </p>
 
-        <p className="text-[10px] text-white/30 mb-2 font-medium">Max Mode</p>
-        <p className="text-[10px] text-white/30 mb-3">
+        <p className="text-xs text-white/45 mb-2 font-medium">Max Mode</p>
+        <p className="text-xs text-white/45 mb-3">
           Adds 20% Cursor upcharge. For extended context (1M), use the dedicated Max/1M model
           variants which have long-context pricing built into their rates.
         </p>
 
-        <p className="text-[10px] text-white/30 mb-2 font-medium">Disclaimer</p>
-        <p className="text-[10px] text-white/30 mb-3">
+        <p className="text-xs text-white/45 mb-2 font-medium">Disclaimer</p>
+        <p className="text-xs text-white/45 mb-3">
           All figures are estimates based on publicly available pricing data. Actual costs depend on
           your specific usage patterns, and rates may change without notice. This tool is not
           affiliated with Cursor.
         </p>
 
-        <p className="text-[10px] text-white/30 mb-1">
+        <p className="text-xs text-white/45 mb-1">
           Source:{' '}
-          <a href="https://cursor.com/docs/models-and-pricing" className="underline hover:text-white/50" target="_blank" rel="noopener noreferrer">
+          <a href="https://cursor.com/docs/models-and-pricing" className="underline hover:text-white/70" target="_blank" rel="noopener noreferrer">
             cursor.com/docs/models-and-pricing
           </a>
         </p>
-        <p className="text-[10px] text-white/30 mb-3">Last updated {pricingDate}</p>
+        <p className="text-xs text-white/45 mb-3">Last updated {pricingDate}</p>
 
         <div className="flex items-center gap-3">
           <a
             href="https://github.com/kingdomseed/cursor-calculator"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 text-[10px] text-white/30 hover:text-white/50"
+            className="flex items-center gap-1 text-xs text-white/45 hover:text-white/70"
           >
             <GitHubIcon className="w-3 h-3" />
             GitHub
@@ -89,7 +89,7 @@ export function Sidebar({ activeTarget, onNavigate, pricingDate }: SidebarProps)
             href="https://jasonholtdigital.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 text-[10px] text-white/30 hover:text-white/50"
+            className="flex items-center gap-1 text-xs text-white/45 hover:text-white/70"
           >
             <JHDIcon className="w-3 h-3" />
             JHD

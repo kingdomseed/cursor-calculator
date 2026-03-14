@@ -11,6 +11,7 @@ interface Props {
 
 export function SidebarLayout({ activeTarget, onNavigate, pricingDate, children }: Props) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   const handleNavigate = useCallback((target: NavigationTarget) => {
     onNavigate(target);
@@ -31,8 +32,37 @@ export function SidebarLayout({ activeTarget, onNavigate, pricingDate, children 
   return (
     <div className="min-h-screen bg-[#f7f7f4] text-[#14120b]">
       {/* Desktop sidebar */}
-      <div className="hidden md:block fixed top-0 left-0 w-52 h-screen z-30">
-        <Sidebar activeTarget={activeTarget} onNavigate={handleNavigate} pricingDate={pricingDate} />
+      <div
+        className={`hidden md:block fixed top-0 left-0 h-screen z-30 transition-all duration-200 ${
+          collapsed ? 'w-12' : 'w-64'
+        }`}
+      >
+        {collapsed ? (
+          <div className="h-full bg-[#14120b] flex flex-col items-center py-4">
+            <button
+              onClick={() => setCollapsed(false)}
+              className="p-2 text-white/60 hover:text-white rounded-lg hover:bg-white/10"
+              aria-label="Expand navigation"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        ) : (
+          <div className="h-full relative">
+            <Sidebar activeTarget={activeTarget} onNavigate={handleNavigate} pricingDate={pricingDate} />
+            <button
+              onClick={() => setCollapsed(true)}
+              className="absolute top-4 right-3 p-1 text-white/40 hover:text-white/70 rounded"
+              aria-label="Collapse navigation"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7M18 19l-7-7 7-7" />
+              </svg>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Mobile hamburger */}
@@ -56,7 +86,7 @@ export function SidebarLayout({ activeTarget, onNavigate, pricingDate, children 
             onClick={() => setMobileOpen(false)}
           />
           <div
-            className="relative w-52 h-full"
+            className="relative w-64 h-full"
             role="dialog"
             aria-modal="true"
           >
@@ -66,7 +96,7 @@ export function SidebarLayout({ activeTarget, onNavigate, pricingDate, children 
       )}
 
       {/* Content area */}
-      <main className="md:ml-52 pt-14 md:pt-0">
+      <main className={`pt-14 md:pt-0 transition-all duration-200 ${collapsed ? 'md:ml-12' : 'md:ml-64'}`}>
         <div className="max-w-2xl mx-auto px-4 py-8 sm:py-12">
           {children}
         </div>
