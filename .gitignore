@@ -38,6 +38,7 @@ lerna-debug.log*
 
 # Private local fixture data
 data/private/
+data/copilot-sessions/*.jsonl
 
 # Local git worktrees
 .worktrees/
