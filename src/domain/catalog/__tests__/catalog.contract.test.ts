@@ -6,6 +6,7 @@ import type { PricingData } from '../../../lib/types';
 import {
   getCurrentModels,
   getManualApiModels,
+  getManualSelectableModels,
   getModelById,
   getPlans,
   getPricingCatalog,
@@ -28,6 +29,29 @@ describe('current catalog contract', () => {
     expect(manualModels.map((model) => model.id)).not.toEqual(
       expect.arrayContaining(IMPORT_REPLAY_HISTORICAL_MODELS.map((model) => model.id)),
     );
+  });
+
+  it('exposes current cursor composer models alongside api models in the manual picker list', () => {
+    const manualModels = getManualSelectableModels();
+
+    expect(manualModels.map((model) => model.id)).toEqual(
+      expect.arrayContaining(['composer-1.5', 'composer-2']),
+    );
+    expect(manualModels.map((model) => model.id)).not.toEqual(
+      expect.arrayContaining(IMPORT_REPLAY_HISTORICAL_MODELS.map((model) => model.id)),
+    );
+  });
+
+  it('keeps Composer 2 Fast as a fast variant on Composer 2', () => {
+    expect(getModelById('composer-2')?.variants?.fast).toEqual({
+      model_id: 'composer-2-fast',
+      rates: {
+        input: 1.5,
+        cache_write: null,
+        cache_read: 0.35,
+        output: 7.5,
+      },
+    });
   });
 
   it('can resolve current models by id and returns undefined for unknown ids', () => {

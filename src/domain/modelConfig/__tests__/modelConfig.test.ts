@@ -39,6 +39,25 @@ const secondaryModel: Model = {
   },
 };
 
+const preferredComposerModel: Model = {
+  id: 'composer-2',
+  name: 'Composer 2',
+  provider: 'cursor',
+  pool: 'auto_composer',
+  context: { default: 200000, max: null },
+  rates: { input: 0.5, cache_write: null, cache_read: 0.2, output: 2.5 },
+  variants: {
+    fast: {
+      model_id: 'composer-2-fast',
+      rates: { input: 1.5, cache_write: null, cache_read: 0.35, output: 7.5 },
+    },
+    thinking: true,
+  },
+  auto_checks: {
+    fast: true,
+  },
+};
+
 describe('defaults', () => {
   it('creates a default config from model auto-checks', () => {
     expect(createDefaultModelConfig(preferredModel)).toEqual({
@@ -52,13 +71,13 @@ describe('defaults', () => {
     });
   });
 
-  it('prefers GPT-5.3 Codex for the initial config when available', () => {
-    expect(createInitialModelConfigs([secondaryModel, preferredModel])).toEqual([
+  it('prefers Composer 2 with Fast enabled for the initial config when available', () => {
+    expect(createInitialModelConfigs([secondaryModel, preferredComposerModel, preferredModel])).toEqual([
       {
-        modelId: 'gpt-5.3-codex',
+        modelId: 'composer-2',
         weight: 100,
         maxMode: false,
-        fast: false,
+        fast: true,
         thinking: false,
         caching: false,
         cacheHitRate: 75,

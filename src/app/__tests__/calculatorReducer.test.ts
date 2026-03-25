@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { getImportReplayModels } from '../../domain/importReplay/catalog';
-import { getManualApiModels, getPlans } from '../../domain/catalog/currentCatalog';
+import { getManualSelectableModels, getPlans } from '../../domain/catalog/currentCatalog';
 import type { ModelConfig } from '../../lib/types';
 import { createInitialCalculatorState } from '../calculatorState';
 import { calculatorReducer } from '../calculatorReducer';
@@ -14,7 +14,7 @@ import {
   selectShowManualControls,
 } from '../calculatorSelectors';
 
-const manualModels = getManualApiModels();
+const manualModels = getManualSelectableModels();
 const importReplayModels = getImportReplayModels();
 const plans = getPlans();
 
@@ -45,7 +45,8 @@ describe('createInitialCalculatorState', () => {
       approximationMode: 'best_effort',
     });
     expect(state.modelConfigs).toHaveLength(1);
-    expect(state.modelConfigs[0]?.modelId).toBe('gpt-5.3-codex');
+    expect(state.modelConfigs[0]?.modelId).toBe('composer-2');
+    expect(state.modelConfigs[0]?.fast).toBe(true);
     expect(state.modelConfigs[0]?.weight).toBe(100);
   });
 });
@@ -213,7 +214,7 @@ describe('calculatorSelectors', () => {
     expect(selectIsImportMode(loaded)).toBe(true);
     expect(selectShowManualControls(loaded)).toBe(false);
     expect(selectSelectedFileName(loaded)).toBe('cursor-usage.csv');
-    expect(selectSelectedModelIds(loaded)).toEqual(['gpt-5.3-codex']);
+    expect(selectSelectedModelIds(loaded)).toEqual(['composer-2']);
   });
 
   it('derives an import replay report from loaded CSV text', () => {
@@ -238,10 +239,16 @@ describe('calculatorSelectors', () => {
   });
 
   it('selects a recommendation for both manual and import flows', () => {
-    const manualState = [
-      { type: 'set_mode', mode: 'tokens' } as const,
-      { type: 'set_cache_read_share', cacheReadShare: 80 } as const,
-    ].reduce(calculatorReducer, createInitialCalculatorState(manualModels));
+    const manualState = calculatorReducer(
+      calculatorReducer(
+        calculatorReducer(
+          createInitialCalculatorState(manualModels),
+          { type: 'reconcile_selected_models', ids: ['gpt-5'], manualModels },
+        ),
+        { type: 'set_mode', mode: 'tokens' },
+      ),
+      { type: 'set_cache_read_share', cacheReadShare: 80 },
+    );
     const manualRecommendation = selectRecommendation(manualState, {
       manualModels,
       importReplayModels,

@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useReducer } from 'react';
-import { getIncludedPoolModels, getManualApiModels, getPlans } from '../domain/catalog/currentCatalog';
+import { getIncludedPoolModels, getManualSelectableModels, getPlans } from '../domain/catalog/currentCatalog';
 import { getImportReplayModels } from '../domain/importReplay/catalog';
 import type {
   ApproximationMode,
@@ -68,7 +68,7 @@ export function useCalculatorController(
   dependencies: CalculatorControllerDependencies = {},
 ): CalculatorController {
   const manualModels = useMemo(
-    () => dependencies.manualModels ?? getManualApiModels(),
+    () => dependencies.manualModels ?? getManualSelectableModels(),
     [dependencies.manualModels],
   );
   const importReplayModels = useMemo(
