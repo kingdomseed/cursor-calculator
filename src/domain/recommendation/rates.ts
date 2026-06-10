@@ -9,6 +9,10 @@ export function computeBillableRates(model: Model, config: ModelConfig): ModelRa
     : { ...model.rates };
 
   if (config.maxMode && model.variants?.max_mode) {
+    if (model.variants.max_mode.rates) {
+      return { ...model.variants.max_mode.rates };
+    }
+
     const upcharge = 1 + model.variants.max_mode.cursor_upcharge;
     rates.input *= upcharge;
     rates.output *= upcharge;

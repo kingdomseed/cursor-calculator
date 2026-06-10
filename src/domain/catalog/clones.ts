@@ -14,22 +14,31 @@ function cloneVariants(variants?: ModelVariants): ModelVariants | undefined {
     return undefined;
   }
 
-  return {
-    max_mode: variants.max_mode
-      ? { cursor_upcharge: variants.max_mode.cursor_upcharge }
-      : undefined,
-    fast: variants.fast
-      ? {
-          model_id: variants.fast.model_id,
-          rates: cloneRates(variants.fast.rates),
-        }
-      : undefined,
-    thinking: variants.thinking,
-  };
+  const cloned: ModelVariants = {};
+
+  if (variants.max_mode) {
+    cloned.max_mode = {
+      cursor_upcharge: variants.max_mode.cursor_upcharge,
+      ...(variants.max_mode.rates ? { rates: cloneRates(variants.max_mode.rates) } : {}),
+    };
+  }
+
+  if (variants.fast) {
+    cloned.fast = {
+      model_id: variants.fast.model_id,
+      rates: cloneRates(variants.fast.rates),
+    };
+  }
+
+  if (variants.thinking !== undefined) {
+    cloned.thinking = variants.thinking;
+  }
+
+  return cloned;
 }
 
 export function cloneModel(model: Model): Model {
-  return {
+  const cloned: Model = {
     id: model.id,
     name: model.name,
     provider: model.provider,
@@ -39,15 +48,22 @@ export function cloneModel(model: Model): Model {
       max: model.context.max,
     },
     rates: cloneRates(model.rates),
-    variants: cloneVariants(model.variants),
-    auto_checks: model.auto_checks
-      ? {
-          max_mode: model.auto_checks.max_mode,
-          fast: model.auto_checks.fast,
-          thinking: model.auto_checks.thinking,
-        }
-      : undefined,
   };
+
+  const variants = cloneVariants(model.variants);
+  if (variants) {
+    cloned.variants = variants;
+  }
+
+  if (model.auto_checks) {
+    cloned.auto_checks = {
+      ...(model.auto_checks.max_mode !== undefined ? { max_mode: model.auto_checks.max_mode } : {}),
+      ...(model.auto_checks.fast !== undefined ? { fast: model.auto_checks.fast } : {}),
+      ...(model.auto_checks.thinking !== undefined ? { thinking: model.auto_checks.thinking } : {}),
+    };
+  }
+
+  return cloned;
 }
 
 export function cloneModels(models: Model[]): Model[] {

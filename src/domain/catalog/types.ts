@@ -16,6 +16,7 @@ export interface ModelRates {
 
 export interface MaxModeVariant {
   cursor_upcharge: number;
+  rates?: ModelRates;
 }
 
 export interface FastVariant {

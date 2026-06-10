@@ -225,13 +225,13 @@ describe('recommendation presentation', () => {
       recommendation: createRecommendation(createPlanResult()),
       includedPoolModels: [
         { id: 'auto', name: 'Auto', provider: 'cursor' },
-        { id: 'composer-1.5', name: 'Composer 1.5', provider: 'cursor' },
+        { id: 'composer-2.5', name: 'Composer 2.5', provider: 'cursor' },
       ],
     });
 
     expect(presentation.includedPoolItems).toEqual([
       { key: 'auto', label: 'Auto', provider: 'cursor', poolLabel: 'Included in all plans' },
-      { key: 'composer-1.5', label: 'Composer 1.5', provider: 'cursor', poolLabel: 'Included in all plans' },
+      { key: 'composer-2.5', label: 'Composer 2.5', provider: 'cursor', poolLabel: 'Included in all plans' },
     ]);
   });
 

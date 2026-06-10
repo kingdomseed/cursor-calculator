@@ -4,7 +4,7 @@
 
 **[Try it live →](https://cursor-cost-calculator.com/)**
 
-Empirical tool for measuring Cursor token usage and cost. Manual calculator rates come from [Cursor's official docs](https://cursor.com/docs/models-and-pricing). If the docs do not disclose a current Cursor rate, the manual calculator does not model it. CSV replay can also use clearly labeled import-only estimates for retired historical labels that no longer exist in the current Cursor catalog.
+Empirical tool for measuring Cursor token usage and cost. Manual calculator rates come from [Cursor's official docs](https://cursor.com/docs). If the docs do not disclose a current Cursor rate, the manual calculator does not model it. CSV replay can also use clearly labeled import-only estimates for retired historical labels that no longer exist in the current Cursor catalog.
 
 ## What it does
 
@@ -12,12 +12,12 @@ Empirical tool for measuring Cursor token usage and cost. Manual calculator rate
 - **Token mode** — "I use 10M tokens/month, what does that cost?" Finds the cheapest plan for manual token entry, with both a quick estimate and exact token-bucket entry, and separates estimated usage cost from plan-adjusted out-of-pocket spend.
 - **Cursor CSV replay** — Import one exported monthly Cursor CSV, reuse the exact input/cache/output token columns, and replay that usage through the same plan recommendation math and cost-versus-coverage framing used by the token calculator.
 - **Weighted model mix** — Split usage across models (60% Sonnet, 40% Opus). Per-model weights, normalized to 100%.
-- **Variant toggles** — Max Mode (+20%), Fast, Thinking, Caching. Dedicated Max/1M model variants have long-context rates built in.
+- **Variant toggles** — Max Mode, Fast, Thinking, Caching. Documented Max/long-context rates are modeled from the catalog rather than inferred.
 - **Caching** — Anthropic models use `cache_write` + `cache_read` with re-read amortization. Everyone else uses `cache_read` only. Different systems, different math.
 - **Import replay controls** — `User API Key` rows are included by default for a “Cursor only” estimate, with strict vs best-effort label mapping and approximate rows called out explicitly.
-- **Imported Composer handling** — `composer-1` rows are API-priced during replay, while `composer-1.5` stays in the included Auto + Composer pool.
+- **Imported Composer handling** — retired Composer rows are API-priced during replay, while current `composer-2.5` usage stays in the included Auto + Composer pool.
 - **Monthly usage summary** — Imported usage shows priced API tokens, cache-read share within priced API rows, non-cache priced tokens, approximate tokens, unsupported tokens, days used versus comparison days for the imported month or date span, and API tokens per used day.
-- **29 models, 6 providers** — Anthropic, OpenAI, Google, xAI, Cursor, Moonshot.
+- **38 models, 6 providers** — Anthropic, OpenAI, Google, xAI, Cursor, Moonshot.
 
 ## Matching an imported CSV in manual mode
 

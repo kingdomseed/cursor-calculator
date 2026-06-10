@@ -35,21 +35,21 @@ const secondaryModel: Model = {
   context: { default: 272000, max: 1000000 },
   rates: { input: 1.25, cache_write: null, cache_read: 0.125, output: 10 },
   variants: {
-    max_mode: { cursor_upcharge: 0.2 },
+    max_mode: { cursor_upcharge: 0 },
   },
 };
 
 const preferredComposerModel: Model = {
-  id: 'composer-2',
-  name: 'Composer 2',
+  id: 'composer-2.5',
+  name: 'Composer 2.5',
   provider: 'cursor',
   pool: 'auto_composer',
   context: { default: 200000, max: null },
   rates: { input: 0.5, cache_write: null, cache_read: 0.2, output: 2.5 },
   variants: {
     fast: {
-      model_id: 'composer-2-fast',
-      rates: { input: 1.5, cache_write: null, cache_read: 0.35, output: 7.5 },
+      model_id: 'composer-2.5-fast',
+      rates: { input: 3, cache_write: null, cache_read: 0.5, output: 15 },
     },
     thinking: true,
   },
@@ -71,10 +71,10 @@ describe('defaults', () => {
     });
   });
 
-  it('prefers Composer 2 with Fast enabled for the initial config when available', () => {
+  it('prefers Composer 2.5 with Fast enabled for the initial config when available', () => {
     expect(createInitialModelConfigs([secondaryModel, preferredComposerModel, preferredModel])).toEqual([
       {
-        modelId: 'composer-2',
+        modelId: 'composer-2.5',
         weight: 100,
         maxMode: false,
         fast: true,
@@ -174,7 +174,7 @@ describe('capabilities', () => {
   it('builds collapsed active badges from the current config', () => {
     expect(
       getActiveModelConfigBadges({
-        modelId: 'claude-sonnet-4-6',
+        modelId: 'claude-4-6-sonnet',
         weight: 100,
         maxMode: true,
         fast: true,

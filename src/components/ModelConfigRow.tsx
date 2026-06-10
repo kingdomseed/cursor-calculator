@@ -67,7 +67,7 @@ export function ModelConfigRow({ model, config, onChange }: Props) {
                   <input type="checkbox" checked={config.maxMode} onChange={(e) => onChange({ ...config, maxMode: e.target.checked })}
                     className="w-4 h-4 rounded border-[#e0e0d8] text-[#14120b] focus:ring-[#14120b]" />
                   <span>Max Mode</span>
-                  <span className="text-xs text-[#14120b]/40">(+20%)</span>
+                  <span className="text-xs text-[#14120b]/40">(model rate)</span>
                 </label>
               )}
               {hasFast && (

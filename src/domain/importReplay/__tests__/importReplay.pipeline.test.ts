@@ -99,8 +99,8 @@ describe('priceImportedRow', () => {
 
     expect(priced.approximated).toBe(false);
     // Opus 4.6 no longer has a long-context surcharge — same per-token rates at 1M context.
-    // Cost = 250k input × $6/M (base $5 + 20% Cursor upcharge) + 50k output × $30/M = $3.00
-    expect(priced.exactCost.total).toBeCloseTo(3, 4);
+    // Cost = 250k input × $5/M + 50k output × $25/M = $2.50
+    expect(priced.exactCost.total).toBeCloseTo(2.5, 4);
   });
 });
 
@@ -145,14 +145,14 @@ describe('parseCursorUsageFiles', () => {
       (entry) => entry.sourceLabel === 'API Key' && entry.modelId === 'gpt-5',
     );
     expect(apiKeyEntry?.tokens.total).toBe(1_750_000);
-    expect(apiKeyEntry?.exactCost?.total).toBeCloseTo(15.075, 4);
+    expect(apiKeyEntry?.exactCost?.total).toBeCloseTo(12.5625, 4);
 
     const agentReviewEntry = report.pricedEntries.find((entry) => entry.sourceLabel === 'Review Est.');
     expect(agentReviewEntry?.modelId).toBe('gpt-5');
     expect(agentReviewEntry?.approximated).toBe(true);
 
     const grokEntry = report.pricedEntries.find((entry) => entry.sourceLabel === 'Grok 4 Est.');
-    expect(grokEntry?.modelId).toBe('grok-code-fast-1');
+    expect(grokEntry?.modelId).toBe('grok-4-3');
     expect(grokEntry?.approximated).toBe(true);
   });
 
@@ -181,7 +181,7 @@ describe('parseCursorUsageFiles', () => {
     expect(report.summary.activeDays).toBe(2);
   });
 
-  it('applies only the flat max upcharge when the model has no documented long-context multiplier', () => {
+  it('applies only the same-rate max mode when the model has no documented long-context multiplier', () => {
     const report = parseCursorUsageFiles(
       [{ name: 'cursor-usage-sample.csv', text: csv }],
       IMPORT_REPLAY_MODELS,
@@ -194,7 +194,7 @@ describe('parseCursorUsageFiles', () => {
 
     expect(importedFastMax?.maxMode).toBe(true);
     expect(importedFastMax?.fast).toBe(true);
-    expect(importedFastMax?.exactCost?.total).toBeCloseTo(15.075, 4);
+    expect(importedFastMax?.exactCost?.total).toBeCloseTo(12.5625, 4);
   });
 
   it('applies long-context max pricing before aggregating imported rows', () => {
@@ -212,7 +212,7 @@ describe('parseCursorUsageFiles', () => {
     expect(importedMax.modelId).toBe('claude-opus-4-6');
     expect(importedMax.maxMode).toBe(true);
     // Opus 4.6 no longer has a long-context surcharge — companion rates now match base.
-    expect(importedMax.exactCost?.total).toBeCloseTo(3, 4);
+    expect(importedMax.exactCost?.total).toBeCloseTo(2.5, 4);
     expect(report.summary.activeDays).toBe(1);
     expect(report.summary.pricedApiDays).toBe(1);
     expect(report.summary.firstActiveDate).toBe('2026-02-19');
@@ -253,7 +253,7 @@ describe('parseCursorUsageFiles', () => {
     expect(gpt51CodexFastMax?.fast).toBe(true);
     expect(gpt51CodexFastMax?.maxMode).toBe(true);
     expect(gpt51CodexFastMax?.approximated).toBe(true);
-    expect(gpt51CodexFastMax?.exactCost?.total).toBeCloseTo(15.075, 4);
+    expect(gpt51CodexFastMax?.exactCost?.total).toBeCloseTo(12.5625, 4);
   });
 
   it('prices provider-backed o3 and retired Anthropic Opus thinking labels instead of leaving them unsupported', () => {
@@ -335,7 +335,7 @@ describe('parseCursorUsageFiles', () => {
     expect(composerEntry?.exactCost?.total).toBeCloseTo(6.28125, 5);
   });
 
-  it('keeps composer-1.5 in the included Auto + Composer pool', () => {
+  it('treats retired composer-1.5 rows as API-priced usage', () => {
     const composerCsv = `Date,User,Kind,Model,Max Mode,Input (w/ Cache Write),Input (w/o Cache Write),Cache Read,Output Tokens,Total Tokens,Requests
 "2026-02-10T13:06:04.478Z","developer@jasonholtdigital.com","Included","composer-1.5","No","0","1000000","250000","500000","1750000","1"`;
 
@@ -345,9 +345,12 @@ describe('parseCursorUsageFiles', () => {
       baseOptions,
     );
 
-    expect(report.summary.pricedApiTokens).toBe(0);
-    expect(report.summary.includedNonApiTokens).toBe(1_750_000);
+    expect(report.summary.pricedApiTokens).toBe(1_750_000);
+    expect(report.summary.includedNonApiTokens).toBe(0);
     expect(report.summary.unsupportedTokens).toBe(0);
-    expect(report.nonApiIncluded[0]?.label).toBe('composer-1.5');
+
+    const composerEntry = report.pricedEntries.find((entry) => entry.modelId === 'composer-1.5');
+    expect(composerEntry?.label).toBe('Composer 1.5');
+    expect(composerEntry?.exactCost?.total).toBeCloseTo(12.3375, 5);
   });
 });

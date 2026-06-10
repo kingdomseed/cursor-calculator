@@ -66,9 +66,8 @@ export function Sidebar({ activeTarget, onNavigate, pricingDate }: SidebarProps)
 
         <p className="text-xs text-white/45 mb-2 font-medium">Max Mode</p>
         <p className="text-xs text-white/45 mb-3">
-          Extends context to a model&apos;s maximum (up to 1M tokens). Adds a 20% Cursor upcharge.
-          Some models also have provider-level long-context rates — Claude 4.6 Opus is the
-          exception with no additional surcharge at 1M context.
+          Extends context to a model&apos;s maximum when Cursor supports it. Current individual plans
+          use model API rates, and documented long-context rates are applied from each model page.
         </p>
 
         <p className="text-xs text-white/45 mb-2 font-medium">Caching</p>
@@ -86,7 +85,7 @@ export function Sidebar({ activeTarget, onNavigate, pricingDate }: SidebarProps)
 
         <p className="mb-3">
           <a
-            href="https://cursor.com/docs/models-and-pricing"
+            href="https://cursor.com/docs"
             target="_blank"
             rel="noopener noreferrer"
             className="text-xs text-white/45 underline hover:text-white/70"

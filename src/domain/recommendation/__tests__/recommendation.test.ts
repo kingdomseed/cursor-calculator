@@ -15,9 +15,9 @@ const opusModel: Model = {
   pool: 'api',
   context: { default: 200000, max: 1000000 },
   rates: { input: 5, cache_write: 6.25, cache_read: 0.5, output: 25 },
-  variants: {
-    max_mode: {
-      cursor_upcharge: 0.20,
+    variants: {
+      max_mode: {
+      cursor_upcharge: 0,
     },
     fast: {
       model_id: 'claude-4-6-opus-fast',
@@ -34,9 +34,10 @@ const gpt54Model: Model = {
   pool: 'api',
   context: { default: 272000, max: 1000000 },
   rates: { input: 2.5, cache_write: null, cache_read: 0.25, output: 15 },
-  variants: {
-    max_mode: {
-      cursor_upcharge: 0.20,
+    variants: {
+      max_mode: {
+      cursor_upcharge: 0,
+      rates: { input: 5, cache_write: null, cache_read: 0.5, output: 22.5 },
     },
     thinking: true,
   },
@@ -66,10 +67,10 @@ describe('computeEffectiveRates', () => {
     expect(rates.output).toBe(25);
   });
 
-  it('applies max mode as a cursor upcharge only', () => {
+  it('uses base rates for same-rate max mode models', () => {
     const rates = computeEffectiveRates(opusModel, { ...baseConfig, maxMode: true });
-    expect(rates.input).toBe(6);
-    expect(rates.output).toBe(30);
+    expect(rates.input).toBe(5);
+    expect(rates.output).toBe(25);
   });
 
   it('replaces rates with the fast variant', () => {
@@ -78,10 +79,10 @@ describe('computeEffectiveRates', () => {
     expect(rates.output).toBe(150);
   });
 
-  it('stacks max mode on top of fast variant pricing', () => {
+  it('keeps fast variant pricing when max mode has no rate override', () => {
     const rates = computeEffectiveRates(opusModel, { ...baseConfig, fast: true, maxMode: true });
-    expect(rates.input).toBe(36);
-    expect(rates.output).toBe(180);
+    expect(rates.input).toBe(30);
+    expect(rates.output).toBe(150);
   });
 
   it('applies Anthropic cache-write amortization', () => {
@@ -91,11 +92,11 @@ describe('computeEffectiveRates', () => {
     expect(rates.output).toBe(25);
   });
 
-  it('scales cache rates when max mode and caching are both enabled', () => {
+  it('uses base cache rates when same-rate max mode and caching are both enabled', () => {
     const config = { ...baseConfig, maxMode: true, caching: true, cacheHitRate: 50 };
     const rates = computeEffectiveRates(opusModel, config);
-    expect(rates.input).toBeCloseTo(4.55, 3);
-    expect(rates.output).toBe(30);
+    expect(rates.input).toBeCloseTo(3.7917, 3);
+    expect(rates.output).toBe(25);
   });
 
   it('applies caching after fast and max layering when all are enabled', () => {
@@ -110,8 +111,24 @@ describe('computeEffectiveRates', () => {
     };
 
     const rates = computeEffectiveRates(opusModel, config);
-    expect(rates.input).toBeCloseTo(27.3, 3);
-    expect(rates.output).toBe(180);
+    expect(rates.input).toBeCloseTo(22.75, 3);
+    expect(rates.output).toBe(150);
+  });
+
+  it('uses explicit long-context rates when max mode publishes a rate override', () => {
+    const config: ModelConfig = {
+      modelId: 'gpt-5-4',
+      weight: 100,
+      maxMode: true,
+      fast: false,
+      thinking: false,
+      caching: false,
+      cacheHitRate: 0,
+    };
+
+    const rates = computeEffectiveRates(gpt54Model, config);
+    expect(rates.input).toBe(5);
+    expect(rates.output).toBe(22.5);
   });
 
   it('uses a simple cache-read blend for models without cache_write', () => {

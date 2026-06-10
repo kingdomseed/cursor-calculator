@@ -41,22 +41,8 @@ describe('getBaseModelId', () => {
   });
 
   describe('max variants via companions', () => {
-    it('maps claude-opus-4-6-max to claude-opus-4-6', () => {
-      expect(getBaseModelId('claude-opus-4-6-max')).toBe('claude-opus-4-6');
-    });
-
-    it('maps gpt-5.4-max to gpt-5.4', () => {
-      expect(getBaseModelId('gpt-5.4-max')).toBe('gpt-5.4');
-    });
-
     it('maps claude-4-sonnet-1m to claude-4-sonnet', () => {
       expect(getBaseModelId('claude-4-sonnet-1m')).toBe('claude-4-sonnet');
-    });
-  });
-
-  describe('prefers non-approximated base', () => {
-    it('maps claude-opus-4-6-max to claude-opus-4-6 (not claude-4-5-opus)', () => {
-      expect(getBaseModelId('claude-opus-4-6-max')).toBe('claude-opus-4-6');
     });
   });
 
@@ -162,23 +148,23 @@ describe('buildModelGroups', () => {
   it('uses the base model label as familyLabel when available', () => {
     const rows = [
       createRow({
-        key: 'claude-opus-4-6-max:max:standard:plain:cursor',
-        modelId: 'claude-opus-4-6-max',
-        label: 'Claude 4.6 Opus Max',
+        key: 'claude-4-sonnet-1m:max:standard:plain:cursor',
+        modelId: 'claude-4-sonnet-1m',
+        label: 'Claude 4 Sonnet 1M',
         provider: 'anthropic',
         primaryMetric: { label: 'Usage cost', value: 80, formattedValue: '$80.00' },
       }),
       createRow({
-        key: 'claude-opus-4-6:base:standard:plain:cursor',
-        modelId: 'claude-opus-4-6',
-        label: 'Claude 4.6 Opus',
+        key: 'claude-4-sonnet:base:standard:plain:cursor',
+        modelId: 'claude-4-sonnet',
+        label: 'Claude 4 Sonnet',
         provider: 'anthropic',
         primaryMetric: { label: 'Usage cost', value: 50, formattedValue: '$50.00' },
       }),
     ];
 
     const groups = buildModelGroups(rows, 'cursor_import')!;
-    expect(groups[0].familyLabel).toBe('Claude 4.6 Opus'); // base model label, not max variant
+    expect(groups[0].familyLabel).toBe('Claude 4 Sonnet'); // base model label, not max variant
   });
 
   it('creates singleton groups with variantCount 1', () => {

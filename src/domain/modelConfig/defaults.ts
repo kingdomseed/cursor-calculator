@@ -3,7 +3,7 @@ import type { ModelConfig } from '../recommendation/types';
 import { redistributeWeights } from './weights';
 
 const DEFAULT_CACHE_HIT_RATE = 75;
-const PREFERRED_DEFAULT_MODEL_ID = 'composer-2';
+const PREFERRED_DEFAULT_MODEL_ID = 'composer-2.5';
 
 export function createDefaultModelConfig(model: Model): ModelConfig {
   return {

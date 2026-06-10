@@ -271,13 +271,13 @@ describe('PlanComparison', () => {
       recommendation: createRecommendation(proPlusPlan, [pro, proPlusPlan]),
       includedPoolModels: [
         { id: 'auto', name: 'Auto', provider: 'cursor' },
-        { id: 'composer-1.5', name: 'Composer 1.5', provider: 'cursor' },
+        { id: 'composer-2.5', name: 'Composer 2.5', provider: 'cursor' },
       ],
       defaultOpen: true,
     });
 
     expect(html).toContain('Auto');
-    expect(html).toContain('Composer 1.5');
+    expect(html).toContain('Composer 2.5');
     expect(html).toContain('Included in all plans');
     const includedMatches = html.match(/Included<\/td>/g) ?? [];
     expect(includedMatches.length).toBe(4);
@@ -350,16 +350,16 @@ describe('PlanComparison', () => {
       plan: 'pro',
       subscription: 20, apiPool: 20, apiBudget: 20, apiUsage: 100, overage: 80, totalCost: 100,
       perModel: [
-        createLineItem({ key: 'co46-base', modelId: 'claude-opus-4-6', label: 'Claude 4.6 Opus', apiCost: 60 }),
-        createLineItem({ key: 'co46-max', modelId: 'claude-opus-4-6-max', label: 'Claude 4.6 Opus Max', apiCost: 40 }),
+        createLineItem({ key: 'sonnet-base', modelId: 'claude-4-sonnet', label: 'Claude 4 Sonnet', apiCost: 60 }),
+        createLineItem({ key: 'sonnet-1m', modelId: 'claude-4-sonnet-1m', label: 'Claude 4 Sonnet 1M', apiCost: 40 }),
       ],
     });
     const ultra = createPlanResult({
       plan: 'ultra',
       subscription: 200, apiPool: 400, apiBudget: 400, apiUsage: 100, overage: 0, totalCost: 200,
       perModel: [
-        createLineItem({ key: 'co46-base', modelId: 'claude-opus-4-6', label: 'Claude 4.6 Opus', apiCost: 60 }),
-        createLineItem({ key: 'co46-max', modelId: 'claude-opus-4-6-max', label: 'Claude 4.6 Opus Max', apiCost: 40 }),
+        createLineItem({ key: 'sonnet-base', modelId: 'claude-4-sonnet', label: 'Claude 4 Sonnet', apiCost: 60 }),
+        createLineItem({ key: 'sonnet-1m', modelId: 'claude-4-sonnet-1m', label: 'Claude 4 Sonnet 1M', apiCost: 40 }),
       ],
     });
 

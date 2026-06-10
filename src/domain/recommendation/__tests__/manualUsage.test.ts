@@ -13,7 +13,8 @@ const gpt54Model: Model = {
   rates: { input: 2.5, cache_write: null, cache_read: 0.25, output: 15 },
   variants: {
     max_mode: {
-      cursor_upcharge: 0.20,
+      cursor_upcharge: 0,
+      rates: { input: 5, cache_write: null, cache_read: 0.5, output: 22.5 },
     },
     thinking: true,
   },

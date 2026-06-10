@@ -152,14 +152,14 @@ describe('BestPlanCard', () => {
       recommendation: createRecommendation(createPlanResult()),
       includedPoolModels: [
         { id: 'auto', name: 'Auto', provider: 'cursor' },
-        { id: 'composer-1.5', name: 'Composer 1.5', provider: 'cursor' },
+        { id: 'composer-2.5', name: 'Composer 2.5', provider: 'cursor' },
       ],
     });
 
     const html = renderCardFromPresentation(presentation);
 
     expect(html).toContain('Auto');
-    expect(html).toContain('Composer 1.5');
+    expect(html).toContain('Composer 2.5');
     expect(html).toContain('Included');
     expect(html).toContain('Included in all plans');
     const autoIndex = html.indexOf('Auto');
@@ -193,8 +193,8 @@ describe('BestPlanCard', () => {
       recommendation: createRecommendation(createPlanResult({
         plan: 'ultra',
         perModel: [
-          createLineItem({ key: 'co46-base', modelId: 'claude-opus-4-6', label: 'Claude 4.6 Opus', apiCost: 50, tokens: { total: 5_000_000, input: 3_750_000, output: 1_250_000 } }),
-          createLineItem({ key: 'co46-max', modelId: 'claude-opus-4-6-max', label: 'Claude 4.6 Opus Max', apiCost: 70, tokens: { total: 3_000_000, input: 2_250_000, output: 750_000 } }),
+          createLineItem({ key: 'sonnet-base', modelId: 'claude-4-sonnet', label: 'Claude 4 Sonnet', apiCost: 50, tokens: { total: 5_000_000, input: 3_750_000, output: 1_250_000 } }),
+          createLineItem({ key: 'sonnet-1m', modelId: 'claude-4-sonnet-1m', label: 'Claude 4 Sonnet 1M', apiCost: 70, tokens: { total: 3_000_000, input: 2_250_000, output: 750_000 } }),
         ],
       })),
     });

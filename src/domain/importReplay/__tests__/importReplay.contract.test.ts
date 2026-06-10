@@ -63,7 +63,7 @@ describe('import replay catalog contract', () => {
     historicalModels[0]!.name = 'Mutated Historical Model';
     exactMappings['gpt-5-fast']!.modelId = 'mutated-model-id';
     approximateMappings.agent_review!.modelId = 'mutated-model-id';
-    companions['gpt-5.4'] = { maxId: 'mutated-model-id' };
+    companions['claude-4-sonnet'] = { maxId: 'mutated-model-id' };
     if (resolved) {
       resolved.name = 'Mutated Resolved Model';
     }
@@ -71,7 +71,7 @@ describe('import replay catalog contract', () => {
     expect(getImportReplayModelById('provider-openai-o3')?.name).toBe('o3');
     expect(getExactImportReplayLabelMappings()['gpt-5-fast']?.modelId).toBe('gpt-5');
     expect(getApproximateImportReplayLabelMappings().agent_review?.modelId).toBe('gpt-5');
-    expect(getLongContextCompanions()['gpt-5.4']?.maxId).toBe('gpt-5.4-max');
+    expect(getLongContextCompanions()['claude-4-sonnet']?.maxId).toBe('claude-4-sonnet-1m');
     expect(getImportReplayHistoricalModels().find((model) => model.id === 'provider-openai-o3')?.name).toBe('o3');
     expect(getImportReplayModels().some((model) => model.id === 'provider-openai-o3')).toBe(true);
   });

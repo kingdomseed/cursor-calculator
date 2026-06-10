@@ -38,8 +38,8 @@ function createReport(overrides: Partial<CursorImportReport['summary']> = {}): C
         approximated: false,
       },
       {
-        key: 'claude-sonnet-4-6',
-        modelId: 'claude-sonnet-4-6',
+        key: 'claude-4-6-sonnet',
+        modelId: 'claude-4-6-sonnet',
         label: 'Claude 4.6 Sonnet',
         provider: 'anthropic',
         pool: 'api',

@@ -45,7 +45,7 @@ describe('createInitialCalculatorState', () => {
       approximationMode: 'best_effort',
     });
     expect(state.modelConfigs).toHaveLength(1);
-    expect(state.modelConfigs[0]?.modelId).toBe('composer-2');
+    expect(state.modelConfigs[0]?.modelId).toBe('composer-2.5');
     expect(state.modelConfigs[0]?.fast).toBe(true);
     expect(state.modelConfigs[0]?.weight).toBe(100);
   });
@@ -111,13 +111,13 @@ describe('calculatorReducer', () => {
 
     const state = calculatorReducer(initial, {
       type: 'reconcile_selected_models',
-      ids: ['claude-sonnet-4-6', 'gpt-5'],
+      ids: ['claude-4-6-sonnet', 'gpt-5'],
       manualModels,
     });
 
     expect(state.modelConfigs).toHaveLength(2);
     expect(state.modelConfigs.map((config) => config.modelId)).toEqual([
-      'claude-sonnet-4-6',
+      'claude-4-6-sonnet',
       'gpt-5',
     ]);
     expect(state.modelConfigs.map((config) => config.weight)).toEqual([50, 50]);
@@ -214,7 +214,7 @@ describe('calculatorSelectors', () => {
     expect(selectIsImportMode(loaded)).toBe(true);
     expect(selectShowManualControls(loaded)).toBe(false);
     expect(selectSelectedFileName(loaded)).toBe('cursor-usage.csv');
-    expect(selectSelectedModelIds(loaded)).toEqual(['composer-2']);
+    expect(selectSelectedModelIds(loaded)).toEqual(['composer-2.5']);
   });
 
   it('derives an import replay report from loaded CSV text', () => {

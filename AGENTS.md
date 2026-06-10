@@ -4,7 +4,7 @@ This file provides guidance to coding agents working in this repository.
 
 ## Project Goal
 
-This project is an **empirical budgeting tool** for Cursor IDE pricing. Every number shown in the app must trace back to Cursor's official docs at `https://cursor.com/docs/models-and-pricing` and the relevant individual model pages. Do not invent or assume pricing rules. If a pricing rule or model rate cannot be sourced from Cursor docs, mark it as unverified instead of presenting it as fact.
+This project is an **empirical budgeting tool** for Cursor IDE pricing. Every number shown in the app must trace back to Cursor's official docs at `https://cursor.com/docs` and the relevant pricing or individual model pages. Do not invent or assume pricing rules. If a pricing rule or model rate cannot be sourced from Cursor docs, mark it as unverified instead of presenting it as fact.
 
 The app answers three questions:
 1. **Budget mode** — “I have a budget.” Which plan is best, and how many tokens do I get per model?
@@ -66,7 +66,7 @@ There is no routing layer or external state-management library. Keep `src/App.ts
 - `getImportReplayModels()` — replay catalog assembly from current and historical import-only models
 - `computeRecommendation()` — shared recommendation entry point for budget mode and manual token mode
 - `computeExactUsageRecommendation()` — plan comparison logic for imported exact-usage rows
-- `computeBillableRates()` and `computeEffectiveRates()` — Max upcharge, fast variants, and caching math
+- `computeBillableRates()` and `computeEffectiveRates()` — Max/long-context rate overrides, fast variants, and caching math
 - `parseCursorUsageFiles()` — CSV parsing, billable row filtering, normalization, replay pricing, and summaries
 - `useCalculatorController()` — app orchestration for reducer state, selectors, and CSV-loading side effects
 
@@ -84,7 +84,7 @@ All pricing facts should be verified against Cursor docs before changing the cat
 
 ### Usage pools
 
-- **Auto + Composer pool** — used by Auto and Composer 1.5 on individual plans. Cursor describes this as generous included usage, but does not disclose a dollar value.
+- **Auto + Composer pool** — used by Auto and Composer 2.5 on individual plans. Cursor describes this as generous included usage, but does not disclose a dollar value.
 - **API pool** — charged at each model's API rate:
   - Pro: `$20/mo` → `$20` API pool
   - Pro Plus: `$60/mo` → `$70` API pool
@@ -93,37 +93,37 @@ All pricing facts should be verified against Cursor docs before changing the cat
 
 ### Max Mode
 
-Max Mode extends context to the model maximum and stacks two cost layers:
-
-1. Cursor upcharge: `+20%` on individual plans
-2. Provider long-context multipliers when input exceeds the default context window
+Max Mode extends context to the model maximum when Cursor supports it. On current individual plans, Max Mode is billed at the model's API rate. Some model pages publish separate long-context rates when input exceeds the default context window.
 
 Current documented examples:
 
-- Claude 4.6 Opus: **no long-context surcharge** — same per-token rates at 1M context
-- Other Claude models: `2x` standard rate when input exceeds `200k`
-- GPT-5.4: input `2x` and output `1.5x` when input exceeds `272k`
+- Claude 4.6 Sonnet and Claude Opus 4.8: **no long-context surcharge** — same per-token rates in Max Mode
+- Gemini 3.1 Pro: input `2x` and output `1.5x` when input exceeds `200k`
+- GPT-5.4 and GPT-5.5: input `2x` and output `1.5x` when input exceeds `272k`
 
-For models with provider surcharges, these are cumulative with the Cursor upcharge. Claude 4.6 Opus is the exception: Max Mode only adds the Cursor upcharge.
+Model-specific long-context rates belong in the catalog as documented rate overrides. Do not infer a blanket Max Mode multiplier.
 
 ### Fast mode
 
 Fast mode is a distinct model variant, not a toggle on the base model.
 
-- Claude 4.6 Opus Fast: `6x` standard Opus pricing
-- GPT-5.4 Fast: `2x` standard pricing
+- Claude Opus 4.8 Fast: `$10/M` input and `$50/M` output, and requires Max Mode
+- GPT-5.5 Fast: `$12.50/M` input and `$75/M` output
+- Composer 2.5 Fast: `$3/M` input and `$15/M` output
 
 Historical imported fast labels may still be replayed as best-effort estimates, but that approximation logic belongs only in the import layer.
 
 ### Thinking mode
 
-Thinking mode exists for Claude models and GPT-5.4, but Cursor docs do not currently publish separate token pricing for thinking tokens.
+Thinking mode exists for Claude models, current GPT models, Gemini models, Grok Build, and Composer 2.5, but Cursor docs do not currently publish separate token pricing for thinking tokens.
 
 ### Context windows
 
-- Claude 4.6 Opus and Sonnet: `200k` default, `1M` max
-- GPT-5.4: `272k` default, `1M` max
-- Composer 1.5: `200k` default, no Max Mode
+- Claude Opus 4.8 and Claude Fable 5: `300k` default, `1M` max
+- Claude 4.6 Sonnet and Gemini 3.1 Pro: `200k` default, `1M` max
+- GPT-5.5 and GPT-5.4: `272k` default, `1M` max
+- Composer 2.5: `200k` default, no Max Mode
+- Grok Build 0.1: `256k` default, no Max Mode extension
 
 ## Testing and Verification
 

@@ -320,11 +320,9 @@ interface Aggregate {
 }
 
 const byModel: Record<string, Aggregate> = {};
-let totalPremium = 0;
 
 for (const s of sessionsWithData) {
   const sd = s.shutdown!.data;
-  totalPremium += sd.totalPremiumRequests;
 
   for (const [model, metrics] of Object.entries(sd.modelMetrics)) {
     if (!byModel[model]) {

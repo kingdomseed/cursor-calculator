@@ -34,7 +34,7 @@ export const EXACT_IMPORT_REPLAY_LABEL_MAPPINGS: Record<string, ImportReplayLabe
     approximated: false,
   },
   'claude-4.6-opus-max-thinking': {
-    modelId: 'claude-opus-4-6-max',
+    modelId: 'claude-opus-4-6',
     fast: false,
     maxMode: true,
     thinking: true,
@@ -93,7 +93,7 @@ export const APPROXIMATE_IMPORT_REPLAY_LABEL_MAPPINGS: Record<string, ImportRepl
     approximated: true,
   },
   'global.anthropic.claude-sonnet-4-6-v1': {
-    modelId: 'claude-sonnet-4-6',
+    modelId: 'claude-4-6-sonnet',
     fast: false,
     maxMode: false,
     thinking: false,
@@ -219,7 +219,7 @@ export const APPROXIMATE_IMPORT_REPLAY_LABEL_MAPPINGS: Record<string, ImportRepl
     approximated: true,
   },
   'grok-4-0709': {
-    modelId: 'grok-code-fast-1',
+    modelId: 'grok-4-3',
     fast: false,
     maxMode: false,
     thinking: false,
@@ -231,9 +231,7 @@ export const IMPORT_REPLAY_LONG_CONTEXT_COMPANIONS: Record<string, ImportReplayL
   'claude-4-sonnet': { maxId: 'claude-4-sonnet-1m' },
   'claude-4-5-opus': { maxId: 'historical-opus-max-2x', approximated: true },
   'claude-4-5-sonnet': { maxId: 'claude-4-sonnet-1m', approximated: true },
-  'claude-opus-4-6': { maxId: 'claude-opus-4-6-max' },
-  'claude-sonnet-4-6': { maxId: 'claude-4-sonnet-1m', approximated: true },
-  'gpt-5.4': { maxId: 'gpt-5.4-max' },
+  'claude-4-6-sonnet': { maxId: 'claude-4-sonnet-1m', approximated: true },
 };
 
 export const IMPORT_REPLAY_APPROXIMATE_FAST_REASONING_SUFFIXES = ['medium', 'high', 'xhigh'] as const;
