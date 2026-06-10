@@ -53,6 +53,7 @@ interface CalculatorController {
   setBudget: (budget: number) => void;
   setTokens: (tokens: number) => void;
   setManualTokenInputMode: (manualTokenInputMode: ManualTokenInputMode) => void;
+  setUseAnecdotalIncludedPoolEstimate: (checked: boolean) => void;
   setCacheReadShare: (cacheReadShare: number) => void;
   setManualExactTokens: (manualExactTokens: ExactTokenBreakdown) => void;
   setInputRatio: (inputRatio: number) => void;
@@ -132,6 +133,13 @@ export function useCalculatorController(
     dispatch({ type: 'set_manual_token_input_mode', manualTokenInputMode });
   }, []);
 
+  const setUseAnecdotalIncludedPoolEstimate = useCallback((checked: boolean) => {
+    dispatch({
+      type: 'set_use_anecdotal_included_pool_estimate',
+      useAnecdotalIncludedPoolEstimate: checked,
+    });
+  }, []);
+
   const setCacheReadShare = useCallback((cacheReadShare: number) => {
     dispatch({ type: 'set_cache_read_share', cacheReadShare });
   }, []);
@@ -204,6 +212,7 @@ export function useCalculatorController(
     setBudget,
     setTokens,
     setManualTokenInputMode,
+    setUseAnecdotalIncludedPoolEstimate,
     setCacheReadShare,
     setManualExactTokens,
     setInputRatio,

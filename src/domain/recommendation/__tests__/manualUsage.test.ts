@@ -21,6 +21,15 @@ const gpt54Model: Model = {
   auto_checks: { max_mode: true },
 };
 
+const composer25Model: Model = {
+  id: 'composer-2.5',
+  name: 'Composer 2.5',
+  provider: 'cursor',
+  pool: 'auto_composer',
+  context: { default: 200000, max: null },
+  rates: { input: 0.5, cache_write: null, cache_read: 0.2, output: 2.5 },
+};
+
 const plans: PricingData['plans'] = {
   pro: { name: 'Pro', monthly_cost: 20, api_pool: 20, description: '' },
   pro_plus: { name: 'Pro Plus', monthly_cost: 60, api_pool: 70, description: '' },
@@ -29,6 +38,16 @@ const plans: PricingData['plans'] = {
 
 const singleConfig: ModelConfig[] = [{
   modelId: 'gpt-5-4',
+  weight: 100,
+  maxMode: false,
+  fast: false,
+  thinking: false,
+  caching: false,
+  cacheHitRate: 0,
+}];
+
+const composerConfig: ModelConfig[] = [{
+  modelId: 'composer-2.5',
   weight: 100,
   maxMode: false,
   fast: false,
@@ -100,5 +119,61 @@ describe('computeManualUsageRecommendation', () => {
     expect(result.best.plan).toBe('pro');
     expect(pro?.apiUsage).toBeCloseTo(10.0625, 4);
     expect(pro?.perModel[0]?.exactTokens?.cacheRead).toBe(250_000);
+  });
+
+  it('leaves Auto + Composer usage out of official API math without an anecdotal estimate', () => {
+    const result = computeManualUsageRecommendation(
+      {
+        inputWithCacheWrite: 0,
+        inputWithoutCacheWrite: 450_000_000,
+        cacheRead: 0,
+        output: 150_000_000,
+        total: 600_000_000,
+      },
+      [composer25Model],
+      composerConfig,
+      plans,
+    );
+
+    const pro = result.all.find((plan) => plan.plan === 'pro');
+    expect(result.best.plan).toBe('pro');
+    expect(pro?.apiUsage).toBe(0);
+    expect(pro?.totalCost).toBe(20);
+    expect(pro?.perModel).toHaveLength(0);
+  });
+
+  it('models Composer 2.5 overage only after the anecdotal plan token allowance is exhausted', () => {
+    const result = computeManualUsageRecommendation(
+      {
+        inputWithCacheWrite: 0,
+        inputWithoutCacheWrite: 450_000_000,
+        cacheRead: 0,
+        output: 150_000_000,
+        total: 600_000_000,
+      },
+      [composer25Model],
+      composerConfig,
+      plans,
+      {
+        sourceLabel: 'Community estimate',
+        tokenAllowances: {
+          pro: 500_000_000,
+          pro_plus: 1_500_000_000,
+          ultra: 6_000_000_000,
+        },
+      },
+    );
+
+    const pro = result.all.find((plan) => plan.plan === 'pro');
+    const proPlus = result.all.find((plan) => plan.plan === 'pro_plus');
+
+    expect(result.best.plan).toBe('pro_plus');
+    expect(pro?.apiUsage).toBe(0);
+    expect(pro?.estimatedIncludedPoolAllowanceTokens).toBe(500_000_000);
+    expect(pro?.estimatedIncludedPoolOverageTokens).toBe(100_000_000);
+    expect(pro?.estimatedIncludedPoolOverageCost).toBeCloseTo(100, 4);
+    expect(pro?.totalCost).toBeCloseTo(120, 4);
+    expect(pro?.perModel[0]?.sourceLabel).toBe('Community estimate');
+    expect(proPlus?.estimatedIncludedPoolOverageCost).toBe(0);
   });
 });

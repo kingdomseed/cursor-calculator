@@ -4,6 +4,7 @@ import { buildSimpleExactTokenBreakdown, computeManualUsageRecommendation } from
 import { computeExactUsageRecommendation, computeRecommendation } from '../domain/recommendation/recommendation';
 import type { Recommendation } from '../domain/recommendation/types';
 import type { Model, PricingData } from '../domain/catalog/types';
+import { ANECDOTAL_INCLUDED_POOL_ESTIMATE } from '../data/includedPoolEstimates';
 import {
   buildRecommendationPresentation,
   type RecommendationPresentation,
@@ -92,6 +93,7 @@ export function selectRecommendation(
       selectSelectedModels(state, inputs.manualModels),
       state.modelConfigs,
       inputs.plans,
+      state.useAnecdotalIncludedPoolEstimate ? ANECDOTAL_INCLUDED_POOL_ESTIMATE : undefined,
     );
   }
 

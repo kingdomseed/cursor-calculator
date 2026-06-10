@@ -16,6 +16,7 @@ export interface CalculatorState {
   budget: number;
   tokens: number;
   manualTokenInputMode: ManualTokenInputMode;
+  useAnecdotalIncludedPoolEstimate: boolean;
   cacheReadShare: number;
   manualExactTokens: ExactTokenBreakdown;
   inputRatio: number;
@@ -38,6 +39,7 @@ export function createInitialCalculatorState(manualModels: Model[]): CalculatorS
     budget: 60,
     tokens,
     manualTokenInputMode: 'simple',
+    useAnecdotalIncludedPoolEstimate: false,
     cacheReadShare,
     manualExactTokens: buildSimpleExactTokenBreakdown(tokens, cacheReadShare, inputRatio),
     inputRatio,

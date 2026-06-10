@@ -2,6 +2,7 @@ import type { Model, PricingData } from '../catalog/types';
 import { computeExactUsageRecommendation } from './recommendation';
 import type {
   ExactTokenBreakdown,
+  IncludedPoolEstimateConfig,
   ModelConfig,
   Recommendation,
   UsageLineItemInput,
@@ -147,11 +148,13 @@ export function computeManualUsageRecommendation(
   models: Model[],
   configs: ModelConfig[],
   plans: PricingData['plans'],
+  includedPoolEstimate?: IncludedPoolEstimateConfig,
 ): Recommendation {
   return computeExactUsageRecommendation(
     buildManualUsageEntries(exactTokens, models, configs),
     models,
     plans,
+    includedPoolEstimate,
   );
 }
 

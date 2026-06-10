@@ -12,6 +12,7 @@ import { PlanComparison } from './components/PlanComparison';
 import { CursorImportPanel } from './components/CursorImportPanel';
 import { Collapsible } from './components/Collapsible';
 import { WelcomeModal } from './components/WelcomeModal';
+import { AnecdotalIncludedPoolToggle } from './components/AnecdotalIncludedPoolToggle';
 
 const PRICING = getPricingCatalog();
 
@@ -23,6 +24,7 @@ function App() {
       budget,
       tokens,
       manualTokenInputMode,
+      useAnecdotalIncludedPoolEstimate,
       cacheReadShare,
       manualExactTokens,
       inputRatio,
@@ -45,6 +47,7 @@ function App() {
     setBudget,
     setTokens,
     setManualTokenInputMode,
+    setUseAnecdotalIncludedPoolEstimate,
     setCacheReadShare,
     setManualExactTokens,
     setInputRatio,
@@ -55,6 +58,7 @@ function App() {
     handleApproximationModeChange,
     handleIncludeUserApiKeyChange,
   } = useCalculatorController();
+  const hasSelectedIncludedPoolModel = selectedModels.some((model) => model.pool === 'auto_composer');
 
   return (
     <>
@@ -89,16 +93,24 @@ function App() {
               </div>
             </>
           ) : tokenSource === 'manual' ? (
-            <TokenInput
-              value={tokens}
-              onChange={setTokens}
-              manualTokenInputMode={manualTokenInputMode}
-              onManualTokenInputModeChange={setManualTokenInputMode}
-              cacheReadShare={cacheReadShare}
-              onCacheReadShareChange={setCacheReadShare}
-              exactTokens={manualExactTokens}
-              onExactTokensChange={setManualExactTokens}
-            />
+            <>
+              <TokenInput
+                value={tokens}
+                onChange={setTokens}
+                manualTokenInputMode={manualTokenInputMode}
+                onManualTokenInputModeChange={setManualTokenInputMode}
+                cacheReadShare={cacheReadShare}
+                onCacheReadShareChange={setCacheReadShare}
+                exactTokens={manualExactTokens}
+                onExactTokensChange={setManualExactTokens}
+              />
+              {hasSelectedIncludedPoolModel && (
+                <AnecdotalIncludedPoolToggle
+                  checked={useAnecdotalIncludedPoolEstimate}
+                  onChange={setUseAnecdotalIncludedPoolEstimate}
+                />
+              )}
+            </>
           ) : (
             <CursorImportPanel
               report={cursorImportReport}

@@ -58,6 +58,12 @@ export interface UsageLineItemInput {
 export interface PlanLineItem extends UsageLineItemInput {
   effectiveRates: EffectiveRates;
   apiCost: number;
+  estimatedIncludedPoolOverageTokens?: number;
+}
+
+export interface IncludedPoolEstimateConfig {
+  tokenAllowances: Partial<Record<PlanKey, number>>;
+  sourceLabel: string;
 }
 
 export interface PlanResult {
@@ -66,6 +72,9 @@ export interface PlanResult {
   apiPool: number;
   apiBudget: number;
   apiUsage: number;
+  estimatedIncludedPoolAllowanceTokens?: number | null;
+  estimatedIncludedPoolOverageTokens?: number;
+  estimatedIncludedPoolOverageCost?: number;
   overage: number;
   unusedPool: number;
   totalCost: number;

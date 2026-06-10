@@ -153,6 +153,54 @@ describe('recommendation presentation', () => {
     expect(findRowValue(presentation, 'totalOutOfPocket', 'pro_plus')).toBe(110);
   });
 
+  it('uses Composer-estimate wording when there is no API-priced usage', () => {
+    const best = createPlanResult({
+      plan: 'pro',
+      subscription: 20,
+      apiPool: 20,
+      apiBudget: 20,
+      apiUsage: 0,
+      estimatedIncludedPoolAllowanceTokens: 500_000_000,
+      estimatedIncludedPoolOverageTokens: 100_000_000,
+      estimatedIncludedPoolOverageCost: 100,
+      overage: 0,
+      unusedPool: 20,
+      totalCost: 120,
+      perModel: [
+        createLineItem({
+          key: 'composer-2.5',
+          modelId: 'composer-2.5',
+          label: 'Composer 2.5',
+          provider: 'cursor',
+          pool: 'auto_composer',
+          apiCost: 100,
+          tokens: { total: 600_000_000, input: 450_000_000, output: 150_000_000 },
+        }),
+      ],
+    });
+
+    const presentation = buildRecommendationPresentation({
+      mode: 'tokens',
+      tokenSource: 'manual',
+      recommendation: createRecommendation(best),
+    });
+
+    expect(presentation.hero.context).toBe(
+      'No API-priced usage is selected. The optional community preset adds $100.00 of estimated Composer pool overage.',
+    );
+    expect(presentation.bestPlan.derived).toMatchObject({
+      usageValue: 100,
+      includedPoolUsed: 0,
+      additionalApiBilled: 0,
+      estimatedIncludedPoolAllowanceTokens: 500_000_000,
+      estimatedIncludedPoolOverageTokens: 100_000_000,
+      estimatedIncludedPoolOverageCost: 100,
+      totalOutOfPocket: 120,
+    });
+    expect(findRowValue(presentation, 'estimatedComposerPool', 'pro')).toBe(500_000_000);
+    expect(findRowValue(presentation, 'estimatedComposerOverage', 'pro')).toBe(100);
+  });
+
   it('uses the same usage-first framing for csv replay as manual token mode', () => {
     const best = createPlanResult({
       plan: 'pro_plus',
@@ -285,6 +333,8 @@ describe('recommendation presentation', () => {
     );
 
     expect(new Set(rowKeys).size).toBe(rowKeys.length);
+    expect(rowKeys).not.toContain('estimatedComposerPool');
+    expect(rowKeys).not.toContain('estimatedComposerOverage');
   });
 
   it('populates modelGroups for csv import mode', () => {

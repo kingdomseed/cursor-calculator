@@ -25,6 +25,9 @@ export interface RecommendationPlanDerivedValues {
   usageValue: number;
   includedPoolUsed: number;
   additionalApiBilled: number;
+  estimatedIncludedPoolAllowanceTokens: number | null;
+  estimatedIncludedPoolOverageTokens: number;
+  estimatedIncludedPoolOverageCost: number;
   totalOutOfPocket: number;
   budgetHeadroom: number | null;
   tokenYield: number;
@@ -146,9 +149,12 @@ function buildPlanPresentation(
   mode: Mode,
   budgetCeiling?: number,
 ): RecommendationPlanPresentation {
-  const usageValue = result.apiUsage;
+  const estimatedIncludedPoolAllowanceTokens = result.estimatedIncludedPoolAllowanceTokens ?? null;
+  const estimatedIncludedPoolOverageTokens = result.estimatedIncludedPoolOverageTokens ?? 0;
+  const estimatedIncludedPoolOverageCost = result.estimatedIncludedPoolOverageCost ?? 0;
+  const usageValue = result.apiUsage + estimatedIncludedPoolOverageCost;
   const additionalApiBilled = result.overage;
-  const includedPoolUsed = Math.max(0, usageValue - additionalApiBilled);
+  const includedPoolUsed = Math.max(0, result.apiUsage - additionalApiBilled);
   const totalOutOfPocket = result.totalCost;
   const tokenYield = result.perModel.reduce((sum, item) => sum + item.tokens.total, 0);
   const budgetHeadroom = mode === 'budget' && budgetCeiling != null
@@ -166,6 +172,9 @@ function buildPlanPresentation(
       usageValue,
       includedPoolUsed,
       additionalApiBilled,
+      estimatedIncludedPoolAllowanceTokens,
+      estimatedIncludedPoolOverageTokens,
+      estimatedIncludedPoolOverageCost,
       totalOutOfPocket,
       budgetHeadroom,
       tokenYield,
@@ -208,9 +217,15 @@ function buildHero(
 
   const coveredByPlan = plan.derived.includedPoolUsed;
   const billedBeyondPool = plan.derived.additionalApiBilled;
-  const context = billedBeyondPool > 0
-    ? `${plan.planLabel} covers the first ${formatCurrency(coveredByPlan)} with its included API pool, leaving ${formatCurrency(billedBeyondPool)} billed beyond the pool.`
-    : `${plan.planLabel} covers the full ${formatCurrency(coveredByPlan)} usage value with its included API pool.`;
+  const estimatedIncludedPoolAllowance = plan.derived.estimatedIncludedPoolAllowanceTokens;
+  const estimatedIncludedPoolOverage = plan.derived.estimatedIncludedPoolOverageCost;
+  const context = buildTokenModeContext(
+    plan.planLabel,
+    coveredByPlan,
+    billedBeyondPool,
+    estimatedIncludedPoolAllowance,
+    estimatedIncludedPoolOverage,
+  );
 
   return {
     title: heading,
@@ -234,6 +249,9 @@ function buildComparisonSections(
   mode: Mode,
   budgetCeiling?: number,
 ): RecommendationComparisonSection[] {
+  const hasIncludedPoolEstimate = plans.some((plan) =>
+    plan.derived.estimatedIncludedPoolAllowanceTokens != null,
+  );
   const primaryRows: RecommendationComparisonRow[] = mode === 'budget'
     ? [
         createRow(plans, 'estimatedMonthlyCost', 'Estimated monthly cost', (plan) => plan.derived.totalOutOfPocket, formatCurrency),
@@ -245,6 +263,38 @@ function buildComparisonSections(
         createRow(plans, 'primaryEstimatedOutOfPocket', 'Estimated out-of-pocket', (plan) => plan.derived.totalOutOfPocket, formatCurrency),
       ];
 
+  const planCoverageRows: RecommendationComparisonRow[] = [
+    createRow(plans, 'includedPool', 'Included API pool', (plan) => plan.includedPool, formatCurrency),
+    createRow(plans, 'includedPoolUsed', 'Included pool used', (plan) => plan.derived.includedPoolUsed, formatCurrency),
+    createRow(plans, 'unusedPool', 'Unused pool', (plan) => plan.unusedPool, formatCurrency),
+  ];
+  const outOfPocketRows: RecommendationComparisonRow[] = [
+    createRow(plans, 'subscription', 'Subscription', (plan) => plan.subscription, formatCurrency),
+    createRow(plans, 'additionalApiBilled', 'Additional API billed', (plan) => plan.derived.additionalApiBilled, formatCurrency),
+  ];
+
+  if (hasIncludedPoolEstimate) {
+    planCoverageRows.push(
+      createRow(plans, 'estimatedComposerPool', 'Estimated Composer pool', (plan) => plan.derived.estimatedIncludedPoolAllowanceTokens, formatTokens),
+      createRow(plans, 'estimatedComposerOverageTokens', 'Estimated Composer overage tokens', (plan) => (
+        plan.derived.estimatedIncludedPoolAllowanceTokens == null
+          ? null
+          : plan.derived.estimatedIncludedPoolOverageTokens
+      ), formatTokens),
+    );
+    outOfPocketRows.push(
+      createRow(plans, 'estimatedComposerOverage', 'Estimated Composer overage', (plan) => (
+        plan.derived.estimatedIncludedPoolAllowanceTokens == null
+          ? null
+          : plan.derived.estimatedIncludedPoolOverageCost
+      ), formatCurrency),
+    );
+  }
+
+  outOfPocketRows.push(
+    createRow(plans, 'totalOutOfPocket', 'Total out-of-pocket', (plan) => plan.derived.totalOutOfPocket, formatCurrency),
+  );
+
   return [
     {
       kind: 'primary_answer',
@@ -254,20 +304,12 @@ function buildComparisonSections(
     {
       kind: 'plan_coverage',
       title: 'Plan coverage',
-      rows: [
-        createRow(plans, 'includedPool', 'Included API pool', (plan) => plan.includedPool, formatCurrency),
-        createRow(plans, 'includedPoolUsed', 'Included pool used', (plan) => plan.derived.includedPoolUsed, formatCurrency),
-        createRow(plans, 'unusedPool', 'Unused pool', (plan) => plan.unusedPool, formatCurrency),
-      ],
+      rows: planCoverageRows,
     },
     {
       kind: 'out_of_pocket_breakdown',
       title: 'Out-of-pocket breakdown',
-      rows: [
-        createRow(plans, 'subscription', 'Subscription', (plan) => plan.subscription, formatCurrency),
-        createRow(plans, 'additionalApiBilled', 'Additional API billed', (plan) => plan.derived.additionalApiBilled, formatCurrency),
-        createRow(plans, 'totalOutOfPocket', 'Total out-of-pocket', (plan) => plan.derived.totalOutOfPocket, formatCurrency),
-      ],
+      rows: outOfPocketRows,
     },
     {
       kind: 'usage_value_details',
@@ -356,6 +398,32 @@ function getHeading(mode: Mode, tokenSource: TokenSource): string {
   return tokenSource === 'cursor_import'
     ? 'Best plan for this imported month'
     : 'Best plan for this usage';
+}
+
+function buildTokenModeContext(
+  planLabel: string,
+  coveredByPlan: number,
+  billedBeyondPool: number,
+  estimatedIncludedPoolAllowance: number | null,
+  estimatedIncludedPoolOverage: number,
+): string {
+  if (estimatedIncludedPoolAllowance != null && coveredByPlan === 0 && billedBeyondPool === 0) {
+    if (estimatedIncludedPoolOverage > 0) {
+      return `No API-priced usage is selected. The optional community preset adds ${formatCurrency(estimatedIncludedPoolOverage)} of estimated Composer pool overage.`;
+    }
+
+    return `No API-priced usage is selected. The selected plan estimate covers this Auto or Composer usage.`;
+  }
+
+  const officialContext = billedBeyondPool > 0
+    ? `${planLabel} covers the first ${formatCurrency(coveredByPlan)} with its included API pool, leaving ${formatCurrency(billedBeyondPool)} billed beyond the pool.`
+    : `${planLabel} covers the full ${formatCurrency(coveredByPlan)} usage value with its included API pool.`;
+
+  if (estimatedIncludedPoolOverage <= 0) {
+    return officialContext;
+  }
+
+  return `${officialContext} It also includes ${formatCurrency(estimatedIncludedPoolOverage)} of estimated Composer pool overage from the optional community preset.`;
 }
 
 function formatPlanLabel(plan: PlanKey): string {

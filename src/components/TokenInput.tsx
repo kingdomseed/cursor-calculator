@@ -61,7 +61,7 @@ export function TokenInput({
           <p className="text-[#14120b]/60 mb-4">
             Enter your monthly tokens, then estimate what share were cache reads.
           </p>
-          <div className="inline-flex items-baseline gap-2">
+          <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-1">
             <input
               type="text"
               value={value.toLocaleString()}
@@ -69,7 +69,7 @@ export function TokenInput({
                 const parsedValue = parseInt(e.target.value.replace(/,/g, ''), 10);
                 onChange(Number.isNaN(parsedValue) ? 0 : parsedValue);
               }}
-              className="w-72 sm:w-96 md:w-[28rem] text-4xl sm:text-5xl md:text-6xl font-bold bg-transparent border-none focus:outline-none focus:ring-0 text-center p-0 overflow-visible"
+              className="w-full min-w-0 px-2 text-4xl sm:text-5xl md:text-6xl font-bold bg-transparent border-none focus:outline-none focus:ring-0 text-center"
             />
             <span className="text-lg sm:text-xl text-[#14120b]/40">tokens</span>
           </div>

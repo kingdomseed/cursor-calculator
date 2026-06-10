@@ -85,6 +85,7 @@ describe('calculatorReducer', () => {
       } as const,
       { type: 'set_input_ratio', inputRatio: 4 } as const,
       { type: 'set_show_advanced', showAdvanced: true } as const,
+      { type: 'set_use_anecdotal_included_pool_estimate', useAnecdotalIncludedPoolEstimate: true } as const,
       { type: 'set_model_configs', modelConfigs: customConfigs } as const,
     ].reduce(calculatorReducer, initial);
 
@@ -103,6 +104,7 @@ describe('calculatorReducer', () => {
     });
     expect(state.inputRatio).toBe(4);
     expect(state.showAdvanced).toBe(true);
+    expect(state.useAnecdotalIncludedPoolEstimate).toBe(true);
     expect(state.modelConfigs).toEqual(customConfigs);
   });
 

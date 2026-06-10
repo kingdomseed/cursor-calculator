@@ -2,7 +2,16 @@ import type { Model, Plan, PlanKey, PricingData } from '../catalog/types';
 import { dollarsToExactTokens } from './budgetUsage';
 import { directBreakdownToDollars, exactTokensToDollars, tokensToDollars } from './conversions';
 import { computeBillableRates, computeEffectiveRates, effectiveRatesFromExactCost, effectiveRatesFromExactTokens } from './rates';
-import type { Mode, ModelConfig, PlanLineItem, PlanResult, Recommendation, TokenBreakdown, UsageLineItemInput } from './types';
+import type {
+  IncludedPoolEstimateConfig,
+  Mode,
+  ModelConfig,
+  PlanLineItem,
+  PlanResult,
+  Recommendation,
+  TokenBreakdown,
+  UsageLineItemInput,
+} from './types';
 
 const PLAN_KEYS: PlanKey[] = ['pro', 'pro_plus', 'ultra'];
 
@@ -42,9 +51,10 @@ export function computeExactUsageRecommendation(
   usageItems: UsageLineItemInput[],
   models: Model[],
   plans: PricingData['plans'],
+  includedPoolEstimate?: IncludedPoolEstimateConfig,
 ): Recommendation {
   const allResults = PLAN_KEYS.map((key) =>
-    computeExactUsagePlanResult(key, plans[key], usageItems, models),
+    computeExactUsagePlanResult(key, plans[key], usageItems, models, includedPoolEstimate),
   );
 
   return {
@@ -143,6 +153,9 @@ function computeBudgetPlanResult(
     apiPool: plan.api_pool,
     apiBudget,
     apiUsage: totalApiUsage,
+    estimatedIncludedPoolAllowanceTokens: null,
+    estimatedIncludedPoolOverageTokens: 0,
+    estimatedIncludedPoolOverageCost: 0,
     overage,
     unusedPool,
     totalCost: plan.monthly_cost + overage,
@@ -202,6 +215,9 @@ function computeTokenPlanResult(
     apiPool: plan.api_pool,
     apiBudget: plan.api_pool,
     apiUsage: totalApiCost,
+    estimatedIncludedPoolAllowanceTokens: null,
+    estimatedIncludedPoolOverageTokens: 0,
+    estimatedIncludedPoolOverageCost: 0,
     overage,
     unusedPool,
     totalCost: plan.monthly_cost + overage,
@@ -215,10 +231,25 @@ function computeExactUsagePlanResult(
   plan: Plan,
   usageItems: UsageLineItemInput[],
   models: Model[],
+  includedPoolEstimate?: IncludedPoolEstimateConfig,
 ): PlanResult {
+  const includedPoolAllowance = includedPoolEstimate?.tokenAllowances[key] ?? null;
+  const includedPoolTokens = usageItems.reduce(
+    (sum, usage) => usage.pool === 'auto_composer' ? sum + usage.tokens.total : sum,
+    0,
+  );
+  const includedPoolOverageTokens = includedPoolAllowance == null
+    ? 0
+    : Math.max(0, includedPoolTokens - includedPoolAllowance);
+  const includedPoolOverageShare = includedPoolTokens > 0
+    ? includedPoolOverageTokens / includedPoolTokens
+    : 0;
+
   const perModel = usageItems
     .map((usage) => {
-      if (usage.pool !== 'api') return null;
+      if (usage.pool !== 'api' && (usage.pool !== 'auto_composer' || !includedPoolEstimate)) {
+        return null;
+      }
 
       const model = models.find((candidate) => candidate.id === usage.modelId);
       if (!model) return null;
@@ -239,11 +270,31 @@ function computeExactUsagePlanResult(
           ? exactTokensToDollars(usage.exactTokens, billableRates)
           : directBreakdownToDollars(usage.tokens, effectiveRates);
 
+      if (usage.pool === 'auto_composer' && includedPoolEstimate) {
+        return buildPlanLineItem(
+          {
+            ...usage,
+            approximated: true,
+            sourceLabel: includedPoolEstimate.sourceLabel,
+          },
+          effectiveRates,
+          apiCost * includedPoolOverageShare,
+          usage.tokens.total * includedPoolOverageShare,
+        );
+      }
+
       return buildPlanLineItem(usage, effectiveRates, apiCost);
     })
     .filter((item): item is PlanLineItem => item !== null);
 
-  const totalApiUsage = perModel.reduce((sum, item) => sum + item.apiCost, 0);
+  const totalApiUsage = perModel.reduce(
+    (sum, item) => item.pool === 'api' ? sum + item.apiCost : sum,
+    0,
+  );
+  const includedPoolOverageCost = perModel.reduce(
+    (sum, item) => item.pool === 'auto_composer' ? sum + item.apiCost : sum,
+    0,
+  );
   const overage = Math.max(0, totalApiUsage - plan.api_pool);
   const unusedPool = Math.max(0, plan.api_pool - totalApiUsage);
 
@@ -253,9 +304,12 @@ function computeExactUsagePlanResult(
     apiPool: plan.api_pool,
     apiBudget: plan.api_pool,
     apiUsage: totalApiUsage,
+    estimatedIncludedPoolAllowanceTokens: includedPoolAllowance,
+    estimatedIncludedPoolOverageTokens: includedPoolOverageTokens,
+    estimatedIncludedPoolOverageCost: includedPoolOverageCost,
     overage,
     unusedPool,
-    totalCost: plan.monthly_cost + overage,
+    totalCost: plan.monthly_cost + overage + includedPoolOverageCost,
     affordable: true,
     perModel,
   };
@@ -265,11 +319,13 @@ function buildPlanLineItem(
   usage: UsageLineItemInput,
   effectiveRates: PlanLineItem['effectiveRates'],
   apiCost: number,
+  estimatedIncludedPoolOverageTokens?: number,
 ): PlanLineItem {
   return {
     ...usage,
     effectiveRates,
     apiCost,
+    ...(estimatedIncludedPoolOverageTokens !== undefined ? { estimatedIncludedPoolOverageTokens } : {}),
   };
 }
 

@@ -11,6 +11,7 @@ export type CalculatorAction =
   | { type: 'set_budget'; budget: number }
   | { type: 'set_tokens'; tokens: number }
   | { type: 'set_manual_token_input_mode'; manualTokenInputMode: ManualTokenInputMode }
+  | { type: 'set_use_anecdotal_included_pool_estimate'; useAnecdotalIncludedPoolEstimate: boolean }
   | { type: 'set_cache_read_share'; cacheReadShare: number }
   | { type: 'set_manual_exact_tokens'; manualExactTokens: ExactTokenBreakdown }
   | { type: 'set_input_ratio'; inputRatio: number }
@@ -39,6 +40,11 @@ export function calculatorReducer(state: CalculatorState, action: CalculatorActi
     }
     case 'set_manual_token_input_mode':
       return { ...state, manualTokenInputMode: action.manualTokenInputMode };
+    case 'set_use_anecdotal_included_pool_estimate':
+      return {
+        ...state,
+        useAnecdotalIncludedPoolEstimate: action.useAnecdotalIncludedPoolEstimate,
+      };
     case 'set_cache_read_share': {
       const nextState = {
         ...state,
