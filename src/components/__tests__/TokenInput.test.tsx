@@ -32,6 +32,9 @@ describe('TokenInput copy', () => {
     expect(simpleMarkup).toContain('Enter your monthly tokens, then estimate what share were cache reads.');
     expect(simpleMarkup).toContain('Cache-read share of entered tokens');
     expect(simpleMarkup).toContain('Tip: for the closest CSV match, use API tokens priced as your total and copy over the cache-read share.');
+    expect(simpleMarkup).toContain('max="10000000000"');
+    expect(simpleMarkup).toContain('5B');
+    expect(simpleMarkup).toContain('10B');
 
     const advancedMarkup = renderToStaticMarkup(
       <TokenInput

@@ -3,6 +3,10 @@ import type { ManualTokenInputMode } from '../app/calculatorState';
 import type { ExactTokenBreakdown } from '../domain/recommendation/types';
 import { Collapsible } from './Collapsible';
 
+const TOKEN_SLIDER_MIN = 100_000;
+const TOKEN_SLIDER_MAX = 10_000_000_000;
+const TOKEN_SLIDER_STEP = 100_000;
+
 interface TokenInputProps {
   value: number;
   onChange: (value: number) => void;
@@ -77,15 +81,15 @@ export function TokenInput({
           <div className="mt-6 px-4">
             <input
               type="range"
-              min="100000"
-              max="1000000000"
-              step="100000"
-              value={Math.min(value, 1_000_000_000)}
+              min={TOKEN_SLIDER_MIN}
+              max={TOKEN_SLIDER_MAX}
+              step={TOKEN_SLIDER_STEP}
+              value={Math.min(value, TOKEN_SLIDER_MAX)}
               onChange={(e) => onChange(Number(e.target.value))}
               className="w-full h-2 bg-[#e0e0d8] rounded-full appearance-none cursor-pointer accent-[#14120b]"
             />
             <div className="flex justify-between text-xs text-[#14120b]/40 mt-2">
-              <span>100k</span><span>500M</span><span>1B</span>
+              <span>100k</span><span>5B</span><span>10B</span>
             </div>
           </div>
 
