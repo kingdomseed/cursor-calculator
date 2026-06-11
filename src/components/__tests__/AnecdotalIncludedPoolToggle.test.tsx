@@ -10,7 +10,7 @@ describe('AnecdotalIncludedPoolToggle', () => {
     );
 
     expect(html).toContain('Anecdotal Composer pool estimate');
-    expect(html).toContain('500.00M');
+    expect(html).toContain('650.00M');
     expect(html).toContain('1.00B');
     expect(html).toContain('1.70B');
     expect(html).toContain('not Cursor entitlements');

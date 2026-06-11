@@ -21,7 +21,7 @@ export const ANECDOTAL_INCLUDED_POOL_SOURCES = [
 ] as const;
 
 export const ANECDOTAL_INCLUDED_POOL_TOKEN_ALLOWANCES: Record<PlanKey, number> = {
-  pro: 500_000_000,
+  pro: 650_000_000,
   pro_plus: 1_000_000_000,
   ultra: 1_700_000_000,
 };
