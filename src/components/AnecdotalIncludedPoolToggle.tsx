@@ -58,9 +58,8 @@ export function AnecdotalIncludedPoolToggle({
       </dl>
 
       <p className="mt-3 text-xs text-[#14120b]/45">
-        Presets are conservative community estimates, not Cursor entitlements. Fast mode, promotions,
-        and account-specific meters may change the real amount. Ultra also reflects a private
-        $200-plan snapshot of about 1.5B tokens at 89% usage.
+        Usage depends on token mix. Cache-heavy work may last longer; Fast mode and output-heavy work
+        may run out sooner.
       </p>
 
       <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
