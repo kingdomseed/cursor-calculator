@@ -58,8 +58,8 @@ export function AnecdotalIncludedPoolToggle({
       </dl>
 
       <p className="mt-3 text-xs text-[#14120b]/45">
-        Usage depends on token mix. Cache-heavy work may last longer; Fast mode and output-heavy work
-        may run out sooner.
+        These are estimates. Actual usage depends heavily on cache hit rate and model selection:
+        cache-heavy work may last longer; Fast mode and output-heavy work may run out sooner.
       </p>
 
       <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
