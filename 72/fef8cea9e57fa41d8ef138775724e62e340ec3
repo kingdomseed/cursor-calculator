@@ -1,0 +1,315 @@
+.agents/skills/autofix/SKILL.md
+  s_2f16e0e318343c::t_87f989ffc3495e 1-339
+.agents/skills/autofix/github.md
+  s_2f16e0e318343c::t_675c7f908986b4 1-145
+.agents/skills/building-components/SKILL.md
+  s_2f16e0e318343c::t_cc09b51cd19d53 1-37
+.agents/skills/building-components/references/accessibility.mdx
+  s_2f16e0e318343c::t_654371484825ed 1-819
+.agents/skills/building-components/references/as-child.mdx
+  s_2f16e0e318343c::t_59b47f8dd6bdb8 1-324
+.agents/skills/building-components/references/composition.mdx
+  s_2f16e0e318343c::t_1d4b8224188879 1-239
+.agents/skills/building-components/references/data-attributes.mdx
+  s_2f16e0e318343c::t_db79808690b8d7 1-413
+.agents/skills/building-components/references/definitions.mdx
+  s_2f16e0e318343c::t_26ca554dd99e39 1-258
+.agents/skills/building-components/references/design-tokens.mdx
+  s_2f16e0e318343c::t_e78ee98ec44020 1-57
+.agents/skills/building-components/references/docs.mdx
+  s_2f16e0e318343c::t_4779953c938f57 1-155
+.agents/skills/building-components/references/marketplaces.mdx
+  s_2f16e0e318343c::t_c342058b3a29c8 1-144
+.agents/skills/building-components/references/npm.mdx
+  s_2f16e0e318343c::t_9a00da18b61488 1-166
+.agents/skills/building-components/references/polymorphism.mdx
+  s_2f16e0e318343c::t_ed9396b2927659 1-583
+.agents/skills/building-components/references/principles.mdx
+  s_2f16e0e318343c::t_c39b1b71510907 1-61
+.agents/skills/building-components/references/registry.mdx
+  s_2f16e0e318343c::t_8144b1ef8e050e 1-169
+.agents/skills/building-components/references/state.mdx
+  s_2f16e0e318343c::t_d1c8e7adbc3faf 1-99
+.agents/skills/building-components/references/styling.mdx
+  s_2f16e0e318343c::t_c2a07e7d134828 1-286
+.agents/skills/building-components/references/types.mdx
+  s_2f16e0e318343c::t_ada5a49b25a61c 1-191
+.agents/skills/code-review/SKILL.md
+  s_2f16e0e318343c::t_73ef025e3f5f51 1-158
+.agents/skills/codebase-design/DEEPENING.md
+  s_2f16e0e318343c::t_6fb7f27f6b700d 1-37
+.agents/skills/codebase-design/DESIGN-IT-TWICE.md
+  s_2f16e0e318343c::t_4f4d1f90c8d681 1-44
+.agents/skills/codebase-design/SKILL.md
+  s_2f16e0e318343c::t_17608154b28121 1-114
+.agents/skills/composition-patterns/AGENTS.md
+  s_2f16e0e318343c::t_8cd6f3eaf14f2a 1-946
+.agents/skills/composition-patterns/README.md
+  s_2f16e0e318343c::t_d69125d6a7d4e0 1-60
+.agents/skills/composition-patterns/SKILL.md
+  s_2f16e0e318343c::t_06449eb2e799a7 1-89
+.agents/skills/composition-patterns/metadata.json
+  s_2f16e0e318343c::t_7c48e2c0b1dbaa 1-11
+.agents/skills/composition-patterns/rules/_sections.md
+  s_2f16e0e318343c::t_c38f87a527582e 1-29
+.agents/skills/composition-patterns/rules/_template.md
+  s_2f16e0e318343c::t_bce8811fe80a7a 1-24
+.agents/skills/composition-patterns/rules/architecture-avoid-boolean-props.md
+  s_2f16e0e318343c::t_702161eba24897 1-100
+.agents/skills/composition-patterns/rules/architecture-compound-components.md
+  s_2f16e0e318343c::t_d8042013216825 1-112
+.agents/skills/composition-patterns/rules/patterns-children-over-render-props.md
+  s_2f16e0e318343c::t_96d9487c40f007 1-87
+.agents/skills/composition-patterns/rules/patterns-explicit-variants.md
+  s_2f16e0e318343c::t_11a674ea29f76b 1-100
+.agents/skills/composition-patterns/rules/react19-no-forwardref.md
+  s_2f16e0e318343c::t_bc34d7b8ccbc7d 1-42
+.agents/skills/composition-patterns/rules/state-context-interface.md
+  s_2f16e0e318343c::t_2420c833073c74 1-191
+.agents/skills/composition-patterns/rules/state-decouple-implementation.md
+  s_2f16e0e318343c::t_750a5f7336eddc 1-113
+.agents/skills/composition-patterns/rules/state-lift-state.md
+  s_2f16e0e318343c::t_e93736a00b2b70 1-125
+.agents/skills/diagnosing-bugs/SKILL.md
+  s_2f16e0e318343c::t_3437b0d512148a 1-134
+.agents/skills/diagnosing-bugs/scripts/hitl-loop.template.sh
+  s_2f16e0e318343c::t_bc200f374cb252 1-41
+.agents/skills/domain-modeling/ADR-FORMAT.md
+  s_2f16e0e318343c::t_dfa2ca1b4e3a51 1-47
+.agents/skills/domain-modeling/CONTEXT-FORMAT.md
+  s_2f16e0e318343c::t_f17cd7df5a49ec 1-60
+.agents/skills/domain-modeling/SKILL.md
+  s_2f16e0e318343c::t_212bfe9a579eb8 1-74
+.agents/skills/find-skills/SKILL.md
+  s_2f16e0e318343c::t_b07d847111464f 1-142
+.agents/skills/git-guardrails-claude-code/SKILL.md
+  s_2f16e0e318343c::t_a533b58f3cdc02 1-95
+.agents/skills/git-guardrails-claude-code/scripts/block-dangerous-git.sh
+  s_2f16e0e318343c::t_69b7b229fc5f64 1-25
+.agents/skills/implement/SKILL.md
+  s_2f16e0e318343c::t_501eafc592f58a 1-15
+.agents/skills/improve-codebase-architecture/HTML-REPORT.md
+  s_2f16e0e318343c::t_ae7de92e850c0f 1-123
+.agents/skills/improve-codebase-architecture/SKILL.md
+  s_2f16e0e318343c::t_0b38a49e6a5e9f 1-66
+.agents/skills/migrate-to-shoehorn/SKILL.md
+  s_2f16e0e318343c::t_2aedc5840cf116 1-118
+.agents/skills/prototype/LOGIC.md
+  s_2f16e0e318343c::t_21c4d4865b825a 1-79
+.agents/skills/prototype/SKILL.md
+  s_2f16e0e318343c::t_a5d3d901fe0f31 1-31
+.agents/skills/prototype/UI.md
+  s_2f16e0e318343c::t_c00e40c4a9f6f2 1-112
+.agents/skills/qa/SKILL.md
+  s_2f16e0e318343c::t_d9a4c563c9f13d 1-130
+.agents/skills/react-best-practices/AGENTS.md
+  s_2f16e0e318343c::t_df0fd62a3e8482 1-3810
+.agents/skills/react-best-practices/README.md
+  s_2f16e0e318343c::t_0be8994ded0d1a 1-123
+.agents/skills/react-best-practices/SKILL.md
+  s_2f16e0e318343c::t_1275ec75b57f3a 1-149
+.agents/skills/react-best-practices/metadata.json
+  s_2f16e0e318343c::t_83a5ea389bd1c3 1-15
+.agents/skills/react-best-practices/rules/_sections.md
+  s_2f16e0e318343c::t_e727b15223f95c 1-46
+.agents/skills/react-best-practices/rules/_template.md
+  s_2f16e0e318343c::t_af4830c890287a 1-28
+.agents/skills/react-best-practices/rules/advanced-effect-event-deps.md
+  s_2f16e0e318343c::t_a0975cb2fb62b9 1-56
+.agents/skills/react-best-practices/rules/advanced-event-handler-refs.md
+  s_2f16e0e318343c::t_689c2596441355 1-55
+.agents/skills/react-best-practices/rules/advanced-init-once.md
+  s_2f16e0e318343c::t_34506af2e9dbbd 1-42
+.agents/skills/react-best-practices/rules/advanced-use-latest.md
+  s_2f16e0e318343c::t_54e1730abd3ef5 1-39
+.agents/skills/react-best-practices/rules/async-api-routes.md
+  s_2f16e0e318343c::t_55f40048339b77 1-38
+.agents/skills/react-best-practices/rules/async-cheap-condition-before-await.md
+  s_2f16e0e318343c::t_3ae85f8215ffbe 1-37
+.agents/skills/react-best-practices/rules/async-defer-await.md
+  s_2f16e0e318343c::t_a073dd82665bd1 1-82
+.agents/skills/react-best-practices/rules/async-dependencies.md
+  s_2f16e0e318343c::t_ab489bdc12e4a7 1-51
+.agents/skills/react-best-practices/rules/async-parallel.md
+  s_2f16e0e318343c::t_296d1d119fd9d8 1-28
+.agents/skills/react-best-practices/rules/async-suspense-boundaries.md
+  s_2f16e0e318343c::t_81d0fe8907f959 1-99
+.agents/skills/react-best-practices/rules/bundle-analyzable-paths.md
+  s_2f16e0e318343c::t_3b350dcf31f81b 1-63
+.agents/skills/react-best-practices/rules/bundle-barrel-imports.md
+  s_2f16e0e318343c::t_52cb32308baee3 1-60
+.agents/skills/react-best-practices/rules/bundle-conditional.md
+  s_2f16e0e318343c::t_89975ca70e1a79 1-31
+.agents/skills/react-best-practices/rules/bundle-defer-third-party.md
+  s_2f16e0e318343c::t_2d82b93fb3652d 1-49
+.agents/skills/react-best-practices/rules/bundle-dynamic-imports.md
+  s_2f16e0e318343c::t_1694575242b310 1-35
+.agents/skills/react-best-practices/rules/bundle-preload.md
+  s_2f16e0e318343c::t_6474bbf55e9d04 1-50
+.agents/skills/react-best-practices/rules/client-event-listeners.md
+  s_2f16e0e318343c::t_813fe8f2719525 1-74
+.agents/skills/react-best-practices/rules/client-localstorage-schema.md
+  s_2f16e0e318343c::t_1ff324ffd1770a 1-71
+.agents/skills/react-best-practices/rules/client-passive-event-listeners.md
+  s_2f16e0e318343c::t_7905793fb22704 1-48
+.agents/skills/react-best-practices/rules/client-swr-dedup.md
+  s_2f16e0e318343c::t_77eec06110f8bc 1-56
+.agents/skills/react-best-practices/rules/js-batch-dom-css.md
+  s_2f16e0e318343c::t_a7869159b51a1a 1-107
+.agents/skills/react-best-practices/rules/js-cache-function-results.md
+  s_2f16e0e318343c::t_a277a59e66de01 1-80
+.agents/skills/react-best-practices/rules/js-cache-property-access.md
+  s_2f16e0e318343c::t_89d9caa67cf810 1-28
+.agents/skills/react-best-practices/rules/js-cache-storage.md
+  s_2f16e0e318343c::t_ced640639ebfb6 1-70
+.agents/skills/react-best-practices/rules/js-combine-iterations.md
+  s_2f16e0e318343c::t_c22136909b32c8 1-32
+.agents/skills/react-best-practices/rules/js-early-exit.md
+  s_2f16e0e318343c::t_e7a36bb69d5739 1-50
+.agents/skills/react-best-practices/rules/js-flatmap-filter.md
+  s_2f16e0e318343c::t_e84c9b5aec9ca9 1-60
+.agents/skills/react-best-practices/rules/js-hoist-regexp.md
+  s_2f16e0e318343c::t_f934abe48b6915 1-45
+.agents/skills/react-best-practices/rules/js-index-maps.md
+  s_2f16e0e318343c::t_ad3854991993fc 1-37
+.agents/skills/react-best-practices/rules/js-length-check-first.md
+  s_2f16e0e318343c::t_ffa29271b0911a 1-49
+.agents/skills/react-best-practices/rules/js-min-max-loop.md
+  s_2f16e0e318343c::t_898070aed6c67a 1-82
+.agents/skills/react-best-practices/rules/js-request-idle-callback.md
+  s_2f16e0e318343c::t_58247dfcb58199 1-105
+.agents/skills/react-best-practices/rules/js-set-map-lookups.md
+  s_2f16e0e318343c::t_bbfe877f0dce70 1-24
+.agents/skills/react-best-practices/rules/js-tosorted-immutable.md
+  s_2f16e0e318343c::t_b509988d1a7c3f 1-57
+.agents/skills/react-best-practices/rules/rendering-activity.md
+  s_2f16e0e318343c::t_099c754d4078ed 1-26
+.agents/skills/react-best-practices/rules/rendering-animate-svg-wrapper.md
+  s_2f16e0e318343c::t_945247e3757c4e 1-47
+.agents/skills/react-best-practices/rules/rendering-conditional-render.md
+  s_2f16e0e318343c::t_463da0af94f8d2 1-40
+.agents/skills/react-best-practices/rules/rendering-content-visibility.md
+  s_2f16e0e318343c::t_7040a84035e60b 1-38
+.agents/skills/react-best-practices/rules/rendering-hoist-jsx.md
+  s_2f16e0e318343c::t_c0c16ab9f195ad 1-46
+.agents/skills/react-best-practices/rules/rendering-hydration-no-flicker.md
+  s_2f16e0e318343c::t_5a16bd370e092b 1-82
+.agents/skills/react-best-practices/rules/rendering-hydration-suppress-warning.md
+  s_2f16e0e318343c::t_943eae92d302f0 1-30
+.agents/skills/react-best-practices/rules/rendering-resource-hints.md
+  s_2f16e0e318343c::t_62ce7388c95147 1-85
+.agents/skills/react-best-practices/rules/rendering-script-defer-async.md
+  s_2f16e0e318343c::t_290cfefbea0da5 1-68
+.agents/skills/react-best-practices/rules/rendering-svg-precision.md
+  s_2f16e0e318343c::t_dbd76b3d0c5195 1-28
+.agents/skills/react-best-practices/rules/rendering-usetransition-loading.md
+  s_2f16e0e318343c::t_44767e4c7018bf 1-75
+.agents/skills/react-best-practices/rules/rerender-defer-reads.md
+  s_2f16e0e318343c::t_199cf9dce2f498 1-39
+.agents/skills/react-best-practices/rules/rerender-dependencies.md
+  s_2f16e0e318343c::t_6aaeb3f696506a 1-45
+.agents/skills/react-best-practices/rules/rerender-derived-state-no-effect.md
+  s_2f16e0e318343c::t_9e482b4a49d75c 1-40
+.agents/skills/react-best-practices/rules/rerender-derived-state.md
+  s_2f16e0e318343c::t_f9ac13a509867f 1-29
+.agents/skills/react-best-practices/rules/rerender-functional-setstate.md
+  s_2f16e0e318343c::t_e5390ce2e5bc2a 1-74
+.agents/skills/react-best-practices/rules/rerender-lazy-state-init.md
+  s_2f16e0e318343c::t_a54a2f83e68eeb 1-58
+.agents/skills/react-best-practices/rules/rerender-memo-with-default-value.md
+  s_2f16e0e318343c::t_1eaccd9f22af22 1-38
+.agents/skills/react-best-practices/rules/rerender-memo.md
+  s_2f16e0e318343c::t_801bd3b001c0dd 1-44
+.agents/skills/react-best-practices/rules/rerender-move-effect-to-event.md
+  s_2f16e0e318343c::t_4f27303d62ec74 1-45
+.agents/skills/react-best-practices/rules/rerender-no-inline-components.md
+  s_2f16e0e318343c::t_31429034594e65 1-82
+.agents/skills/react-best-practices/rules/rerender-simple-expression-in-memo.md
+  s_2f16e0e318343c::t_82dc0dabd399ea 1-35
+.agents/skills/react-best-practices/rules/rerender-split-combined-hooks.md
+  s_2f16e0e318343c::t_2d025c97c6e6a0 1-64
+.agents/skills/react-best-practices/rules/rerender-transitions.md
+  s_2f16e0e318343c::t_cc696409d63920 1-40
+.agents/skills/react-best-practices/rules/rerender-use-deferred-value.md
+  s_2f16e0e318343c::t_5588ee9f931253 1-59
+.agents/skills/react-best-practices/rules/rerender-use-ref-transient-values.md
+  s_2f16e0e318343c::t_688005de536a8e 1-73
+.agents/skills/react-best-practices/rules/server-after-nonblocking.md
+  s_2f16e0e318343c::t_647fccd90492f0 1-73
+.agents/skills/react-best-practices/rules/server-auth-actions.md
+  s_2f16e0e318343c::t_cfddd95c3f01d3 1-96
+.agents/skills/react-best-practices/rules/server-cache-lru.md
+  s_2f16e0e318343c::t_3dc4f94149411f 1-41
+.agents/skills/react-best-practices/rules/server-cache-react.md
+  s_2f16e0e318343c::t_cc5c4184af462e 1-76
+.agents/skills/react-best-practices/rules/server-dedup-props.md
+  s_2f16e0e318343c::t_960e3630ff17f0 1-65
+.agents/skills/react-best-practices/rules/server-hoist-static-io.md
+  s_2f16e0e318343c::t_5620a0dfefae5f 1-149
+.agents/skills/react-best-practices/rules/server-no-shared-module-state.md
+  s_2f16e0e318343c::t_843ee3e4e9f62d 1-50
+.agents/skills/react-best-practices/rules/server-parallel-fetching.md
+  s_2f16e0e318343c::t_8d465dd836ff5a 1-83
+.agents/skills/react-best-practices/rules/server-parallel-nested-fetching.md
+  s_2f16e0e318343c::t_dc3e5802fb5f76 1-34
+.agents/skills/react-best-practices/rules/server-serialization.md
+  s_2f16e0e318343c::t_77b5ad1e2a55dd 1-38
+.agents/skills/request-refactor-plan/SKILL.md
+  s_2f16e0e318343c::t_869f1ed3c8b329 1-68
+.agents/skills/resolving-merge-conflicts/SKILL.md
+  s_2f16e0e318343c::t_d49269654f6fd4 1-14
+.agents/skills/review/SKILL.md
+  s_2f16e0e318343c::t_8b43d3788dd9b0 1-69
+.agents/skills/setup-matt-pocock-skills/SKILL.md
+  s_2f16e0e318343c::t_ec712969e1e3a3 1-127
+.agents/skills/setup-matt-pocock-skills/domain.md
+  s_2f16e0e318343c::t_31eab0aa6a14e9 1-51
+.agents/skills/setup-matt-pocock-skills/issue-tracker-github.md
+  s_2f16e0e318343c::t_5ec0a2e33da2ae 1-34
+.agents/skills/setup-matt-pocock-skills/issue-tracker-gitlab.md
+  s_2f16e0e318343c::t_8f3c0f168c4076 1-35
+.agents/skills/setup-matt-pocock-skills/issue-tracker-local.md
+  s_2f16e0e318343c::t_7b8f73dcb52a25 1-19
+.agents/skills/setup-matt-pocock-skills/triage-labels.md
+  s_2f16e0e318343c::t_267c8b5ec9532b 1-15
+.agents/skills/setup-pre-commit/SKILL.md
+  s_2f16e0e318343c::t_c7171efc5f5400 1-91
+.agents/skills/tdd/SKILL.md
+  s_2f16e0e318343c::t_c1c00f57a3b677 1-108
+.agents/skills/tdd/mocking.md
+  s_2f16e0e318343c::t_2035d1949460b2 1-59
+.agents/skills/tdd/refactoring.md
+  s_2f16e0e318343c::t_af6907b482d113 1-10
+.agents/skills/tdd/tests.md
+  s_2f16e0e318343c::t_f38e07ec0bfe1b 1-61
+.agents/skills/to-issues/SKILL.md
+  s_2f16e0e318343c::t_79b4956eaf2e18 1-84
+.agents/skills/to-prd/SKILL.md
+  s_2f16e0e318343c::t_472423bc1f34d9 1-75
+.agents/skills/triage/AGENT-BRIEF.md
+  s_2f16e0e318343c::t_4abb64faff47ab 1-207
+.agents/skills/triage/OUT-OF-SCOPE.md
+  s_2f16e0e318343c::t_7df618651a172f 1-105
+.agents/skills/triage/SKILL.md
+  s_2f16e0e318343c::t_631b8898f0889f 1-112
+.agents/skills/ubiquitous-language/SKILL.md
+  s_2f16e0e318343c::t_b50f262ed5dc2c 1-93
+.agents/skills/web-design-guidelines/SKILL.md
+  s_2f16e0e318343c::t_ed3948384162fb 1-39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "72fef8cea9e57fa41d8ef138775724e62e340ec3",
+  "prompts": {},
+  "sessions": {
+    "s_2f16e0e318343c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f1210-c2ff-7ab2-af9f-692b82c013b5",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Jason Holt <jason@jasonholtdigital.com>"
+    }
+  }
+}
