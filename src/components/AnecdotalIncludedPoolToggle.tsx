@@ -30,7 +30,7 @@ export function AnecdotalIncludedPoolToggle({
             community-reported dashboard data to model overage after the pool is exhausted.
           </p>
           <p className="mt-1 text-xs font-medium text-[#14120b]/55">
-            Applies to Auto, Composer 2.5, and Grok 4.5. Plan estimates use Composer 2.5-equivalent tokens.
+            1B Pro Plus anchor; scale: Pro 1x, Pro Plus 3x, Ultra 20x.
           </p>
         </div>
         <input
@@ -57,7 +57,7 @@ export function AnecdotalIncludedPoolToggle({
       </dl>
 
       <p className="mt-3 text-xs text-[#14120b]/45">
-        These are estimates. Actual usage depends heavily on cache hit rate and model selection:
+        Composer 2.5-equivalent estimates. Actual usage depends heavily on cache hit rate and model selection:
         cache-heavy work may last longer; Fast mode and output-heavy work may run out sooner.
       </p>
 

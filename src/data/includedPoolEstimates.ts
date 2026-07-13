@@ -21,9 +21,9 @@ export const ANECDOTAL_INCLUDED_POOL_SOURCES = [
 ] as const;
 
 export const ANECDOTAL_FIRST_PARTY_POOL_TOKEN_ALLOWANCES: Record<PlanKey, number> = {
-  pro: 650_000_000,
-  pro_plus: 1_600_000_000,
-  ultra: 3_000_000_000,
+  pro: 333_333_333,
+  pro_plus: 1_000_000_000,
+  ultra: 6_666_666_667,
 };
 
 export const ANECDOTAL_INCLUDED_POOL_ESTIMATE: IncludedPoolEstimateConfig = {
