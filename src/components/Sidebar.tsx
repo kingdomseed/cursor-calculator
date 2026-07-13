@@ -59,9 +59,9 @@ export function Sidebar({ activeTarget, onNavigate, pricingDate }: SidebarProps)
           How plans work
         </p>
         <p className="text-xs text-white/45 mb-3">
-          Every plan includes two usage pools: usage-based and API-based. Auto and Composer draw
-          from the usage-based pool and are included in every subscription. The API pool covers all
-          other models. Once exhausted, you pay overage at the same per-token rates.
+          Every plan includes two usage pools. Auto, Composer 2.5, and Grok 4.5 draw from the
+          First-party models pool. Explicitly selected API models draw from the API pool. Once a
+          pool is exhausted, on-demand usage uses the documented per-token rates.
         </p>
 
         <p className="text-xs text-white/45 mb-2 font-medium">Max Mode</p>

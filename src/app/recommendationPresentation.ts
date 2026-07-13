@@ -265,8 +265,8 @@ function buildComparisonSections(
 
   const planCoverageRows: RecommendationComparisonRow[] = [
     createRow(plans, 'includedPool', 'Included API pool', (plan) => plan.includedPool, formatCurrency),
-    createRow(plans, 'includedPoolUsed', 'Included pool used', (plan) => plan.derived.includedPoolUsed, formatCurrency),
-    createRow(plans, 'unusedPool', 'Unused pool', (plan) => plan.unusedPool, formatCurrency),
+    createRow(plans, 'includedPoolUsed', 'API pool used', (plan) => plan.derived.includedPoolUsed, formatCurrency),
+    createRow(plans, 'unusedPool', 'Unused API pool', (plan) => plan.unusedPool, formatCurrency),
   ];
   const outOfPocketRows: RecommendationComparisonRow[] = [
     createRow(plans, 'subscription', 'Subscription', (plan) => plan.subscription, formatCurrency),
@@ -275,15 +275,15 @@ function buildComparisonSections(
 
   if (hasIncludedPoolEstimate) {
     planCoverageRows.push(
-      createRow(plans, 'estimatedComposerPool', 'Estimated Composer pool', (plan) => plan.derived.estimatedIncludedPoolAllowanceTokens, formatTokens),
-      createRow(plans, 'estimatedComposerOverageTokens', 'Estimated Composer overage tokens', (plan) => (
+      createRow(plans, 'estimatedFirstPartyPool', 'Estimated Composer 2.5-equivalent pool', (plan) => plan.derived.estimatedIncludedPoolAllowanceTokens, formatTokens),
+      createRow(plans, 'estimatedFirstPartyOverageTokens', 'Estimated equivalent overage tokens', (plan) => (
         plan.derived.estimatedIncludedPoolAllowanceTokens == null
           ? null
           : plan.derived.estimatedIncludedPoolOverageTokens
       ), formatTokens),
     );
     outOfPocketRows.push(
-      createRow(plans, 'estimatedComposerOverage', 'Estimated Composer overage', (plan) => (
+      createRow(plans, 'estimatedFirstPartyOverage', 'Estimated first-party overage', (plan) => (
         plan.derived.estimatedIncludedPoolAllowanceTokens == null
           ? null
           : plan.derived.estimatedIncludedPoolOverageCost
@@ -409,10 +409,10 @@ function buildTokenModeContext(
 ): string {
   if (estimatedIncludedPoolAllowance != null && coveredByPlan === 0 && billedBeyondPool === 0) {
     if (estimatedIncludedPoolOverage > 0) {
-      return `No API-priced usage is selected. The optional community preset adds ${formatCurrency(estimatedIncludedPoolOverage)} of estimated Composer pool overage.`;
+      return `No API-priced usage is selected. The optional community preset adds ${formatCurrency(estimatedIncludedPoolOverage)} of estimated first-party pool overage.`;
     }
 
-    return `No API-priced usage is selected. The selected plan estimate covers this Auto or Composer usage.`;
+    return `No API-priced usage is selected. The selected plan estimate covers this first-party usage.`;
   }
 
   const officialContext = billedBeyondPool > 0
@@ -423,7 +423,7 @@ function buildTokenModeContext(
     return officialContext;
   }
 
-  return `${officialContext} It also includes ${formatCurrency(estimatedIncludedPoolOverage)} of estimated Composer pool overage from the optional community preset.`;
+  return `${officialContext} It also includes ${formatCurrency(estimatedIncludedPoolOverage)} of estimated first-party pool overage from the optional community preset.`;
 }
 
 function formatPlanLabel(plan: PlanKey): string {
@@ -437,7 +437,7 @@ function buildIncludedPoolItems(models: IncludedPoolModelInput[]): IncludedPoolI
     key: model.id,
     label: model.name,
     provider: model.provider,
-    poolLabel: 'Included in all plans',
+    poolLabel: 'First-party pool',
   }));
 }
 

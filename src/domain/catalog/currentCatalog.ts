@@ -6,9 +6,9 @@ const CURRENT_CATALOG = clonePricingData(pricingData as PricingData);
 const CURRENT_MODEL_BY_ID = new Map(CURRENT_CATALOG.models.map((model) => [model.id, model]));
 const MANUAL_API_MODELS = CURRENT_CATALOG.models.filter((model) => model.pool === 'api');
 const MANUAL_SELECTABLE_MODELS = CURRENT_CATALOG.models.filter(
-  (model) => model.pool === 'api' || (model.pool === 'auto_composer' && model.provider === 'cursor'),
+  (model) => model.pool === 'api' || model.pool === 'first_party',
 );
-const INCLUDED_POOL_MODELS = CURRENT_CATALOG.models.filter((model) => model.pool === 'auto_composer');
+const INCLUDED_POOL_MODELS = CURRENT_CATALOG.models.filter((model) => model.pool === 'first_party');
 
 export function getPricingCatalog(): PricingData {
   return clonePricingData(CURRENT_CATALOG);

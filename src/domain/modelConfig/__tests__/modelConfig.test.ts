@@ -43,7 +43,7 @@ const preferredComposerModel: Model = {
   id: 'composer-2.5',
   name: 'Composer 2.5',
   provider: 'cursor',
-  pool: 'auto_composer',
+  pool: 'first_party',
   context: { default: 200000, max: null },
   rates: { input: 0.5, cache_write: null, cache_read: 0.2, output: 2.5 },
   variants: {

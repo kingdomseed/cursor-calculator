@@ -149,10 +149,11 @@ export function computeManualUsageRecommendation(
   configs: ModelConfig[],
   plans: PricingData['plans'],
   includedPoolEstimate?: IncludedPoolEstimateConfig,
+  pricingModels: Model[] = models,
 ): Recommendation {
   return computeExactUsageRecommendation(
     buildManualUsageEntries(exactTokens, models, configs),
-    models,
+    pricingModels,
     plans,
     includedPoolEstimate,
   );

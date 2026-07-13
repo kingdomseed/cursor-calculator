@@ -161,7 +161,7 @@ describe('BestPlanCard', () => {
     expect(html).toContain('Auto');
     expect(html).toContain('Composer 2.5');
     expect(html).toContain('Included');
-    expect(html).toContain('Included in all plans');
+    expect(html).toContain('First-party pool');
     const autoIndex = html.indexOf('Auto');
     const modelIndex = html.indexOf('Model 1');
     expect(autoIndex).toBeLessThan(modelIndex);

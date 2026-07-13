@@ -58,7 +58,10 @@ function App() {
     handleApproximationModeChange,
     handleIncludeUserApiKeyChange,
   } = useCalculatorController();
-  const hasSelectedIncludedPoolModel = selectedModels.some((model) => model.pool === 'auto_composer');
+  const hasSelectedIncludedPoolModel = selectedModels.some((model) => model.pool === 'first_party');
+  const selectableModels = mode === 'budget'
+    ? manualModels.filter((model) => model.pool === 'api')
+    : manualModels;
 
   return (
     <>
@@ -104,7 +107,7 @@ function App() {
                 exactTokens={manualExactTokens}
                 onExactTokensChange={setManualExactTokens}
               />
-              {hasSelectedIncludedPoolModel && (
+              {(hasSelectedIncludedPoolModel || useAnecdotalIncludedPoolEstimate) && (
                 <AnecdotalIncludedPoolToggle
                   checked={useAnecdotalIncludedPoolEstimate}
                   onChange={setUseAnecdotalIncludedPoolEstimate}
@@ -129,9 +132,11 @@ function App() {
         {showManualControls && (
           <>
             <div className="mt-8">
-              <label className="block text-sm font-medium text-[#14120b]/60 mb-2">Models to compare</label>
+              <label className="block text-sm font-medium text-[#14120b]/60 mb-2">
+                {mode === 'budget' ? 'API models to compare' : 'Models to compare'}
+              </label>
               <ModelSelector
-                options={manualModels}
+                options={selectableModels}
                 selected={selectedModelIds}
                 onChange={handleModelSelectionChange}
                 placeholder="Select models..."

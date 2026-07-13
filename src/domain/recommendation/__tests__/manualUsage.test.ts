@@ -25,7 +25,7 @@ const composer25Model: Model = {
   id: 'composer-2.5',
   name: 'Composer 2.5',
   provider: 'cursor',
-  pool: 'auto_composer',
+  pool: 'first_party',
   context: { default: 200000, max: null },
   rates: { input: 0.5, cache_write: null, cache_read: 0.2, output: 2.5 },
 };
@@ -55,6 +55,26 @@ const composerConfig: ModelConfig[] = [{
   caching: false,
   cacheHitRate: 0,
 }];
+
+const grok45Model: Model = {
+  id: 'grok-4-5',
+  name: 'Grok 4.5',
+  provider: 'cursor',
+  pool: 'first_party',
+  context: { default: 256000, max: null },
+  rates: { input: 2, cache_write: null, cache_read: 0.5, output: 6 },
+  pool_usage_promotion: {
+    ends_on: '2026-07-15',
+    allowance_multiplier: 2,
+    label: 'Included first-party usage is doubled through July 15, 2026',
+  },
+  variants: {
+    fast: {
+      model_id: 'grok-4-5-fast',
+      rates: { input: 4, cache_write: null, cache_read: 1, output: 18 },
+    },
+  },
+};
 
 describe('buildSimpleExactTokenBreakdown', () => {
   it('converts total tokens, cache-read share, and ratio into exact buckets', () => {
@@ -121,7 +141,7 @@ describe('computeManualUsageRecommendation', () => {
     expect(pro?.perModel[0]?.exactTokens?.cacheRead).toBe(250_000);
   });
 
-  it('leaves Auto + Composer usage out of official API math without an anecdotal estimate', () => {
+  it('leaves first-party usage out of official API math without an anecdotal estimate', () => {
     const result = computeManualUsageRecommendation(
       {
         inputWithCacheWrite: 0,
@@ -156,7 +176,8 @@ describe('computeManualUsageRecommendation', () => {
       plans,
       {
         sourceLabel: 'Community estimate',
-        tokenAllowances: {
+        referenceModelId: 'composer-2.5',
+        equivalentTokenAllowances: {
           pro: 500_000_000,
           pro_plus: 1_500_000_000,
           ultra: 6_000_000_000,
@@ -175,5 +196,75 @@ describe('computeManualUsageRecommendation', () => {
     expect(pro?.totalCost).toBeCloseTo(120, 4);
     expect(pro?.perModel[0]?.sourceLabel).toBe('Community estimate');
     expect(proPlus?.estimatedIncludedPoolOverageCost).toBe(0);
+  });
+
+  it('weights Grok first-party usage against the Composer reference allowance', () => {
+    const result = computeManualUsageRecommendation(
+      {
+        inputWithCacheWrite: 0,
+        inputWithoutCacheWrite: 75_000_000,
+        cacheRead: 0,
+        output: 25_000_000,
+        total: 100_000_000,
+      },
+      [grok45Model],
+      [{
+        modelId: 'grok-4-5',
+        weight: 100,
+        maxMode: false,
+        fast: false,
+        thinking: false,
+        caching: false,
+        cacheHitRate: 0,
+      }],
+      plans,
+      {
+        sourceLabel: 'Rate-weighted community estimate',
+        referenceModelId: 'composer-2.5',
+        equivalentTokenAllowances: { pro: 200_000_000 },
+        asOf: new Date('2026-07-16T00:00:00Z'),
+      },
+      [composer25Model, grok45Model],
+    );
+
+    const pro = result.all.find((plan) => plan.plan === 'pro');
+    expect(pro?.estimatedIncludedPoolAllowanceTokens).toBe(200_000_000);
+    expect(pro?.estimatedIncludedPoolOverageTokens).toBeCloseTo(100_000_000, -2);
+    expect(pro?.estimatedIncludedPoolOverageCost).toBeCloseTo(100, 4);
+    expect(pro?.totalCost).toBeCloseTo(120, 4);
+  });
+
+  it('applies Grok doubled first-party usage during its promotion', () => {
+    const result = computeManualUsageRecommendation(
+      {
+        inputWithCacheWrite: 0,
+        inputWithoutCacheWrite: 75_000_000,
+        cacheRead: 0,
+        output: 25_000_000,
+        total: 100_000_000,
+      },
+      [grok45Model],
+      [{
+        modelId: 'grok-4-5',
+        weight: 100,
+        maxMode: false,
+        fast: false,
+        thinking: false,
+        caching: false,
+        cacheHitRate: 0,
+      }],
+      plans,
+      {
+        sourceLabel: 'Rate-weighted community estimate',
+        referenceModelId: 'composer-2.5',
+        equivalentTokenAllowances: { pro: 200_000_000 },
+        asOf: new Date('2026-07-15T12:00:00Z'),
+      },
+      [composer25Model, grok45Model],
+    );
+
+    const pro = result.all.find((plan) => plan.plan === 'pro');
+    expect(pro?.estimatedIncludedPoolOverageTokens).toBe(0);
+    expect(pro?.estimatedIncludedPoolOverageCost).toBe(0);
   });
 });

@@ -20,13 +20,14 @@ export const ANECDOTAL_INCLUDED_POOL_SOURCES = [
   },
 ] as const;
 
-export const ANECDOTAL_INCLUDED_POOL_TOKEN_ALLOWANCES: Record<PlanKey, number> = {
+export const ANECDOTAL_FIRST_PARTY_POOL_TOKEN_ALLOWANCES: Record<PlanKey, number> = {
   pro: 650_000_000,
   pro_plus: 1_600_000_000,
   ultra: 3_000_000_000,
 };
 
 export const ANECDOTAL_INCLUDED_POOL_ESTIMATE: IncludedPoolEstimateConfig = {
-  tokenAllowances: ANECDOTAL_INCLUDED_POOL_TOKEN_ALLOWANCES,
-  sourceLabel: 'Community estimate',
+  referenceModelId: 'composer-2.5',
+  equivalentTokenAllowances: ANECDOTAL_FIRST_PARTY_POOL_TOKEN_ALLOWANCES,
+  sourceLabel: 'Rate-weighted community estimate',
 };

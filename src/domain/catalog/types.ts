@@ -30,11 +30,28 @@ export interface ModelVariants {
   thinking?: boolean;
 }
 
+export interface ModelRatePromotion {
+  ends_on: string;
+  rates: Partial<ModelRates>;
+  label: string;
+}
+
+export interface PoolUsagePromotion {
+  ends_on: string;
+  allowance_multiplier: number;
+  label: string;
+}
+
 export interface Model {
   id: string;
   name: string;
   provider: string;
-  pool: 'api' | 'auto_composer';
+  pool: 'api' | 'first_party';
+  docs_url?: string;
+  rate_promotion?: ModelRatePromotion;
+  pool_usage_promotion?: PoolUsagePromotion;
+  availability_note?: string;
+  usage_note?: string;
   context: {
     default: number;
     max: number | null;

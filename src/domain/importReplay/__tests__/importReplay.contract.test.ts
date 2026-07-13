@@ -23,6 +23,38 @@ describe('import replay catalog contract', () => {
     expect(getManualApiModels().map((model) => model.id)).not.toEqual(
       expect.arrayContaining(historicalModels.map((model) => model.id)),
     );
+    expect(historicalModels.map((model) => model.id)).toEqual(
+      expect.arrayContaining([
+        'composer-1.5',
+        'composer-2',
+        'grok-build-0-1',
+        'grok-4-3',
+        'grok-4-20',
+        'kimi-k2.5',
+        'claude-opus-4-6-fast',
+      ]),
+    );
+  });
+
+  it('preserves exact replay pricing for retired current-catalog entries', () => {
+    expect(getImportReplayModelById('composer-2')?.variants?.fast?.rates).toEqual({
+      input: 1.5,
+      cache_write: null,
+      cache_read: 0.35,
+      output: 7.5,
+    });
+    expect(getImportReplayModelById('grok-4-20')?.variants?.max_mode?.rates).toEqual({
+      input: 4,
+      cache_write: null,
+      cache_read: 0.4,
+      output: 12,
+    });
+    expect(getImportReplayModelById('claude-opus-4-6-fast')?.rates).toEqual({
+      input: 30,
+      cache_write: 37.5,
+      cache_read: 3,
+      output: 150,
+    });
   });
 
   it('resolves every exact and approximate label mapping to a valid replay model', () => {

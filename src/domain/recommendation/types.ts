@@ -62,8 +62,10 @@ export interface PlanLineItem extends UsageLineItemInput {
 }
 
 export interface IncludedPoolEstimateConfig {
-  tokenAllowances: Partial<Record<PlanKey, number>>;
+  referenceModelId: string;
+  equivalentTokenAllowances: Partial<Record<PlanKey, number>>;
   sourceLabel: string;
+  asOf?: Date;
 }
 
 export interface PlanResult {

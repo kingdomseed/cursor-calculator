@@ -94,6 +94,7 @@ export function selectRecommendation(
       state.modelConfigs,
       inputs.plans,
       state.useAnecdotalIncludedPoolEstimate ? ANECDOTAL_INCLUDED_POOL_ESTIMATE : undefined,
+      inputs.manualModels,
     );
   }
 

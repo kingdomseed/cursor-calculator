@@ -84,8 +84,13 @@ export function useCalculatorController(
     () => getIncludedPoolModels(),
     [],
   );
+  const apiModels = useMemo(
+    () => manualModels.filter((model) => model.pool === 'api'),
+    [manualModels],
+  );
+  const initialModels = apiModels.length > 0 ? apiModels : manualModels;
 
-  const [state, dispatch] = useReducer(calculatorReducer, manualModels, createInitialCalculatorState);
+  const [state, dispatch] = useReducer(calculatorReducer, initialModels, createInitialCalculatorState);
   const { cursorImportFiles, cursorImportOptions } = state;
 
   const selectedModelIds = useMemo(() => selectSelectedModelIds(state), [state]);
@@ -111,7 +116,18 @@ export function useCalculatorController(
 
   const navigate = useCallback((target: NavigationTarget) => {
     dispatch({ type: 'navigate', target });
-  }, []);
+
+    if (target === 'budget' && apiModels.length > 0) {
+      const selectedApiIds = state.modelConfigs
+        .map((config) => config.modelId)
+        .filter((id) => apiModels.some((model) => model.id === id));
+      dispatch({
+        type: 'reconcile_selected_models',
+        ids: selectedApiIds.length > 0 ? selectedApiIds : [apiModels[0].id],
+        manualModels: apiModels,
+      });
+    }
+  }, [apiModels, state.modelConfigs]);
 
   const setMode = useCallback((mode: CalculatorState['mode']) => {
     dispatch({ type: 'set_mode', mode });

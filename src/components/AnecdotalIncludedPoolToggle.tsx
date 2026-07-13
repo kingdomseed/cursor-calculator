@@ -1,4 +1,4 @@
-import { ANECDOTAL_INCLUDED_POOL_SOURCES, ANECDOTAL_INCLUDED_POOL_TOKEN_ALLOWANCES } from '../data/includedPoolEstimates';
+import { ANECDOTAL_FIRST_PARTY_POOL_TOKEN_ALLOWANCES, ANECDOTAL_INCLUDED_POOL_SOURCES } from '../data/includedPoolEstimates';
 import { formatNumber } from '../domain/recommendation/formatters';
 
 interface AnecdotalIncludedPoolToggleProps {
@@ -13,9 +13,9 @@ export function AnecdotalIncludedPoolToggle({
   onChange,
 }: AnecdotalIncludedPoolToggleProps) {
   const planEstimates = [
-    { label: 'Pro', tokens: ANECDOTAL_INCLUDED_POOL_TOKEN_ALLOWANCES.pro },
-    { label: 'Pro Plus', tokens: ANECDOTAL_INCLUDED_POOL_TOKEN_ALLOWANCES.pro_plus },
-    { label: 'Ultra', tokens: ANECDOTAL_INCLUDED_POOL_TOKEN_ALLOWANCES.ultra },
+    { label: 'Pro', tokens: ANECDOTAL_FIRST_PARTY_POOL_TOKEN_ALLOWANCES.pro },
+    { label: 'Pro Plus', tokens: ANECDOTAL_FIRST_PARTY_POOL_TOKEN_ALLOWANCES.pro_plus },
+    { label: 'Ultra', tokens: ANECDOTAL_FIRST_PARTY_POOL_TOKEN_ALLOWANCES.ultra },
   ];
 
   return (
@@ -23,15 +23,14 @@ export function AnecdotalIncludedPoolToggle({
       <div className="flex items-start justify-between gap-4">
         <div>
           <label htmlFor={SWITCH_ID} className="text-sm font-semibold text-[#14120b]">
-            Anecdotal Composer pool estimate
+            Anecdotal first-party pool estimate
           </label>
           <p id={`${SWITCH_ID}-description`} className="mt-1 text-xs text-[#14120b]/55">
-            Cursor does not publish Auto + Composer token limits. This optional estimate uses
-            community-reported Composer 2.5 dashboard data to model overage after the usage pool is
-            exhausted.
+            Cursor does not publish first-party pool limits. This optional estimate uses
+            community-reported dashboard data to model overage after the pool is exhausted.
           </p>
           <p className="mt-1 text-xs font-medium text-[#14120b]/55">
-            Applies only to Auto or Composer 2.5 usage above the selected plan estimate.
+            Applies to Auto, Composer 2.5, and Grok 4.5. Plan estimates use Composer 2.5-equivalent tokens.
           </p>
         </div>
         <input

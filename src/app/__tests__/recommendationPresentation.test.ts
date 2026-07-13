@@ -153,7 +153,7 @@ describe('recommendation presentation', () => {
     expect(findRowValue(presentation, 'totalOutOfPocket', 'pro_plus')).toBe(110);
   });
 
-  it('uses Composer-estimate wording when there is no API-priced usage', () => {
+  it('uses first-party estimate wording when there is no API-priced usage', () => {
     const best = createPlanResult({
       plan: 'pro',
       subscription: 20,
@@ -172,7 +172,7 @@ describe('recommendation presentation', () => {
           modelId: 'composer-2.5',
           label: 'Composer 2.5',
           provider: 'cursor',
-          pool: 'auto_composer',
+          pool: 'first_party',
           apiCost: 100,
           tokens: { total: 600_000_000, input: 450_000_000, output: 150_000_000 },
         }),
@@ -186,7 +186,7 @@ describe('recommendation presentation', () => {
     });
 
     expect(presentation.hero.context).toBe(
-      'No API-priced usage is selected. The optional community preset adds $100.00 of estimated Composer pool overage.',
+      'No API-priced usage is selected. The optional community preset adds $100.00 of estimated first-party pool overage.',
     );
     expect(presentation.bestPlan.derived).toMatchObject({
       usageValue: 100,
@@ -197,8 +197,8 @@ describe('recommendation presentation', () => {
       estimatedIncludedPoolOverageCost: 100,
       totalOutOfPocket: 120,
     });
-    expect(findRowValue(presentation, 'estimatedComposerPool', 'pro')).toBe(500_000_000);
-    expect(findRowValue(presentation, 'estimatedComposerOverage', 'pro')).toBe(100);
+    expect(findRowValue(presentation, 'estimatedFirstPartyPool', 'pro')).toBe(500_000_000);
+    expect(findRowValue(presentation, 'estimatedFirstPartyOverage', 'pro')).toBe(100);
   });
 
   it('uses the same usage-first framing for csv replay as manual token mode', () => {
@@ -278,8 +278,8 @@ describe('recommendation presentation', () => {
     });
 
     expect(presentation.includedPoolItems).toEqual([
-      { key: 'auto', label: 'Auto', provider: 'cursor', poolLabel: 'Included in all plans' },
-      { key: 'composer-2.5', label: 'Composer 2.5', provider: 'cursor', poolLabel: 'Included in all plans' },
+      { key: 'auto', label: 'Auto', provider: 'cursor', poolLabel: 'First-party pool' },
+      { key: 'composer-2.5', label: 'Composer 2.5', provider: 'cursor', poolLabel: 'First-party pool' },
     ]);
   });
 
@@ -333,8 +333,8 @@ describe('recommendation presentation', () => {
     );
 
     expect(new Set(rowKeys).size).toBe(rowKeys.length);
-    expect(rowKeys).not.toContain('estimatedComposerPool');
-    expect(rowKeys).not.toContain('estimatedComposerOverage');
+    expect(rowKeys).not.toContain('estimatedFirstPartyPool');
+    expect(rowKeys).not.toContain('estimatedFirstPartyOverage');
   });
 
   it('populates modelGroups for csv import mode', () => {

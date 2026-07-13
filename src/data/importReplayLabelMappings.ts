@@ -40,6 +40,13 @@ export const EXACT_IMPORT_REPLAY_LABEL_MAPPINGS: Record<string, ImportReplayLabe
     thinking: true,
     approximated: false,
   },
+  'composer-2-fast': {
+    modelId: 'composer-2',
+    fast: true,
+    maxMode: false,
+    thinking: false,
+    approximated: true,
+  },
 };
 
 export const APPROXIMATE_IMPORT_REPLAY_LABEL_MAPPINGS: Record<string, ImportReplayLabelMapping> = {
@@ -232,6 +239,10 @@ export const IMPORT_REPLAY_LONG_CONTEXT_COMPANIONS: Record<string, ImportReplayL
   'claude-4-5-opus': { maxId: 'historical-opus-max-2x', approximated: true },
   'claude-4-5-sonnet': { maxId: 'claude-4-sonnet-1m', approximated: true },
   'claude-4-6-sonnet': { maxId: 'claude-4-sonnet-1m', approximated: true },
+};
+
+export const IMPORT_REPLAY_VARIANT_PARENTS: Record<string, string> = {
+  'claude-opus-4-6-fast': 'claude-opus-4-6',
 };
 
 export const IMPORT_REPLAY_APPROXIMATE_FAST_REASONING_SUFFIXES = ['medium', 'high', 'xhigh'] as const;

@@ -5,6 +5,8 @@ import { normalizeImportedModel } from '../normalization';
 import { parseCursorCsvText } from '../csvParser';
 import { priceImportedRow } from '../pricing';
 import { parseCursorUsageFiles } from '../summary';
+import { computeExactUsageRecommendation } from '../../recommendation/recommendation';
+import { getPlans } from '../../catalog/currentCatalog';
 import type { CursorImportOptions, ExactTokenBreakdown, SupportedNormalization } from '../types';
 
 const IMPORT_REPLAY_MODELS = getImportReplayModels();
@@ -40,6 +42,35 @@ describe('parseCursorCsvText', () => {
 });
 
 describe('normalizeImportedModel', () => {
+  it('marks direct retired catalog labels as approximate', () => {
+    expect(
+      normalizeImportedModel(
+        'composer-2',
+        false,
+        IMPORT_REPLAY_MODEL_BY_ID,
+        'strict',
+      ),
+    ).toMatchObject({
+      kind: 'supported',
+      modelId: 'composer-2',
+      approximated: true,
+    });
+
+    expect(
+      normalizeImportedModel(
+        'composer-2-fast',
+        false,
+        IMPORT_REPLAY_MODEL_BY_ID,
+        'strict',
+      ),
+    ).toMatchObject({
+      kind: 'supported',
+      modelId: 'composer-2',
+      fast: true,
+      approximated: true,
+    });
+  });
+
   it('approximates unsupported GPT-5.x fast labels in best-effort mode and rejects them in strict mode', () => {
     expect(
       normalizeImportedModel(
@@ -72,6 +103,53 @@ describe('normalizeImportedModel', () => {
 });
 
 describe('priceImportedRow', () => {
+  it('marks inferred Fast + Max rates as approximate', () => {
+    const model = getImportReplayModelById('gpt-5.6-sol');
+    const normalized: SupportedNormalization = {
+      kind: 'supported',
+      modelId: 'gpt-5.6-sol',
+      fast: true,
+      maxMode: true,
+      thinking: false,
+      approximated: true,
+    };
+    const tokens: ExactTokenBreakdown = {
+      inputWithCacheWrite: 0,
+      inputWithoutCacheWrite: 1_000_000,
+      cacheRead: 0,
+      output: 1_000_000,
+      total: 2_000_000,
+    };
+
+    const priced = priceImportedRow(model!, normalized, tokens, IMPORT_REPLAY_MODEL_BY_ID);
+
+    expect(priced.approximated).toBe(true);
+    expect(priced.exactCost.total).toBe(110);
+  });
+
+  it('carries approximate Fast + Max costs through plan recommendation', () => {
+    const fastMaxCsv = `Date,User,Kind,Model,Max Mode,Input (w/ Cache Write),Input (w/o Cache Write),Cache Read,Output Tokens,Total Tokens,Requests
+"2026-07-13T13:00:40.253Z","developer@example.com","On-Demand","gpt-5.6-sol-fast","Yes","0","1000000","0","1000000","2000000","1"`;
+    const report = parseCursorUsageFiles(
+      [{ name: 'cursor-usage-fast-max.csv', text: fastMaxCsv }],
+      IMPORT_REPLAY_MODELS,
+      baseOptions,
+    );
+
+    expect(report.pricedEntries[0]).toMatchObject({
+      modelId: 'gpt-5.6-sol',
+      fast: true,
+      maxMode: true,
+      approximated: true,
+      exactCost: { total: 110 },
+    });
+    expect(() => computeExactUsageRecommendation(
+      report.pricedEntries,
+      IMPORT_REPLAY_MODELS,
+      getPlans(),
+    )).not.toThrow();
+  });
+
   it('applies long-context companion pricing when max-mode input exceeds the default context', () => {
     const model = getImportReplayModelById('claude-opus-4-6');
     const normalized: SupportedNormalization = {

@@ -43,6 +43,19 @@ export function cloneModel(model: Model): Model {
     name: model.name,
     provider: model.provider,
     pool: model.pool,
+    ...(model.docs_url ? { docs_url: model.docs_url } : {}),
+    ...(model.rate_promotion ? {
+      rate_promotion: {
+        ends_on: model.rate_promotion.ends_on,
+        rates: { ...model.rate_promotion.rates },
+        label: model.rate_promotion.label,
+      },
+    } : {}),
+    ...(model.pool_usage_promotion ? {
+      pool_usage_promotion: { ...model.pool_usage_promotion },
+    } : {}),
+    ...(model.availability_note ? { availability_note: model.availability_note } : {}),
+    ...(model.usage_note ? { usage_note: model.usage_note } : {}),
     context: {
       default: model.context.default,
       max: model.context.max,

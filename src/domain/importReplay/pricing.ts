@@ -21,8 +21,16 @@ export function priceImportedRow(
     cacheHitRate: 0,
   };
 
-  let rates = computeBillableRates(model, config);
-  let approximated = false;
+  const hasUndocumentedFastMaxRates = !!(
+    normalized.fast
+    && normalized.maxMode
+    && model.variants?.fast
+    && model.variants.max_mode?.rates
+  );
+  let rates = hasUndocumentedFastMaxRates
+    ? approximateCombinedFastMaxRates(model)
+    : computeBillableRates(model, config);
+  let approximated = hasUndocumentedFastMaxRates;
 
   if (normalized.maxMode) {
     const totalInputTokens =
@@ -33,7 +41,7 @@ export function priceImportedRow(
     if (model.context.default > 0 && totalInputTokens > model.context.default) {
       const adjusted = applyLongContextCompanionRates(model, rates, modelsById);
       rates = adjusted.rates;
-      approximated = adjusted.approximated;
+      approximated = approximated || adjusted.approximated;
     }
   }
 
@@ -58,6 +66,44 @@ export function priceImportedRow(
     },
     approximated,
   };
+}
+
+function approximateCombinedFastMaxRates(
+  model: import('../catalog/types').Model,
+): import('../catalog/types').Model['rates'] {
+  const fastRates = model.variants?.fast?.rates;
+  const maxRates = model.variants?.max_mode?.rates;
+  if (!fastRates || !maxRates) return model.rates;
+
+  return {
+    input: applyMultiplier(fastRates.input, model.rates.input, maxRates.input),
+    cache_write: applyOptionalMultiplier(
+      fastRates.cache_write,
+      model.rates.cache_write,
+      maxRates.cache_write,
+      model.rates.input,
+      maxRates.input,
+    ),
+    cache_read: applyOptionalMultiplier(
+      fastRates.cache_read,
+      model.rates.cache_read,
+      maxRates.cache_read,
+      model.rates.input,
+      maxRates.input,
+    ),
+    output: applyMultiplier(fastRates.output, model.rates.output, maxRates.output),
+  };
+}
+
+function applyOptionalMultiplier(
+  current: number | null,
+  base: number | null,
+  target: number | null,
+  fallbackBase: number,
+  fallbackTarget: number,
+): number | null {
+  if (current === null) return null;
+  return applyMultiplier(current, base ?? fallbackBase, target ?? fallbackTarget);
 }
 
 function multiplyRates(

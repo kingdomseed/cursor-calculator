@@ -2,7 +2,7 @@ import { getActiveModelConfigBadges, getModelConfigCapabilities } from '../domai
 import { useMemo, useState } from 'react';
 import type { Model, ModelConfig } from '../lib/types';
 import { formatRate } from '../domain/recommendation/formatters';
-import { computeEffectiveRates } from '../domain/recommendation/rates';
+import { computeEffectiveRates, isPoolUsagePromotionActive, isRatePromotionActive } from '../domain/recommendation/rates';
 import { PROVIDER_COLORS } from '../lib/constants';
 import { Collapsible } from './Collapsible';
 
@@ -26,6 +26,7 @@ export function ModelConfigRow({ model, config, onChange }: Props) {
     hasCaching,
   } = getModelConfigCapabilities(model);
   const activeBadges = getActiveModelConfigBadges(config);
+  const fastAndMaxAreSeparate = !!model.variants?.max_mode?.rates;
 
   return (
     <div className="bg-white rounded-xl border border-[#e0e0d8] p-4">
@@ -64,7 +65,11 @@ export function ModelConfigRow({ model, config, onChange }: Props) {
             <div className="flex flex-wrap gap-4 text-sm">
               {hasMaxMode && (
                 <label className="flex items-center gap-1.5 cursor-pointer">
-                  <input type="checkbox" checked={config.maxMode} onChange={(e) => onChange({ ...config, maxMode: e.target.checked })}
+                  <input type="checkbox" checked={config.maxMode} onChange={(e) => onChange({
+                    ...config,
+                    maxMode: e.target.checked,
+                    fast: e.target.checked && fastAndMaxAreSeparate ? false : config.fast,
+                  })}
                     className="w-4 h-4 rounded border-[#e0e0d8] text-[#14120b] focus:ring-[#14120b]" />
                   <span>Max Mode</span>
                   <span className="text-xs text-[#14120b]/40">(model rate)</span>
@@ -72,10 +77,16 @@ export function ModelConfigRow({ model, config, onChange }: Props) {
               )}
               {hasFast && (
                 <label className="flex items-center gap-1.5 cursor-pointer">
-                  <input type="checkbox" checked={config.fast} onChange={(e) => onChange({ ...config, fast: e.target.checked })}
+                  <input type="checkbox" checked={config.fast} onChange={(e) => onChange({
+                    ...config,
+                    fast: e.target.checked,
+                    maxMode: e.target.checked && fastAndMaxAreSeparate ? false : config.maxMode,
+                  })}
                     className="w-4 h-4 rounded border-[#e0e0d8] text-[#14120b] focus:ring-[#14120b]" />
                   <span>Fast</span>
-                  <span className="text-xs text-[#14120b]/40">(stacks with Max)</span>
+                  <span className="text-xs text-[#14120b]/40">
+                    {fastAndMaxAreSeparate ? '(separate from Max)' : '(stacks with Max)'}
+                  </span>
                 </label>
               )}
             </div>
@@ -111,6 +122,29 @@ export function ModelConfigRow({ model, config, onChange }: Props) {
                     <span className="text-xs font-semibold bg-[#f7f7f4] px-1.5 py-0.5 rounded w-10 text-center">{config.cacheHitRate}%</span>
                   </div>
                 </div>
+              )}
+            </div>
+          )}
+
+          {(model.docs_url || model.availability_note || model.usage_note || isRatePromotionActive(model) || isPoolUsagePromotionActive(model)) && (
+            <div className="space-y-1 text-xs text-[#14120b]/50">
+              {isRatePromotionActive(model) && model.rate_promotion && (
+                <p className="text-emerald-700">{model.rate_promotion.label}</p>
+              )}
+              {model.availability_note && <p className="text-amber-700">{model.availability_note}</p>}
+              {model.usage_note && <p>{model.usage_note}</p>}
+              {isPoolUsagePromotionActive(model) && model.pool_usage_promotion && (
+                <p className="text-emerald-700">{model.pool_usage_promotion.label}</p>
+              )}
+              {model.docs_url && (
+                <a
+                  href={model.docs_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block underline hover:text-[#14120b]"
+                >
+                  Cursor model docs
+                </a>
               )}
             </div>
           )}

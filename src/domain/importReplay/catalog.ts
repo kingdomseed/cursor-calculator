@@ -14,6 +14,9 @@ import { IMPORT_REPLAY_HISTORICAL_MODELS } from '../../data/importReplayHistoric
 
 const IMPORT_REPLAY_MODELS = [...getCurrentModels(), ...cloneModels(IMPORT_REPLAY_HISTORICAL_MODELS)];
 const IMPORT_REPLAY_MODEL_BY_ID = new Map(IMPORT_REPLAY_MODELS.map((model) => [model.id, model]));
+const HISTORICAL_IMPORT_REPLAY_MODEL_IDS = new Set(
+  IMPORT_REPLAY_HISTORICAL_MODELS.map((model) => model.id),
+);
 const EXACT_IMPORT_REPLAY_MAPPINGS = cloneLabelMappings(EXACT_IMPORT_REPLAY_LABEL_MAPPINGS);
 const APPROXIMATE_IMPORT_REPLAY_MAPPINGS = cloneLabelMappings(APPROXIMATE_IMPORT_REPLAY_LABEL_MAPPINGS);
 const LONG_CONTEXT_COMPANIONS = cloneLongContextCompanions(IMPORT_REPLAY_LONG_CONTEXT_COMPANIONS);
@@ -29,6 +32,10 @@ export function getImportReplayHistoricalModels(): Model[] {
 export function getImportReplayModelById(id: string): Model | undefined {
   const model = IMPORT_REPLAY_MODEL_BY_ID.get(id);
   return model ? cloneModel(model) : undefined;
+}
+
+export function isHistoricalImportReplayModelId(id: string): boolean {
+  return HISTORICAL_IMPORT_REPLAY_MODEL_IDS.has(id);
 }
 
 export function getExactImportReplayLabelMappings(): Record<string, ImportReplayLabelMapping> {

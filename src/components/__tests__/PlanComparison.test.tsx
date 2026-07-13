@@ -278,7 +278,7 @@ describe('PlanComparison', () => {
 
     expect(html).toContain('Auto');
     expect(html).toContain('Composer 2.5');
-    expect(html).toContain('Included in all plans');
+    expect(html).toContain('First-party pool');
     const includedMatches = html.match(/Included<\/td>/g) ?? [];
     expect(includedMatches.length).toBe(4);
   });

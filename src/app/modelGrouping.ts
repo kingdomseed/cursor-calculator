@@ -1,5 +1,8 @@
-import { getPricingCatalog } from '../domain/catalog/currentCatalog';
-import { IMPORT_REPLAY_LONG_CONTEXT_COMPANIONS } from '../data/importReplayLabelMappings';
+import { getImportReplayModels } from '../domain/importReplay/catalog';
+import {
+  IMPORT_REPLAY_LONG_CONTEXT_COMPANIONS,
+  IMPORT_REPLAY_VARIANT_PARENTS,
+} from '../data/importReplayLabelMappings';
 import type { TokenSource } from './calculatorState';
 import type { RecommendationModelDisplayRow } from './recommendationPresentation';
 
@@ -16,8 +19,10 @@ export interface RecommendationModelGroup {
 // Module-scope maps built once from catalog and companion data
 
 const fastVariantToParent: Map<string, string> = new Map();
-const catalog = getPricingCatalog();
-for (const model of catalog.models) {
+for (const [variantId, parentId] of Object.entries(IMPORT_REPLAY_VARIANT_PARENTS)) {
+  fastVariantToParent.set(variantId, parentId);
+}
+for (const model of getImportReplayModels()) {
   if (model.variants?.fast) {
     fastVariantToParent.set(model.variants.fast.model_id, model.id);
   }

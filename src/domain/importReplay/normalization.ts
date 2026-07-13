@@ -3,6 +3,7 @@ import {
   getApproximateImportReplayLabelMappings,
   getDefaultApproximateFastMultiplier,
   getExactImportReplayLabelMappings,
+  isHistoricalImportReplayModelId,
 } from './catalog';
 import type { ApproximationMode, ImportReplayModelsById, NormalizationResult, SupportedNormalization } from './types';
 
@@ -22,7 +23,7 @@ export function normalizeImportedModel(
       fast: false,
       maxMode: resolveMaxMode(rawLabel, maxMode, modelsById),
       thinking: false,
-      approximated: false,
+      approximated: isHistoricalImportReplayModelId(rawLabel),
     });
   }
 
@@ -32,7 +33,7 @@ export function normalizeImportedModel(
       fast: exactAlias.fast,
       maxMode: resolveMaxMode(exactAlias.modelId, maxMode, modelsById, exactAlias.maxMode),
       thinking: exactAlias.thinking,
-      approximated: exactAlias.approximated,
+      approximated: exactAlias.approximated || isHistoricalImportReplayModelId(exactAlias.modelId),
     });
   }
 

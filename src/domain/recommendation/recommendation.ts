@@ -1,7 +1,7 @@
 import type { Model, Plan, PlanKey, PricingData } from '../catalog/types';
 import { dollarsToExactTokens } from './budgetUsage';
 import { directBreakdownToDollars, exactTokensToDollars, tokensToDollars } from './conversions';
-import { computeBillableRates, computeEffectiveRates, effectiveRatesFromExactCost, effectiveRatesFromExactTokens } from './rates';
+import { computeBillableRates, computeEffectiveRates, effectiveRatesFromExactCost, effectiveRatesFromExactTokens, getPoolUsageAllowanceMultiplier } from './rates';
 import type {
   IncludedPoolEstimateConfig,
   Mode,
@@ -233,9 +233,43 @@ function computeExactUsagePlanResult(
   models: Model[],
   includedPoolEstimate?: IncludedPoolEstimateConfig,
 ): PlanResult {
-  const includedPoolAllowance = includedPoolEstimate?.tokenAllowances[key] ?? null;
-  const includedPoolTokens = usageItems.reduce(
-    (sum, usage) => usage.pool === 'auto_composer' ? sum + usage.tokens.total : sum,
+  const referenceModel = includedPoolEstimate
+    ? models.find((model) => model.id === includedPoolEstimate.referenceModelId)
+    : undefined;
+  const includedPoolAllowance = referenceModel
+    ? includedPoolEstimate?.equivalentTokenAllowances[key] ?? null
+    : null;
+  const pricedUsageItems = usageItems.flatMap((usage) => {
+    const model = models.find((candidate) => candidate.id === usage.modelId);
+    if (!model) return [];
+
+    const pricing = priceUsageItem(usage, model);
+    if (usage.pool !== 'first_party' || !referenceModel) {
+      return [{ usage, ...pricing, equivalentTokens: usage.tokens.total }];
+    }
+
+    const referencePricing = priceUsageItem(
+      {
+        ...usage,
+        modelId: referenceModel.id,
+        fast: false,
+        maxMode: false,
+        exactCost: undefined,
+      },
+      referenceModel,
+    );
+    const allowanceMultiplier = getPoolUsageAllowanceMultiplier(
+      model,
+      includedPoolEstimate?.asOf,
+    );
+    const equivalentTokens = referencePricing.apiCost > 0
+      ? usage.tokens.total * (pricing.apiCost / referencePricing.apiCost) / allowanceMultiplier
+      : 0;
+
+    return [{ usage, ...pricing, equivalentTokens }];
+  });
+  const includedPoolTokens = pricedUsageItems.reduce(
+    (sum, item) => item.usage.pool === 'first_party' ? sum + item.equivalentTokens : sum,
     0,
   );
   const includedPoolOverageTokens = includedPoolAllowance == null
@@ -245,32 +279,13 @@ function computeExactUsagePlanResult(
     ? includedPoolOverageTokens / includedPoolTokens
     : 0;
 
-  const perModel = usageItems
-    .map((usage) => {
-      if (usage.pool !== 'api' && (usage.pool !== 'auto_composer' || !includedPoolEstimate)) {
+  const perModel = pricedUsageItems
+    .map(({ usage, effectiveRates, apiCost }) => {
+      if (usage.pool !== 'api' && (usage.pool !== 'first_party' || !includedPoolEstimate)) {
         return null;
       }
 
-      const model = models.find((candidate) => candidate.id === usage.modelId);
-      if (!model) return null;
-
-      const config = createConfigFromUsage(usage);
-      const billableRates = computeBillableRates(model, config);
-      const effectiveRates = usage.exactCost
-        ? effectiveRatesFromExactCost(usage.exactCost, usage.tokens, billableRates)
-        : usage.exactTokens
-          ? effectiveRatesFromExactTokens(usage.exactTokens, billableRates)
-          : {
-              input: billableRates.input,
-              output: billableRates.output,
-            };
-      const apiCost = usage.exactCost
-        ? usage.exactCost.total
-        : usage.exactTokens
-          ? exactTokensToDollars(usage.exactTokens, billableRates)
-          : directBreakdownToDollars(usage.tokens, effectiveRates);
-
-      if (usage.pool === 'auto_composer' && includedPoolEstimate) {
+      if (usage.pool === 'first_party' && includedPoolEstimate) {
         return buildPlanLineItem(
           {
             ...usage,
@@ -292,7 +307,7 @@ function computeExactUsagePlanResult(
     0,
   );
   const includedPoolOverageCost = perModel.reduce(
-    (sum, item) => item.pool === 'auto_composer' ? sum + item.apiCost : sum,
+    (sum, item) => item.pool === 'first_party' ? sum + item.apiCost : sum,
     0,
   );
   const overage = Math.max(0, totalApiUsage - plan.api_pool);
@@ -313,6 +328,32 @@ function computeExactUsagePlanResult(
     affordable: true,
     perModel,
   };
+}
+
+function priceUsageItem(
+  usage: UsageLineItemInput,
+  model: Model,
+): Pick<PlanLineItem, 'effectiveRates' | 'apiCost'> {
+  if (usage.exactCost) {
+    return {
+      effectiveRates: effectiveRatesFromExactCost(usage.exactCost, usage.tokens, model.rates),
+      apiCost: usage.exactCost.total,
+    };
+  }
+
+  const config = createConfigFromUsage(usage);
+  const billableRates = computeBillableRates(model, config);
+  const effectiveRates = usage.exactTokens
+      ? effectiveRatesFromExactTokens(usage.exactTokens, billableRates)
+      : {
+          input: billableRates.input,
+          output: billableRates.output,
+        };
+  const apiCost = usage.exactTokens
+      ? exactTokensToDollars(usage.exactTokens, billableRates)
+      : directBreakdownToDollars(usage.tokens, effectiveRates);
+
+  return { effectiveRates, apiCost };
 }
 
 function buildPlanLineItem(

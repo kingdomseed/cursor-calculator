@@ -84,7 +84,7 @@ All pricing facts should be verified against Cursor docs before changing the cat
 
 ### Usage pools
 
-- **Auto + Composer pool** — used by Auto and Composer 2.5 on individual plans. Cursor describes this as generous included usage, but does not disclose a dollar value.
+- **First-party models pool** — used by Auto, Composer 2.5, and Grok 4.5 on individual plans. Cursor describes this as generous included usage, but does not disclose a dollar value.
 - **API pool** — charged at each model's API rate:
   - Pro: `$20/mo` → `$20` API pool
   - Pro Plus: `$60/mo` → `$70` API pool
@@ -109,21 +109,28 @@ Fast mode is a distinct model variant, not a toggle on the base model.
 
 - Claude Opus 4.8 Fast: `$10/M` input and `$50/M` output, and requires Max Mode
 - GPT-5.5 Fast: `$12.50/M` input and `$75/M` output
+- GPT-5.6 Sol, Terra, and Luna Fast: `2x` each model's standard rates
 - Composer 2.5 Fast: `$3/M` input and `$15/M` output
+- Grok 4.5 Fast: `$4/M` input and `$18/M` output
 
 Historical imported fast labels may still be replayed as best-effort estimates, but that approximation logic belongs only in the import layer.
 
 ### Thinking mode
 
-Thinking mode exists for Claude models, current GPT models, Gemini models, Grok Build, and Composer 2.5, but Cursor docs do not currently publish separate token pricing for thinking tokens.
+Thinking mode exists for Claude models, current GPT models, Gemini models, and Composer 2.5, but Cursor docs do not currently publish separate token pricing for thinking tokens.
 
 ### Context windows
 
 - Claude Opus 4.8 and Claude Fable 5: `300k` default, `1M` max
 - Claude 4.6 Sonnet and Gemini 3.1 Pro: `200k` default, `1M` max
 - GPT-5.5 and GPT-5.4: `272k` default, `1M` max
+- Claude Sonnet 5: `200k` default, `1M` max
+- GPT-5.6 Sol: `272k` default, `1M` max; input `2x` and output `1.5x` above `272k`
+- GPT-5.6 Terra and Luna: `272k` default, no Max Mode extension
 - Composer 2.5: `200k` default, no Max Mode
-- Grok Build 0.1: `256k` default, no Max Mode extension
+- Grok 4.5: `256k` default, no Max Mode extension
+- GLM 5.2: `200k` default, no Max Mode extension
+- Kimi K2.7 Code: `262k` default, no Max Mode extension
 
 ## Testing and Verification
 
