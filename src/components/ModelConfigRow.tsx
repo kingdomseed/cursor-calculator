@@ -31,12 +31,12 @@ export function ModelConfigRow({ model, config, onChange }: Props) {
   return (
     <div className="bg-white rounded-xl border border-[#e0e0d8] p-4">
       {/* Header: always visible, clickable to expand */}
-      <button
-        type="button"
-        onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between cursor-pointer"
-      >
-        <div className="flex items-center gap-2 min-w-0">
+      <div className="flex items-center justify-between gap-2">
+        <button
+          type="button"
+          onClick={() => setExpanded(!expanded)}
+          className="flex min-w-0 flex-1 items-center gap-2 cursor-pointer"
+        >
           <svg className={`w-3.5 h-3.5 text-[#14120b]/40 transition-transform flex-shrink-0 ${expanded ? "rotate-90" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
@@ -45,8 +45,9 @@ export function ModelConfigRow({ model, config, onChange }: Props) {
           {!expanded && activeBadges.map(badge => (
             <span key={badge} className="text-[10px] px-1.5 py-0.5 rounded bg-[#f7f7f4] text-[#14120b]/50 flex-shrink-0">{badge}</span>
           ))}
-        </div>
-        <div className="flex items-center gap-1 flex-shrink-0 ml-2" onClick={(e) => e.stopPropagation()}>
+        </button>
+        <label className="flex items-center gap-1 flex-shrink-0">
+          <span className="sr-only">{model.name} usage weight percent</span>
           <input
             type="number" min="0" max="100" step="5"
             value={config.weight}
@@ -54,8 +55,8 @@ export function ModelConfigRow({ model, config, onChange }: Props) {
             className="w-16 text-right text-sm font-semibold bg-[#f7f7f4] border border-[#e0e0d8] rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[#14120b]/30"
           />
           <span className="text-sm text-[#14120b]/50">%</span>
-        </div>
-      </button>
+        </label>
+      </div>
 
       {/* Expandable details */}
       <Collapsible open={expanded}>
@@ -117,6 +118,7 @@ export function ModelConfigRow({ model, config, onChange }: Props) {
                   <p className="text-xs text-[#14120b]/40 mb-2">Overrides the global cache-read share for this model</p>
                   <div className="flex items-center gap-2">
                     <input type="range" min="0" max="95" step="5" value={config.cacheHitRate}
+                      aria-label={`${model.name} custom cache-read share`}
                       onChange={(e) => onChange({ ...config, cacheHitRate: Number(e.target.value) })}
                       className="flex-1 h-1.5 bg-[#e0e0d8] rounded-full appearance-none cursor-pointer accent-[#14120b]" />
                     <span className="text-xs font-semibold bg-[#f7f7f4] px-1.5 py-0.5 rounded w-10 text-center">{config.cacheHitRate}%</span>

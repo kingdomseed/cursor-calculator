@@ -202,9 +202,15 @@ function ModelRow({ item }: { item: RecommendationModelDisplayRow }) {
 }
 
 function getBreakdownSections(presentation: RecommendationPresentation): CardBreakdownSection[] {
-  return presentation.comparisonSections
-    .filter((section) => section.kind !== 'primary_answer')
-    .map((section) => buildBreakdownSection(section, presentation.bestPlan.plan));
+  const sections: CardBreakdownSection[] = [];
+
+  for (const section of presentation.comparisonSections) {
+    if (section.kind !== 'primary_answer') {
+      sections.push(buildBreakdownSection(section, presentation.bestPlan.plan));
+    }
+  }
+
+  return sections;
 }
 
 function buildBreakdownSection(

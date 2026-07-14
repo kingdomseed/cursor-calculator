@@ -30,12 +30,26 @@ export function reconcileSelectedModelConfigs(
   selectedIds: string[],
   models: Model[],
 ): ModelConfig[] {
-  const kept = previousConfigs.filter((config) => selectedIds.includes(config.modelId));
-  const newIds = selectedIds.filter((id) => !previousConfigs.some((config) => config.modelId === id));
-  const added = newIds
-    .map((id) => models.find((candidate) => candidate.id === id))
-    .filter((model): model is Model => model !== undefined)
-    .map((model) => createDefaultModelConfig(model));
+  const selectedIdSet = new Set(selectedIds);
+  const previousIdSet = new Set(previousConfigs.map((config) => config.modelId));
+  const modelById = new Map(models.map((model) => [model.id, model]));
+  const kept: ModelConfig[] = [];
+  const added: ModelConfig[] = [];
+
+  for (const config of previousConfigs) {
+    if (selectedIdSet.has(config.modelId)) {
+      kept.push(config);
+    }
+  }
+
+  for (const id of selectedIds) {
+    if (previousIdSet.has(id)) continue;
+
+    const model = modelById.get(id);
+    if (model) {
+      added.push(createDefaultModelConfig(model));
+    }
+  }
 
   return redistributeWeights([...kept, ...added]);
 }

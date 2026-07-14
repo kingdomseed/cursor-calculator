@@ -88,6 +88,10 @@ export function useCalculatorController(
     () => manualModels.filter((model) => model.pool === 'api'),
     [manualModels],
   );
+  const apiModelIds = useMemo(
+    () => new Set(apiModels.map((model) => model.id)),
+    [apiModels],
+  );
   const initialModels = apiModels.length > 0 ? apiModels : manualModels;
 
   const [state, dispatch] = useReducer(calculatorReducer, initialModels, createInitialCalculatorState);
@@ -118,16 +122,19 @@ export function useCalculatorController(
     dispatch({ type: 'navigate', target });
 
     if (target === 'budget' && apiModels.length > 0) {
-      const selectedApiIds = state.modelConfigs
-        .map((config) => config.modelId)
-        .filter((id) => apiModels.some((model) => model.id === id));
+      const selectedApiIds: string[] = [];
+      for (const config of state.modelConfigs) {
+        if (apiModelIds.has(config.modelId)) {
+          selectedApiIds.push(config.modelId);
+        }
+      }
       dispatch({
         type: 'reconcile_selected_models',
         ids: selectedApiIds.length > 0 ? selectedApiIds : [apiModels[0].id],
         manualModels: apiModels,
       });
     }
-  }, [apiModels, state.modelConfigs]);
+  }, [apiModelIds, apiModels, state.modelConfigs]);
 
   const setMode = useCallback((mode: CalculatorState['mode']) => {
     dispatch({ type: 'set_mode', mode });

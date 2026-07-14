@@ -6,6 +6,7 @@ export function BudgetInput({ value, onChange }: { value: number; onChange: (v: 
         <span className="text-2xl font-medium text-[#14120b]/40">$</span>
         <input
           type="text"
+          aria-label="Monthly budget in dollars"
           value={value.toLocaleString()}
           onChange={(e) => {
             const val = parseInt(e.target.value.replace(/,/g, ""), 10);
@@ -20,6 +21,7 @@ export function BudgetInput({ value, onChange }: { value: number; onChange: (v: 
       <div className="mt-6 px-4">
         <input
           type="range" min="20" max="500" step="10" value={Math.max(20, Math.min(500, value))}
+          aria-label="Monthly budget slider in dollars"
           onChange={(e) => onChange(Number(e.target.value))}
           className="w-full h-2 bg-[#e0e0d8] rounded-full appearance-none cursor-pointer accent-[#14120b]"
         />

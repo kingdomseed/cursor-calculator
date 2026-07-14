@@ -11,30 +11,25 @@ interface Props {
 }
 
 export function SidebarLayout({ activeTarget, onNavigate, pricingDate, children }: Props) {
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
-  const mobileDialogRef = useRef<HTMLDivElement>(null);
+  const mobileDialogRef = useRef<HTMLDialogElement>(null);
 
   const handleNavigate = useCallback((target: NavigationTarget) => {
     onNavigate(target);
-    setMobileOpen(false);
+    mobileDialogRef.current?.close();
   }, [onNavigate]);
 
   useEffect(() => {
-    if (!mobileOpen) return;
-
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setMobileOpen(false);
+    const desktopMediaQuery = window.matchMedia('(min-width: 768px)');
+    const closeOnDesktop = (event: MediaQueryListEvent) => {
+      if (event.matches) {
+        mobileDialogRef.current?.close();
+      }
     };
 
-    document.addEventListener('keydown', handleEscape);
-
-    // Focus the first nav button when the overlay opens
-    const firstButton = mobileDialogRef.current?.querySelector('button');
-    if (firstButton) firstButton.focus();
-
-    return () => document.removeEventListener('keydown', handleEscape);
-  }, [mobileOpen]);
+    desktopMediaQuery.addEventListener('change', closeOnDesktop);
+    return () => desktopMediaQuery.removeEventListener('change', closeOnDesktop);
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#f7f7f4] text-[#14120b] contour-bg">
@@ -98,7 +93,11 @@ export function SidebarLayout({ activeTarget, onNavigate, pricingDate, children 
       <div className="md:hidden fixed top-0 left-0 right-0 z-20 bg-white border-b border-[#e0e0d8] px-4 py-3">
         <button
           type="button"
-          onClick={() => setMobileOpen(true)}
+          onClick={() => {
+            const dialog = mobileDialogRef.current;
+            dialog?.showModal();
+            dialog?.querySelector<HTMLButtonElement>('[data-sidebar] button')?.focus();
+          }}
           className="p-1"
           aria-label="Open navigation"
         >
@@ -109,23 +108,22 @@ export function SidebarLayout({ activeTarget, onNavigate, pricingDate, children 
       </div>
 
       {/* Mobile overlay */}
-      {mobileOpen && (
-        <div className="md:hidden fixed inset-0 z-40">
-          <div
-            className="absolute inset-0 bg-black/40"
-            onClick={() => setMobileOpen(false)}
-          />
-          <div
-            ref={mobileDialogRef}
-            className="relative w-64 h-full"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Navigation"
-          >
-            <Sidebar activeTarget={activeTarget} onNavigate={handleNavigate} pricingDate={pricingDate} />
-          </div>
+      <dialog
+        ref={mobileDialogRef}
+        aria-label="Navigation"
+        className="md:hidden fixed inset-0 z-40 m-0 h-dvh max-h-none w-screen max-w-none border-0 bg-transparent p-0 backdrop:bg-transparent"
+      >
+        <div className="relative z-10 w-64 h-full">
+          <Sidebar activeTarget={activeTarget} onNavigate={handleNavigate} pricingDate={pricingDate} />
         </div>
-      )}
+        <button
+          type="button"
+          tabIndex={-1}
+          aria-label="Close navigation"
+          className="absolute inset-0 z-0 cursor-default bg-black/40"
+          onClick={() => mobileDialogRef.current?.close()}
+        />
+      </dialog>
 
       {/* Content area */}
       <main className={`pt-14 md:pt-0 transition-all duration-200 ${collapsed ? 'md:ml-12' : 'md:ml-64'}`}>

@@ -6,6 +6,7 @@ import { Collapsible } from './Collapsible';
 const TOKEN_SLIDER_MIN = 100_000;
 const TOKEN_SLIDER_MAX = 10_000_000_000;
 const TOKEN_SLIDER_STEP = 100_000;
+const CACHE_READ_SHARE_ID = 'manual-token-cache-read-share';
 
 interface TokenInputProps {
   value: number;
@@ -35,6 +36,7 @@ export function TokenInput({
       <p className="text-[#14120b]/60 mb-4">How many tokens will you use this month?</p>
       <div className="inline-flex bg-white rounded-full p-1 shadow-sm border border-[#e0e0d8] mb-6">
         <button
+          type="button"
           onClick={() => onManualTokenInputModeChange('simple')}
           className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
             isSimpleMode
@@ -45,6 +47,7 @@ export function TokenInput({
           Quick estimate
         </button>
         <button
+          type="button"
           onClick={() => onManualTokenInputModeChange('advanced')}
           className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
             !isSimpleMode
@@ -64,6 +67,7 @@ export function TokenInput({
           <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-1">
             <input
               type="text"
+              aria-label="Monthly token estimate"
               value={value.toLocaleString()}
               onChange={(e) => {
                 const parsedValue = parseInt(e.target.value.replace(/,/g, ''), 10);
@@ -81,6 +85,7 @@ export function TokenInput({
           <div className="mt-6 px-4">
             <input
               type="range"
+              aria-label="Monthly token estimate slider"
               min={TOKEN_SLIDER_MIN}
               max={TOKEN_SLIDER_MAX}
               step={TOKEN_SLIDER_STEP}
@@ -95,12 +100,13 @@ export function TokenInput({
 
           <div className="mt-6 p-4 bg-white rounded-xl border border-[#e0e0d8] text-left">
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-medium">Cache-read share of entered tokens</label>
+              <label htmlFor={CACHE_READ_SHARE_ID} className="text-sm font-medium">Cache-read share of entered tokens</label>
               <span className="text-sm font-semibold bg-[#f7f7f4] px-2 py-0.5 rounded">
                 {cacheReadShare.toFixed(cacheReadShare % 1 === 0 ? 0 : 1)}%
               </span>
             </div>
             <input
+              id={CACHE_READ_SHARE_ID}
               type="range"
               min="0"
               max="100"

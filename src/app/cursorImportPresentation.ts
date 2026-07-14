@@ -1,6 +1,11 @@
 import type { CursorImportReport } from '../domain/importReplay/types';
 import { formatNumber } from '../domain/recommendation/formatters';
 
+const PERCENT_FORMATTER = new Intl.NumberFormat('en-US', {
+  style: 'percent',
+  maximumFractionDigits: 1,
+});
+
 export interface ImportSummaryStat {
   label: string;
   value: string;
@@ -89,10 +94,7 @@ export function formatMonthYear(dayKey: string): string {
 }
 
 function formatPercent(value: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'percent',
-    maximumFractionDigits: 1,
-  }).format(value);
+  return PERCENT_FORMATTER.format(value);
 }
 
 export function buildImportSummarySections(report: CursorImportReport): ImportSummarySection[] {

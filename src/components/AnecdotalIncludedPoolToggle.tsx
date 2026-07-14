@@ -7,17 +7,16 @@ interface AnecdotalIncludedPoolToggleProps {
 }
 
 const SWITCH_ID = 'anecdotal-included-pool-estimate';
+const PLAN_ESTIMATES = [
+  { label: 'Pro', tokens: ANECDOTAL_FIRST_PARTY_POOL_TOKEN_ALLOWANCES.pro },
+  { label: 'Pro Plus', tokens: ANECDOTAL_FIRST_PARTY_POOL_TOKEN_ALLOWANCES.pro_plus },
+  { label: 'Ultra', tokens: ANECDOTAL_FIRST_PARTY_POOL_TOKEN_ALLOWANCES.ultra },
+];
 
 export function AnecdotalIncludedPoolToggle({
   checked,
   onChange,
 }: AnecdotalIncludedPoolToggleProps) {
-  const planEstimates = [
-    { label: 'Pro', tokens: ANECDOTAL_FIRST_PARTY_POOL_TOKEN_ALLOWANCES.pro },
-    { label: 'Pro Plus', tokens: ANECDOTAL_FIRST_PARTY_POOL_TOKEN_ALLOWANCES.pro_plus },
-    { label: 'Ultra', tokens: ANECDOTAL_FIRST_PARTY_POOL_TOKEN_ALLOWANCES.ultra },
-  ];
-
   return (
     <section className="mt-4 p-4 bg-white rounded-xl border border-[#e0e0d8]">
       <div className="flex items-start justify-between gap-4">
@@ -44,7 +43,7 @@ export function AnecdotalIncludedPoolToggle({
       </div>
 
       <dl className="mt-3 grid grid-cols-3 gap-2">
-        {planEstimates.map((estimate) => (
+        {PLAN_ESTIMATES.map((estimate) => (
           <div key={estimate.label} className="rounded-lg bg-[#f7f7f4] px-3 py-2">
             <dt className="text-[11px] font-medium uppercase tracking-wide text-[#14120b]/45">
               {estimate.label}
