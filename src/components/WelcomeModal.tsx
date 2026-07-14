@@ -33,6 +33,7 @@ export function WelcomeModal() {
           All rates come from Cursor's public docs, but this is an estimate — not a guarantee. Pricing can change at any time, and actual costs depend on your usage patterns. This tool is not affiliated with Cursor and is not responsible for any financial decisions.
         </p>
         <button
+          type="button"
           onClick={dismiss}
           className="w-full bg-[#14120b] text-white rounded-xl py-3 text-sm font-semibold hover:bg-[#14120b]/90 transition-colors cursor-pointer"
         >

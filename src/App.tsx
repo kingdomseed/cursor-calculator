@@ -15,6 +15,9 @@ import { WelcomeModal } from './components/WelcomeModal';
 import { AnecdotalIncludedPoolToggle } from './components/AnecdotalIncludedPoolToggle';
 
 const PRICING = getPricingCatalog();
+const BUDGET_CACHE_READ_SHARE_ID = 'budget-cache-read-share';
+const MODEL_SELECTOR_LABEL_ID = 'model-selector-label';
+const INPUT_OUTPUT_RATIO_ID = 'input-output-ratio';
 
 function App() {
   const {
@@ -73,12 +76,13 @@ function App() {
               <BudgetInput value={budget} onChange={setBudget} />
               <div className="mt-6 p-4 bg-white rounded-xl border border-[#e0e0d8]">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-sm font-medium">Cache-read share</label>
+                  <label htmlFor={BUDGET_CACHE_READ_SHARE_ID} className="text-sm font-medium">Cache-read share</label>
                   <span className="text-sm font-semibold bg-[#f7f7f4] px-2 py-0.5 rounded">
                     {cacheReadShare}%
                   </span>
                 </div>
                 <input
+                  id={BUDGET_CACHE_READ_SHARE_ID}
                   type="range"
                   min="0"
                   max="95"
@@ -132,14 +136,15 @@ function App() {
         {showManualControls && (
           <>
             <div className="mt-8">
-              <label className="block text-sm font-medium text-[#14120b]/60 mb-2">
+              <span id={MODEL_SELECTOR_LABEL_ID} className="block text-sm font-medium text-[#14120b]/60 mb-2">
                 {mode === 'budget' ? 'API models to compare' : 'Models to compare'}
-              </label>
+              </span>
               <ModelSelector
                 options={selectableModels}
                 selected={selectedModelIds}
                 onChange={handleModelSelectionChange}
                 placeholder="Select models..."
+                labelledBy={MODEL_SELECTOR_LABEL_ID}
               />
             </div>
 
@@ -156,6 +161,7 @@ function App() {
             {(mode === 'budget' || (mode === 'tokens' && tokenSource === 'manual' && manualTokenInputMode === 'simple')) && (
               <div className="mt-4">
                 <button
+                  type="button"
                   onClick={() => setShowAdvanced(!showAdvanced)}
                   className="flex items-center gap-2 text-sm text-[#14120b]/60 hover:text-[#14120b]"
                 >
@@ -167,12 +173,13 @@ function App() {
                 <Collapsible open={showAdvanced}>
                   <div className="mt-4 p-4 bg-white rounded-xl border border-[#e0e0d8]">
                     <div className="flex items-center justify-between mb-2">
-                      <label className="text-sm font-medium">
+                      <label htmlFor={INPUT_OUTPUT_RATIO_ID} className="text-sm font-medium">
                         {mode === 'tokens' ? 'Non-cache Input : Output Ratio' : 'Input : Output Ratio'}
                       </label>
                       <span className="text-sm font-semibold bg-[#f7f7f4] px-2 py-0.5 rounded">{inputRatio} : 1</span>
                     </div>
                     <input
+                      id={INPUT_OUTPUT_RATIO_ID}
                       type="range"
                       min="1"
                       max="10"

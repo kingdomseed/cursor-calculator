@@ -41,6 +41,7 @@ export function PlanComparison({ presentation, defaultOpen = false }: Props) {
   return (
     <div className="mt-6">
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         className="flex items-center gap-2 text-sm text-[#14120b]/60 hover:text-[#14120b]"
