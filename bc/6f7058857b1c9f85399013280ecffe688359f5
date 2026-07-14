@@ -1,0 +1,51 @@
+package.json
+  s_bea6c3a371cbfd::t_47114a44d03573 14-18
+src/domain/modelConfig/defaults.ts
+  s_bea6c3a371cbfd::t_47114a44d03573 33-52
+src/components/Icons.tsx
+  s_bea6c3a371cbfd::t_47114a44d03573 45-46
+src/components/BestPlanCard.tsx
+  s_bea6c3a371cbfd::t_47114a44d03573 205-213
+src/components/TokenInput.tsx
+  s_bea6c3a371cbfd::t_cd7c9719aaa8fc 9,39,50,70,88,103,109
+src/components/SidebarLayout.tsx
+  s_bea6c3a371cbfd::t_3da32d5328088d 96-100
+  s_bea6c3a371cbfd::t_fb1b82b0e901d5 116-117,119-125
+  s_bea6c3a371cbfd::t_b35c52dfa1285e 15,19,23-27,30-32,111-115,126
+src/components/ModelConfigRow.tsx
+  s_bea6c3a371cbfd::t_cd7c9719aaa8fc 34-39,48-50,58-59,121
+src/app/useCalculatorController.ts
+  s_bea6c3a371cbfd::t_47114a44d03573 91-94,137
+  s_bea6c3a371cbfd::t_66a31ba5144ba6 125-130
+src/components/AnecdotalIncludedPoolToggle.tsx
+  s_bea6c3a371cbfd::t_47114a44d03573 10-14,46
+src/components/ModelSelector.tsx
+  s_bea6c3a371cbfd::t_b35c52dfa1285e 1,31,34-36,90-96
+  s_bea6c3a371cbfd::t_cd7c9719aaa8fc 11,14,69
+src/components/BudgetInput.tsx
+  s_bea6c3a371cbfd::t_cd7c9719aaa8fc 9,24
+src/app/cursorImportPresentation.ts
+  s_bea6c3a371cbfd::t_47114a44d03573 4-8,97
+src/App.tsx
+  s_bea6c3a371cbfd::t_cd7c9719aaa8fc 18-20,79,85,139,141,147,164,176,182
+src/components/WelcomeModal.tsx
+  s_bea6c3a371cbfd::t_cd7c9719aaa8fc 36
+src/components/PlanComparison.tsx
+  s_bea6c3a371cbfd::t_cd7c9719aaa8fc 44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "bc6f7058857b1c9f85399013280ecffe688359f5",
+  "prompts": {},
+  "sessions": {
+    "s_bea6c3a371cbfd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5fcb-2c46-7570-9ca0-729f5068e663",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Jason Holt <jason@jasonholtdigital.com>"
+    }
+  }
+}
