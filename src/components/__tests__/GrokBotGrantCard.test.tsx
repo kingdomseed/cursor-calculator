@@ -15,16 +15,18 @@ const presentation = {
 };
 
 describe('GrokBotGrantCard', () => {
-  it('keeps the simple copy and reveals on hover or keyboard focus', () => {
+  it('keeps the simple copy and slides out from the right on hover or keyboard focus', () => {
     const html = renderToStaticMarkup(<GrokBotGrantCard presentation={presentation} />);
 
     expect(html).toContain('You get Grok Bot usage on Pro, Pro Plus, and Ultra.');
+    expect(html).toContain('Grok Bot Usage');
     expect(html).toContain('tabindex="0"');
-    expect(html).toContain('aria-label="Grok Bot"');
-    expect(html).toContain('hover:translate-y-0');
-    expect(html).toContain('focus:translate-y-0');
-    expect(html).toContain('focus-within:translate-y-0');
-    expect(html).toContain('h-16');
+    expect(html).toContain('aria-label="Grok Bot Usage"');
+    expect(html).toContain('hover:translate-x-0');
+    expect(html).toContain('focus:translate-x-0');
+    expect(html).toContain('focus-within:translate-x-0');
+    expect(html).toContain('fixed inset-y-0 right-0');
+    expect(html).not.toContain('h-16');
     expect(html).not.toContain('grant');
   });
 });
