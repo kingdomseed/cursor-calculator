@@ -12,7 +12,7 @@ const opusModel: Model = {
   id: 'claude-4-6-opus',
   name: 'Claude 4.6 Opus',
   provider: 'anthropic',
-  pool: 'api',
+  pool: 'other_models',
   context: { default: 200000, max: 1000000 },
   rates: { input: 5, cache_write: 6.25, cache_read: 0.5, output: 25 },
     variants: {
@@ -31,7 +31,7 @@ const gpt54Model: Model = {
   id: 'gpt-5-4',
   name: 'GPT-5.4',
   provider: 'openai',
-  pool: 'api',
+  pool: 'other_models',
   context: { default: 272000, max: 1000000 },
   rates: { input: 2.5, cache_write: null, cache_read: 0.25, output: 15 },
     variants: {
@@ -54,7 +54,7 @@ const baseConfig: ModelConfig = {
   cacheHitRate: 0,
 };
 
-const testPlans: PricingData['plans'] = {
+const testPlans: Partial<PricingData['plans']> = {
   pro: { name: 'Pro', monthly_cost: 20, api_pool: 20, description: '' },
   pro_plus: { name: 'Pro Plus', monthly_cost: 60, api_pool: 70, description: '' },
   ultra: { name: 'Ultra', monthly_cost: 200, api_pool: 400, description: '' },
@@ -232,7 +232,7 @@ describe('computeRecommendation - budget mode', () => {
   });
 
   it('prefers the plan with more API pool headroom on a budget-mode tie', () => {
-    const tiePlans: PricingData['plans'] = {
+    const tiePlans: Partial<PricingData['plans']> = {
       pro: { name: 'Pro', monthly_cost: 10, api_pool: 15, description: '' },
       pro_plus: { name: 'Pro Plus', monthly_cost: 20, api_pool: 25, description: '' },
       ultra: { name: 'Ultra', monthly_cost: 200, api_pool: 400, description: '' },
@@ -269,7 +269,7 @@ describe('computeRecommendation - token mode', () => {
   });
 
   it('prefers the plan with more API pool headroom on a token-mode tie', () => {
-    const tiePlans: PricingData['plans'] = {
+    const tiePlans: Partial<PricingData['plans']> = {
       pro: { name: 'Pro', monthly_cost: 20, api_pool: 10, description: '' },
       pro_plus: { name: 'Pro Plus', monthly_cost: 30, api_pool: 20, description: '' },
       ultra: { name: 'Ultra', monthly_cost: 200, api_pool: 400, description: '' },
@@ -312,7 +312,7 @@ describe('exact usage pricing', () => {
         modelId: 'gpt-5-4',
         label: 'GPT-5.4',
         provider: 'openai',
-        pool: 'api',
+        pool: 'other_models',
         tokens: {
           total: 1_750_000,
           input: 1_250_000,

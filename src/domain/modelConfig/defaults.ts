@@ -9,7 +9,7 @@ export function createDefaultModelConfig(model: Model): ModelConfig {
   return {
     modelId: model.id,
     weight: 0,
-    maxMode: model.auto_checks?.max_mode ?? false,
+    maxMode: false,
     fast: model.auto_checks?.fast ?? false,
     thinking: model.auto_checks?.thinking ?? false,
     caching: false,

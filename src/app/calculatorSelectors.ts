@@ -4,6 +4,9 @@ import { buildSimpleExactTokenBreakdown, computeManualUsageRecommendation } from
 import { computeExactUsageRecommendation, computeRecommendation } from '../domain/recommendation/recommendation';
 import type { Recommendation } from '../domain/recommendation/types';
 import type { Model, PricingData } from '../domain/catalog/types';
+import { getPlanKeysForAudience } from '../domain/catalog/pools';
+import { computeCloudAutomationsCost } from '../domain/cloudAutomations/pricing';
+import type { CloudAutomationsResult } from '../domain/cloudAutomations/types';
 import { ANECDOTAL_INCLUDED_POOL_ESTIMATE } from '../data/includedPoolEstimates';
 import {
   buildRecommendationPresentation,
@@ -32,7 +35,19 @@ export function selectIsImportMode(state: CalculatorState): boolean {
 }
 
 export function selectShowManualControls(state: CalculatorState): boolean {
-  return state.mode === 'budget' || state.tokenSource === 'manual';
+  return state.view !== 'cloud_automations' && (state.mode === 'budget' || state.tokenSource === 'manual');
+}
+
+export function selectAudiencePlans(
+  state: CalculatorState,
+  plans: PricingData['plans'],
+): Partial<PricingData['plans']> {
+  return Object.fromEntries(
+    getPlanKeysForAudience(state.audience).flatMap((key) => {
+      const plan = plans[key];
+      return plan ? [[key, plan]] : [];
+    }),
+  );
 }
 
 export function selectSelectedFileName(state: CalculatorState): string | null {
@@ -66,6 +81,13 @@ export function selectRecommendation(
   state: CalculatorState,
   inputs: RecommendationSelectorInputs,
 ): Recommendation | null {
+  if (state.view === 'cloud_automations') {
+    return null;
+  }
+
+  const audiencePlans = selectAudiencePlans(state, inputs.plans);
+  const recommendationOptions = { audience: state.audience };
+
   if (selectIsImportMode(state)) {
     const cursorImportReport = inputs.cursorImportReport ?? selectCursorImportReport(state, inputs.importReplayModels);
     if (!cursorImportReport || cursorImportReport.pricedEntries.length === 0) {
@@ -75,7 +97,9 @@ export function selectRecommendation(
     return computeExactUsageRecommendation(
       cursorImportReport.pricedEntries,
       inputs.importReplayModels,
-      inputs.plans,
+      audiencePlans,
+      undefined,
+      recommendationOptions,
     );
   }
 
@@ -92,9 +116,12 @@ export function selectRecommendation(
       exactTokens,
       selectSelectedModels(state, inputs.manualModels),
       state.modelConfigs,
-      inputs.plans,
-      state.useAnecdotalIncludedPoolEstimate ? ANECDOTAL_INCLUDED_POOL_ESTIMATE : undefined,
+      audiencePlans,
+      state.audience === 'personal' && state.useAnecdotalIncludedPoolEstimate
+        ? ANECDOTAL_INCLUDED_POOL_ESTIMATE
+        : undefined,
       inputs.manualModels,
+      recommendationOptions,
     );
   }
 
@@ -104,9 +131,10 @@ export function selectRecommendation(
     state.tokens,
     selectSelectedModels(state, inputs.manualModels),
     state.modelConfigs,
-    inputs.plans,
+    audiencePlans,
     state.inputRatio,
     state.cacheReadShare,
+    recommendationOptions,
   );
 }
 
@@ -122,8 +150,29 @@ export function selectRecommendationPresentation(
   return buildRecommendationPresentation({
     mode: state.mode,
     tokenSource: state.tokenSource,
+    audience: state.audience,
     budgetCeiling: state.mode === 'budget' ? state.budget : undefined,
     recommendation,
     includedPoolModels,
   });
+}
+
+export function selectCloudAutomationsResult(
+  state: CalculatorState,
+  models: Model[],
+): CloudAutomationsResult {
+  return computeCloudAutomationsCost(
+    {
+      audience: state.audience,
+      product: state.cloudProduct,
+      runtime: state.cloudRuntime,
+      automationScope: state.cloudAutomationScope,
+      modelId: state.cloudModelId,
+      tokens: state.cloudTokens,
+      cacheReadShare: state.cloudCacheReadShare,
+      inputRatio: state.cloudInputRatio,
+      fast: state.cloudFast,
+    },
+    models,
+  );
 }

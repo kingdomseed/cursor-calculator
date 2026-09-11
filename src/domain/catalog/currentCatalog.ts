@@ -1,14 +1,13 @@
 import pricingData from '../../data/cursor-pricing.json';
 import { cloneModel, cloneModels, clonePlans, clonePricingData } from './clones';
-import type { Model, PricingData } from './types';
+import { getPlanKeysForAudience, isCursorModelsPool, isOtherModelsPool } from './pools';
+import type { Audience, Model, Plan, PlanKey, PricingData } from './types';
 
 const CURRENT_CATALOG = clonePricingData(pricingData as PricingData);
 const CURRENT_MODEL_BY_ID = new Map(CURRENT_CATALOG.models.map((model) => [model.id, model]));
-const MANUAL_API_MODELS = CURRENT_CATALOG.models.filter((model) => model.pool === 'api');
-const MANUAL_SELECTABLE_MODELS = CURRENT_CATALOG.models.filter(
-  (model) => model.pool === 'api' || model.pool === 'first_party',
-);
-const INCLUDED_POOL_MODELS = CURRENT_CATALOG.models.filter((model) => model.pool === 'first_party');
+const MANUAL_API_MODELS = CURRENT_CATALOG.models.filter((model) => isOtherModelsPool(model.pool));
+const MANUAL_SELECTABLE_MODELS = CURRENT_CATALOG.models;
+const INCLUDED_POOL_MODELS = CURRENT_CATALOG.models.filter((model) => isCursorModelsPool(model.pool));
 
 export function getPricingCatalog(): PricingData {
   return clonePricingData(CURRENT_CATALOG);
@@ -16,6 +15,16 @@ export function getPricingCatalog(): PricingData {
 
 export function getPlans(): PricingData['plans'] {
   return clonePlans(CURRENT_CATALOG.plans);
+}
+
+export function getPlansForAudience(audience: Audience): Partial<Record<PlanKey, Plan>> {
+  const plans = getPlans();
+  return Object.fromEntries(
+    getPlanKeysForAudience(audience).flatMap((key) => {
+      const plan = plans[key];
+      return plan ? [[key, plan]] : [];
+    }),
+  );
 }
 
 export function getCurrentModels(): Model[] {

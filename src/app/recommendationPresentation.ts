@@ -1,4 +1,4 @@
-import type { PlanKey } from '../domain/catalog/types';
+import type { Audience, OtherModelsAllowanceStatus, PlanKey } from '../domain/catalog/types';
 import { formatCurrency, formatNumber, formatRate } from '../domain/recommendation/formatters';
 import type { Mode, PlanLineItem, PlanResult, Recommendation } from '../domain/recommendation/types';
 import type { TokenSource } from './calculatorState';
@@ -49,7 +49,10 @@ export interface RecommendationPlanPresentation {
   planLabel: string;
   affordable: boolean;
   subscription: number;
-  includedPool: number;
+  subscriptionNote?: string;
+  includedPool: number | null;
+  otherModelsAllowanceStatus?: OtherModelsAllowanceStatus;
+  otherModelsAllowanceLabel?: string;
   unusedPool: number;
   derived: RecommendationPlanDerivedValues;
   modelRows: RecommendationModelDisplayRow[];
@@ -88,15 +91,24 @@ export interface IncludedPoolItem {
   poolLabel: string;
 }
 
+export interface GrokBotPresentation {
+  heading: string;
+  cadenceLabel: string;
+  grantSummary: string;
+  notes: string[];
+}
+
 export interface RecommendationPresentation {
   mode: Mode;
   tokenSource: TokenSource;
+  audience: Audience;
   heading: string;
   hero: RecommendationHero;
   bestPlan: RecommendationPlanPresentation;
   plans: RecommendationPlanPresentation[];
   comparisonSections: RecommendationComparisonSection[];
   includedPoolItems: IncludedPoolItem[];
+  grokBot: GrokBotPresentation;
   modelGroups: RecommendationModelGroup[] | null;
 }
 
@@ -109,6 +121,7 @@ export interface IncludedPoolModelInput {
 interface BuildRecommendationPresentationInput {
   mode: Mode;
   tokenSource: TokenSource;
+  audience?: Audience;
   budgetCeiling?: number;
   recommendation: Recommendation;
   includedPoolModels?: IncludedPoolModelInput[];
@@ -117,6 +130,7 @@ interface BuildRecommendationPresentationInput {
 export function buildRecommendationPresentation({
   mode,
   tokenSource,
+  audience = 'personal',
   budgetCeiling,
   recommendation,
   includedPoolModels = [],
@@ -134,12 +148,14 @@ export function buildRecommendationPresentation({
   return {
     mode,
     tokenSource,
+    audience,
     heading,
     hero: buildHero(bestPlan, heading, mode, budgetCeiling),
     bestPlan,
     plans,
-    comparisonSections: buildComparisonSections(plans, mode, budgetCeiling),
+    comparisonSections: buildComparisonSections(plans, mode, budgetCeiling, audience),
     includedPoolItems: buildIncludedPoolItems(includedPoolModels),
+    grokBot: buildGrokBotPresentation(audience, bestPlan.plan),
     modelGroups: buildModelGroups(bestPlan.modelRows, tokenSource),
   };
 }
@@ -166,7 +182,10 @@ function buildPlanPresentation(
     planLabel: formatPlanLabel(result.plan),
     affordable: result.affordable,
     subscription: result.subscription,
+    subscriptionNote: result.subscriptionNote,
     includedPool: result.apiPool,
+    otherModelsAllowanceStatus: result.otherModelsAllowanceStatus,
+    otherModelsAllowanceLabel: result.otherModelsAllowanceLabel,
     unusedPool: result.unusedPool,
     derived: {
       usageValue,
@@ -192,11 +211,12 @@ function buildHero(
   if (mode === 'budget') {
     const budgetValue = budgetCeiling == null ? null : budgetCeiling;
     const headroom = plan.derived.budgetHeadroom;
+    const poolPhrase = formatOtherModelsAllowance(plan);
     const context = budgetValue == null || headroom == null
-      ? `${plan.planLabel} includes a ${formatCurrency(plan.includedPool)} API pool.`
+      ? `${plan.planLabel} Other Models allowance: ${poolPhrase}.`
       : headroom >= 0
-        ? `${plan.planLabel} stays ${formatCurrency(headroom)} under your ${formatCurrency(budgetValue)} budget and includes a ${formatCurrency(plan.includedPool)} API pool.`
-        : `${plan.planLabel} exceeds your ${formatCurrency(budgetValue)} budget by ${formatCurrency(Math.abs(headroom))} and includes a ${formatCurrency(plan.includedPool)} API pool.`;
+        ? `${plan.planLabel} stays ${formatCurrency(headroom)} under your ${formatCurrency(budgetValue)} budget. Other Models: ${poolPhrase}.`
+        : `${plan.planLabel} exceeds your ${formatCurrency(budgetValue)} budget by ${formatCurrency(Math.abs(headroom))}. Other Models: ${poolPhrase}.`;
 
     return {
       title: heading,
@@ -248,6 +268,7 @@ function buildComparisonSections(
   plans: RecommendationPlanPresentation[],
   mode: Mode,
   budgetCeiling?: number,
+  audience: Audience = 'personal',
 ): RecommendationComparisonSection[] {
   const hasIncludedPoolEstimate = plans.some((plan) =>
     plan.derived.estimatedIncludedPoolAllowanceTokens != null,
@@ -264,14 +285,40 @@ function buildComparisonSections(
       ];
 
   const planCoverageRows: RecommendationComparisonRow[] = [
-    createRow(plans, 'includedPool', 'Included API pool', (plan) => plan.includedPool, formatCurrency),
-    createRow(plans, 'includedPoolUsed', 'API pool used', (plan) => plan.derived.includedPoolUsed, formatCurrency),
-    createRow(plans, 'unusedPool', 'Unused API pool', (plan) => plan.unusedPool, formatCurrency),
+    createLabeledRow(
+      plans,
+      'includedPool',
+      'Other Models allowance',
+      (plan) => formatOtherModelsAllowance(plan),
+      (plan) => plan.includedPool,
+    ),
+    createRow(plans, 'includedPoolUsed', 'Other Models used', (plan) => (
+      plan.includedPool == null ? null : plan.derived.includedPoolUsed
+    ), formatCurrency),
+    createRow(plans, 'unusedPool', 'Unused Other Models floor', (plan) => (
+      plan.includedPool == null ? null : plan.unusedPool
+    ), formatCurrency),
   ];
   const outOfPocketRows: RecommendationComparisonRow[] = [
-    createRow(plans, 'subscription', 'Subscription', (plan) => plan.subscription, formatCurrency),
-    createRow(plans, 'additionalApiBilled', 'Additional API billed', (plan) => plan.derived.additionalApiBilled, formatCurrency),
+    createLabeledRow(
+      plans,
+      'subscription',
+      'Subscription',
+      (plan) => plan.subscriptionNote ?? formatCurrency(plan.subscription),
+      (plan) => plan.subscription,
+    ),
+    createRow(plans, 'additionalApiBilled', 'Billed beyond last published floor', (plan) => (
+      plan.includedPool == null ? null : plan.derived.additionalApiBilled
+    ), formatCurrency),
   ];
+
+  if (audience === 'teams_enterprise') {
+    planCoverageRows.push(
+      createLabeledRow(plans, 'cursorTokenRate', 'Cursor Token Rate', () => (
+        '$0.25/M on third-party input, output, and cached tokens'
+      )),
+    );
+  }
 
   if (hasIncludedPoolEstimate) {
     planCoverageRows.push(
@@ -390,6 +437,36 @@ function createRow(
   };
 }
 
+function createLabeledRow(
+  plans: RecommendationPlanPresentation[],
+  key: string,
+  label: string,
+  getLabel: (plan: RecommendationPlanPresentation) => string,
+  getValue?: (plan: RecommendationPlanPresentation) => number | null,
+): RecommendationComparisonRow {
+  return {
+    key,
+    label,
+    values: plans.map((plan) => ({
+      plan: plan.plan,
+      planLabel: plan.planLabel,
+      affordable: plan.affordable,
+      value: getValue ? getValue(plan) : null,
+      formattedValue: getLabel(plan),
+    })),
+  };
+}
+
+function formatOtherModelsAllowance(plan: RecommendationPlanPresentation): string {
+  if (plan.otherModelsAllowanceLabel) {
+    return plan.otherModelsAllowanceLabel;
+  }
+  if (plan.includedPool == null) {
+    return 'Unpublished';
+  }
+  return formatCurrency(plan.includedPool);
+}
+
 function getHeading(mode: Mode, tokenSource: TokenSource): string {
   if (mode === 'budget') {
     return 'Best plan for your budget';
@@ -416,8 +493,8 @@ function buildTokenModeContext(
   }
 
   const officialContext = billedBeyondPool > 0
-    ? `${planLabel} covers the first ${formatCurrency(coveredByPlan)} with its included API pool, leaving ${formatCurrency(billedBeyondPool)} billed beyond the pool.`
-    : `${planLabel} covers the full ${formatCurrency(coveredByPlan)} usage value with its included API pool.`;
+    ? `${planLabel} covers the first ${formatCurrency(coveredByPlan)} with its last published Other Models floor, leaving ${formatCurrency(billedBeyondPool)} billed beyond that floor.`
+    : `${planLabel} covers the full ${formatCurrency(coveredByPlan)} usage value within its last published Other Models floor.`;
 
   if (estimatedIncludedPoolOverage <= 0) {
     return officialContext;
@@ -426,10 +503,29 @@ function buildTokenModeContext(
   return `${officialContext} It also includes ${formatCurrency(estimatedIncludedPoolOverage)} of estimated first-party pool overage from the optional community preset.`;
 }
 
-function formatPlanLabel(plan: PlanKey): string {
-  if (plan === 'pro_plus') return 'Pro Plus';
-  if (plan === 'ultra') return 'Ultra';
-  return 'Pro';
+export function formatPlanLabel(plan: PlanKey): string {
+  switch (plan) {
+    case 'hobby':
+      return 'Hobby';
+    case 'start':
+      return 'Start';
+    case 'pro':
+      return 'Pro';
+    case 'pro_plus':
+      return 'Pro Plus';
+    case 'ultra':
+      return 'Ultra';
+    case 'teams_standard':
+      return 'Teams Standard';
+    case 'teams_premium':
+      return 'Teams Premium';
+    case 'enterprise':
+      return 'Enterprise';
+    default: {
+      const _exhaustive: never = plan;
+      return _exhaustive;
+    }
+  }
 }
 
 function buildIncludedPoolItems(models: IncludedPoolModelInput[]): IncludedPoolItem[] {
@@ -437,8 +533,43 @@ function buildIncludedPoolItems(models: IncludedPoolModelInput[]): IncludedPoolI
     key: model.id,
     label: model.name,
     provider: model.provider,
-    poolLabel: 'First-party pool',
+    poolLabel: 'Cursor Models',
   }));
+}
+
+export function buildGrokBotPresentation(audience: Audience, plan: PlanKey): GrokBotPresentation {
+  if (audience === 'teams_enterprise' && plan === 'enterprise') {
+    return {
+      heading: 'Grok Bot',
+      cadenceLabel: 'Weekly',
+      grantSummary: 'Ask your account executive about Grok Bot on Enterprise.',
+      notes: grokBotNotes(),
+    };
+  }
+
+  if (audience === 'teams_enterprise') {
+    return {
+      heading: 'Grok Bot',
+      cadenceLabel: 'Weekly',
+      grantSummary: 'You get Grok Bot usage on Teams. You do not need a Premium seat.',
+      notes: grokBotNotes(),
+    };
+  }
+
+  return {
+    heading: 'Grok Bot',
+    cadenceLabel: 'Weekly',
+    grantSummary: 'You get Grok Bot usage on Pro, Pro Plus, and Ultra.',
+    notes: grokBotNotes(),
+  };
+}
+
+function grokBotNotes(): string[] {
+  return [
+    'Cursor does not publish how much you get each week.',
+    'If you run out and on-demand is on, extra usage bills as Cursor on-demand.',
+    'SuperGrok and X Premium+ do not add extra Grok Bot usage to your Cursor plan.',
+  ];
 }
 
 function formatTokens(value: number): string {

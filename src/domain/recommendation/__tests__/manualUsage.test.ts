@@ -8,7 +8,7 @@ const gpt54Model: Model = {
   id: 'gpt-5-4',
   name: 'GPT-5.4',
   provider: 'openai',
-  pool: 'api',
+  pool: 'other_models',
   context: { default: 272000, max: 1000000 },
   rates: { input: 2.5, cache_write: null, cache_read: 0.25, output: 15 },
   variants: {
@@ -25,12 +25,12 @@ const composer25Model: Model = {
   id: 'composer-2.5',
   name: 'Composer 2.5',
   provider: 'cursor',
-  pool: 'first_party',
+  pool: 'cursor_models',
   context: { default: 200000, max: null },
   rates: { input: 0.5, cache_write: null, cache_read: 0.2, output: 2.5 },
 };
 
-const plans: PricingData['plans'] = {
+const plans: Partial<PricingData['plans']> = {
   pro: { name: 'Pro', monthly_cost: 20, api_pool: 20, description: '' },
   pro_plus: { name: 'Pro Plus', monthly_cost: 60, api_pool: 70, description: '' },
   ultra: { name: 'Ultra', monthly_cost: 200, api_pool: 400, description: '' },
@@ -60,7 +60,7 @@ const grok45Model: Model = {
   id: 'grok-4-5',
   name: 'Grok 4.5',
   provider: 'cursor',
-  pool: 'first_party',
+  pool: 'cursor_models',
   context: { default: 256000, max: null },
   rates: { input: 2, cache_write: null, cache_read: 0.5, output: 6 },
   pool_usage_promotion: {

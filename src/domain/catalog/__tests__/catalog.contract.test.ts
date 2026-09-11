@@ -10,6 +10,7 @@ import {
   getManualSelectableModels,
   getModelById,
   getPlans,
+  getPlansForAudience,
   getPricingCatalog,
 } from '../currentCatalog';
 
@@ -22,36 +23,52 @@ describe('current catalog contract', () => {
     expect(getCurrentModels()).toEqual(productionPricing.models);
   });
 
-  it('exposes only current api-pool models to the manual selector', () => {
+  it('exposes only current Other Models to the manual API accessor', () => {
     const manualModels = getManualApiModels();
 
     expect(manualModels.length).toBeGreaterThan(0);
-    expect(manualModels.every((model) => model.pool === 'api')).toBe(true);
+    expect(manualModels.every((model) => model.pool === 'other_models')).toBe(true);
     expect(manualModels.map((model) => model.id)).not.toEqual(
       expect.arrayContaining(IMPORT_REPLAY_HISTORICAL_MODELS.map((model) => model.id)),
     );
   });
 
-  it('exposes the three Cursor first-party models in the included pool', () => {
-    const manualModels = getManualSelectableModels();
-    const firstPartyModels = getIncludedPoolModels();
+  it('keeps Cursor Models included and Auto as a router, not a pool member', () => {
+    const included = getIncludedPoolModels();
+    const selectable = getManualSelectableModels();
 
-    expect(firstPartyModels.map((model) => model.id).sort()).toEqual([
-      'auto',
+    expect(included.map((model) => model.id).sort()).toEqual([
       'composer-2.5',
       'grok-4.5',
+      'grok-4.6',
     ]);
-    expect(firstPartyModels.every((model) => model.pool === 'first_party')).toBe(true);
-    expect(firstPartyModels.every((model) => model.provider === 'cursor')).toBe(true);
-    expect(manualModels.map((model) => model.id)).toEqual(
-      expect.arrayContaining(firstPartyModels.map((model) => model.id)),
+    expect(included.every((model) => model.pool === 'cursor_models')).toBe(true);
+    expect(getModelById('auto')?.pool).toBe('auto_router');
+    expect(included.map((model) => model.id)).not.toContain('auto');
+    expect(selectable.map((model) => model.id)).toEqual(
+      expect.arrayContaining(['auto', ...included.map((model) => model.id)]),
     );
-    expect(manualModels.map((model) => model.id)).not.toEqual(
+    expect(selectable.map((model) => model.id)).not.toEqual(
       expect.arrayContaining(IMPORT_REPLAY_HISTORICAL_MODELS.map((model) => model.id)),
     );
   });
 
-  it('keeps retired July 2026 entries out of the current manual catalog', () => {
+  it('splits personal plans from Teams and Enterprise', () => {
+    const personal = getPlansForAudience('personal');
+    const teams = getPlansForAudience('teams_enterprise');
+
+    expect(Object.keys(personal).sort()).toEqual(['hobby', 'pro', 'pro_plus', 'start', 'ultra']);
+    expect(Object.keys(teams).sort()).toEqual(['enterprise', 'teams_premium', 'teams_standard']);
+    expect(personal.pro?.api_pool).toBe(20);
+    expect(personal.pro?.other_models_allowance_status).toBe('last_published_official_floor');
+    expect(personal.pro_plus?.api_pool).toBe(70);
+    expect(personal.ultra?.api_pool).toBe(400);
+    expect(personal.start?.other_models_allowance_status).toBe('not_included');
+    expect(teams.teams_standard?.api_pool).toBeNull();
+    expect(teams.teams_premium?.other_models_allowance_status).toBe('unpublished');
+  });
+
+  it('keeps retired historical entries out of the current manual catalog', () => {
     const retiredIds = [
       'composer-1.5',
       'composer-2',
@@ -62,88 +79,59 @@ describe('current catalog contract', () => {
     ];
 
     expect(retiredIds.every((id) => getModelById(id) === undefined)).toBe(true);
-    expect(getModelById('composer-1')?.pool).toBe('api');
+    expect(getModelById('composer-1')?.pool).toBe('other_models');
   });
 
-  it('contains the July 13 model rates, contexts, and variants', () => {
-    expect(getModelById('claude-sonnet-5')).toEqual({
-      id: 'claude-sonnet-5',
-      name: 'Claude Sonnet 5',
-      provider: 'anthropic',
-      pool: 'api',
-      docs_url: 'https://cursor.com/docs/models/claude-sonnet-5',
-      rate_promotion: {
-        ends_on: '2026-08-31',
-        rates: { input: 2, output: 10 },
-        label: '$2/M input and $10/M output through August 31, 2026',
-      },
-      context: { default: 200000, max: 1000000 },
-      rates: { input: 3, cache_write: 3.75, cache_read: 0.3, output: 15 },
-      variants: { max_mode: { cursor_upcharge: 0 }, thinking: true },
+  it('contains the September 2026 current rates and new live rows', () => {
+    expect(getModelById('claude-sonnet-5')?.rates).toEqual({
+      input: 2,
+      cache_write: 2.5,
+      cache_read: 0.2,
+      output: 10,
     });
-    expect(getModelById('gpt-5.6-sol')).toMatchObject({
-      context: { default: 272000, max: 1000000 },
-      rates: { input: 5, cache_write: 6.25, cache_read: 0.5, output: 30 },
-      variants: {
-        max_mode: {
-          rates: { input: 10, cache_write: 12.5, cache_read: 1, output: 45 },
-        },
-        fast: {
-          model_id: 'gpt-5.6-sol-fast',
-          rates: { input: 10, cache_write: 12.5, cache_read: 1, output: 60 },
-        },
-        thinking: true,
-      },
+    expect(getModelById('claude-sonnet-5')?.rate_promotion).toBeUndefined();
+    expect(getModelById('gpt-5.6-sol')?.rates).toEqual({
+      input: 4,
+      cache_write: 5,
+      cache_read: 0.4,
+      output: 20,
     });
-    expect(getModelById('gpt-5.6-terra')).toMatchObject({
-      context: { default: 272000, max: null },
-      rates: { input: 2.5, cache_write: 3.125, cache_read: 0.25, output: 15 },
-      variants: {
-        fast: {
-          model_id: 'gpt-5.6-terra-fast',
-          rates: { input: 5, cache_write: 6.25, cache_read: 0.5, output: 30 },
-        },
-        thinking: true,
-      },
+    expect(getModelById('gpt-5.6-sol')?.variants?.fast?.rates).toEqual({
+      input: 8,
+      cache_write: 10,
+      cache_read: 0.8,
+      output: 40,
     });
-    expect(getModelById('gpt-5.6-luna')).toMatchObject({
-      context: { default: 272000, max: null },
-      rates: { input: 1, cache_write: 1.25, cache_read: 0.1, output: 6 },
-      variants: {
-        fast: {
-          model_id: 'gpt-5.6-luna-fast',
-          rates: { input: 2, cache_write: 2.5, cache_read: 0.2, output: 12 },
-        },
-        thinking: true,
-      },
+    expect(getModelById('gpt-5.6-terra')?.context).toEqual({ default: 272000, max: 1000000 });
+    expect(getModelById('gpt-5.6-luna')?.rates).toEqual({
+      input: 0.2,
+      cache_write: 0.25,
+      cache_read: 0.02,
+      output: 1.2,
     });
-    expect(getModelById('glm-5.2')).toMatchObject({
-      provider: 'zai',
-      context: { default: 200000, max: null },
-      rates: { input: 1.4, cache_write: null, cache_read: 0.26, output: 4.4 },
+    expect(getModelById('grok-4.6')?.pool).toBe('cursor_models');
+    expect(getModelById('grok-4.6')?.rates).toEqual({
+      input: 2,
+      cache_write: null,
+      cache_read: 0.5,
+      output: 6,
     });
-    expect(getModelById('kimi-k2.7-code')).toMatchObject({
-      provider: 'moonshot',
-      context: { default: 262000, max: null },
-      rates: { input: 0.95, cache_write: null, cache_read: 0.19, output: 4 },
+    expect(getModelById('claude-opus-5')?.rates).toEqual({
+      input: 5,
+      cache_write: 6.25,
+      cache_read: 0.5,
+      output: 25,
     });
-    expect(getModelById('grok-4.5')).toMatchObject({
-      provider: 'cursor',
-      pool: 'first_party',
-      availability_note: 'Not yet available in the European Union',
-      pool_usage_promotion: {
-        ends_on: '2026-07-15',
-        allowance_multiplier: 2,
-      },
-      context: { default: 256000, max: null },
-      rates: { input: 2, cache_write: null, cache_read: 0.5, output: 6 },
-      variants: {
-        fast: {
-          model_id: 'grok-4.5-fast',
-          rates: { input: 4, cache_write: null, cache_read: 1, output: 18 },
-        },
-      },
+    expect(getModelById('claude-fable-5-1')?.rates.cache_read).toBe(0.25);
+    expect(getModelById('gemini-3.8-flash')?.id).toBe('gemini-3.8-flash');
+    expect(getModelById('muse-spark-1.3')?.provider).toBe('meta');
+    expect(getModelById('kimi-k3')?.rates).toEqual({
+      input: 3,
+      cache_write: null,
+      cache_read: 0.3,
+      output: 15,
     });
+    expect(getModelById('grok-4.5')?.pool_usage_promotion).toBeUndefined();
   });
 
   it('does not expose retired standalone companion model names in the current catalog', () => {
@@ -187,7 +175,7 @@ describe('current catalog contract', () => {
       id: 'mutated-model',
       name: 'Mutated Model',
       provider: 'cursor',
-      pool: 'api',
+      pool: 'other_models',
       context: { default: 0, max: 0 },
       rates: { input: 0, cache_write: null, cache_read: null, output: 0 },
     });

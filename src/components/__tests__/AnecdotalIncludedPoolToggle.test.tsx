@@ -8,9 +8,10 @@ describe('AnecdotalIncludedPoolToggle', () => {
   it('anchors Pro Plus at 1B and scales Pro and Ultra at 1x, 3x, and 20x', () => {
     const allowances = ANECDOTAL_FIRST_PARTY_POOL_TOKEN_ALLOWANCES;
 
-    expect(allowances.pro_plus).toBe(1_000_000_000);
-    expect(allowances.pro).toBe(Math.round(allowances.pro_plus / 3));
-    expect(allowances.ultra).toBe(Math.round((allowances.pro_plus * 20) / 3));
+    const proPlus = allowances.pro_plus ?? 0;
+    expect(proPlus).toBe(1_000_000_000);
+    expect(allowances.pro).toBe(Math.round(proPlus / 3));
+    expect(allowances.ultra).toBe(Math.round((proPlus * 20) / 3));
   });
 
   it('renders conservative plan estimates and source links as unofficial', () => {
@@ -18,7 +19,7 @@ describe('AnecdotalIncludedPoolToggle', () => {
       <AnecdotalIncludedPoolToggle checked={false} onChange={vi.fn()} />,
     );
 
-    expect(html).toContain('Anecdotal first-party pool estimate');
+    expect(html).toContain('Anecdotal Cursor Models estimate');
     expect(html).toContain('333.33M');
     expect(html).toContain('1.00B');
     expect(html).toContain('6.67B');

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import type { NavigationTarget } from '../app/calculatorState';
-import { ChartLineIcon, FileCsvIcon, WalletIcon } from './Icons';
+import { ChartLineIcon, CloudIcon, FileCsvIcon, WalletIcon } from './Icons';
 import { Sidebar } from './Sidebar';
 
 interface Props {
@@ -55,6 +55,7 @@ export function SidebarLayout({ activeTarget, onNavigate, pricingDate, children 
               { target: 'budget' as const, label: 'I have a budget', icon: WalletIcon },
               { target: 'manual_usage' as const, label: 'I know my usage', icon: ChartLineIcon },
               { target: 'csv_import' as const, label: 'I have a CSV', icon: FileCsvIcon },
+              { target: 'cloud_automations' as const, label: 'Cloud and automations', icon: CloudIcon },
             ] as const).map(({ target, label, icon: Icon }) => (
               <button
                 key={target}

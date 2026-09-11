@@ -11,7 +11,7 @@ function createLineItem(overrides: Partial<PlanLineItem> = {}): PlanLineItem {
     modelId: 'model-1',
     label: 'Model 1',
     provider: 'anthropic',
-    pool: 'api',
+    pool: 'other_models',
     tokens: {
       total: 10_000_000,
       input: 7_500_000,
@@ -152,5 +152,35 @@ describe('selectRecommendation', () => {
     );
 
     expect(highCacheTokens).toBeGreaterThan(noCacheTokens);
+  });
+
+  it('filters IDE recommendations by audience and keeps cloud off the IDE result', () => {
+    const plans = getPlans();
+    const inputs = { manualModels, importReplayModels: [], plans };
+    const personal = selectRecommendation(createInitialCalculatorState(manualModels), inputs);
+    const teams = selectRecommendation(
+      { ...createInitialCalculatorState(manualModels), audience: 'teams_enterprise' },
+      inputs,
+    );
+    const cloud = selectRecommendation(
+      { ...createInitialCalculatorState(manualModels), view: 'cloud_automations' },
+      inputs,
+    );
+
+    expect(personal?.all.map((result) => result.plan)).toEqual([
+      'hobby',
+      'start',
+      'pro',
+      'pro_plus',
+      'ultra',
+    ]);
+    expect(personal?.best.plan).toBe('pro_plus');
+    expect(teams?.all.map((result) => result.plan)).toEqual([
+      'teams_standard',
+      'teams_premium',
+      'enterprise',
+    ]);
+    expect(teams?.best.plan).toBe('teams_standard');
+    expect(cloud).toBeNull();
   });
 });

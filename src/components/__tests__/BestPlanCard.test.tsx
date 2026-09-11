@@ -11,7 +11,7 @@ function createLineItem(overrides: Partial<PlanLineItem> = {}): PlanLineItem {
     modelId: 'model-1',
     label: 'Model 1',
     provider: 'anthropic',
-    pool: 'api',
+    pool: 'other_models',
     tokens: {
       total: 10_000_000,
       input: 7_500_000,
@@ -161,7 +161,7 @@ describe('BestPlanCard', () => {
     expect(html).toContain('Auto');
     expect(html).toContain('Composer 2.5');
     expect(html).toContain('Included');
-    expect(html).toContain('First-party pool');
+    expect(html).toContain('Cursor Models');
     const autoIndex = html.indexOf('Auto');
     const modelIndex = html.indexOf('Model 1');
     expect(autoIndex).toBeLessThan(modelIndex);
@@ -245,7 +245,7 @@ describe('BestPlanCard', () => {
     expect(html).toContain('Pro Plus');
     expect(html).toContain('Best Plan Model');
     expect(html).not.toContain('First Plan Model');
-    expect(html).toContain('Included API pool');
+    expect(html).toContain('Other Models allowance');
     expect(html).toContain('$77.00');
     expect(html).not.toContain('$21.00');
   });

@@ -22,11 +22,11 @@ export function AnecdotalIncludedPoolToggle({
       <div className="flex items-start justify-between gap-4">
         <div>
           <label htmlFor={SWITCH_ID} className="text-sm font-semibold text-[#14120b]">
-            Anecdotal first-party pool estimate
+            Anecdotal Cursor Models estimate
           </label>
           <p id={`${SWITCH_ID}-description`} className="mt-1 text-xs text-[#14120b]/55">
-            Cursor does not publish first-party pool limits. This optional estimate uses
-            community-reported dashboard data to model overage after the pool is exhausted.
+            Cursor does not publish Cursor Models dollar limits. This optional unverified estimate uses
+            community-reported dashboard data and stays off Teams/Enterprise.
           </p>
           <p className="mt-1 text-xs font-medium text-[#14120b]/55">
             1B Pro Plus anchor; scale: Pro 1x, Pro Plus 3x, Ultra 20x.
@@ -49,7 +49,7 @@ export function AnecdotalIncludedPoolToggle({
               {estimate.label}
             </dt>
             <dd className="text-sm font-semibold text-[#14120b]">
-              {formatNumber(estimate.tokens)}
+              {formatNumber(estimate.tokens ?? 0)}
             </dd>
           </div>
         ))}

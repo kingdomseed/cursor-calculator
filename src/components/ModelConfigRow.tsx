@@ -1,5 +1,6 @@
 import { getActiveModelConfigBadges, getModelConfigCapabilities } from '../domain/modelConfig/capabilities';
 import { useMemo, useState } from 'react';
+import type { Audience } from '../domain/catalog/types';
 import type { Model, ModelConfig } from '../lib/types';
 import { formatRate } from '../domain/recommendation/formatters';
 import { computeEffectiveRates, isPoolUsagePromotionActive, isRatePromotionActive } from '../domain/recommendation/rates';
@@ -10,17 +11,17 @@ interface Props {
   model: Model;
   config: ModelConfig;
   onChange: (config: ModelConfig) => void;
+  audience?: Audience;
 }
 
-export function ModelConfigRow({ model, config, onChange }: Props) {
+export function ModelConfigRow({ model, config, onChange, audience = 'personal' }: Props) {
   const [expanded, setExpanded] = useState(false);
   const effectiveRates = useMemo(
-    () => computeEffectiveRates(model, config),
-    [model, config]
+    () => computeEffectiveRates(model, config, undefined, audience),
+    [audience, model, config]
   );
 
   const {
-    hasMaxMode,
     hasFast,
     hasThinking,
     hasCaching,
@@ -51,7 +52,12 @@ export function ModelConfigRow({ model, config, onChange }: Props) {
           <input
             type="number" min="0" max="100" step="5"
             value={config.weight}
-            onChange={(e) => onChange({ ...config, weight: Number(e.target.value) })}
+            onChange={(e) => {
+              const weight = e.currentTarget.valueAsNumber;
+              if (Number.isFinite(weight)) {
+                onChange({ ...config, weight });
+              }
+            }}
             className="w-16 text-right text-sm font-semibold bg-[#f7f7f4] border border-[#e0e0d8] rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[#14120b]/30"
           />
           <span className="text-sm text-[#14120b]/50">%</span>
@@ -62,36 +68,22 @@ export function ModelConfigRow({ model, config, onChange }: Props) {
       <Collapsible open={expanded}>
         <div className="mt-3 space-y-3">
           {/* Variant checkboxes: pricing variants */}
-          {(hasMaxMode || hasFast) && (
+          {hasFast ? (
             <div className="flex flex-wrap gap-4 text-sm">
-              {hasMaxMode && (
-                <label className="flex items-center gap-1.5 cursor-pointer">
-                  <input type="checkbox" checked={config.maxMode} onChange={(e) => onChange({
-                    ...config,
-                    maxMode: e.target.checked,
-                    fast: e.target.checked && fastAndMaxAreSeparate ? false : config.fast,
-                  })}
-                    className="w-4 h-4 rounded border-[#e0e0d8] text-[#14120b] focus:ring-[#14120b]" />
-                  <span>Max Mode</span>
-                  <span className="text-xs text-[#14120b]/40">(model rate)</span>
-                </label>
-              )}
-              {hasFast && (
-                <label className="flex items-center gap-1.5 cursor-pointer">
-                  <input type="checkbox" checked={config.fast} onChange={(e) => onChange({
-                    ...config,
-                    fast: e.target.checked,
-                    maxMode: e.target.checked && fastAndMaxAreSeparate ? false : config.maxMode,
-                  })}
-                    className="w-4 h-4 rounded border-[#e0e0d8] text-[#14120b] focus:ring-[#14120b]" />
-                  <span>Fast</span>
-                  <span className="text-xs text-[#14120b]/40">
-                    {fastAndMaxAreSeparate ? '(separate from Max)' : '(stacks with Max)'}
-                  </span>
-                </label>
-              )}
+              <label className="flex items-center gap-1.5 cursor-pointer">
+                <input type="checkbox" checked={config.fast} onChange={(e) => onChange({
+                  ...config,
+                  fast: e.target.checked,
+                  maxMode: e.target.checked && fastAndMaxAreSeparate ? false : config.maxMode,
+                })}
+                  className="w-4 h-4 rounded border-[#e0e0d8] text-[#14120b] focus:ring-[#14120b]" />
+                <span>Fast</span>
+                <span className="text-xs text-[#14120b]/40">
+                  {fastAndMaxAreSeparate ? '(separate from Max)' : '(stacks with Max)'}
+                </span>
+              </label>
             </div>
-          )}
+          ) : null}
 
           {/* Token usage modifiers: thinking */}
           {hasThinking && (

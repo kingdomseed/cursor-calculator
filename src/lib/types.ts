@@ -1,4 +1,5 @@
 export type {
+  Audience,
   FastVariant,
   MaxModeVariant,
   Model,
@@ -7,6 +8,7 @@ export type {
   Plan,
   PlanKey,
   PricingData,
+  UsagePool,
 } from '../domain/catalog/types';
 export type {
   EffectiveRates,

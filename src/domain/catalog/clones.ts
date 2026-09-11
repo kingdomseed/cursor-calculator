@@ -56,6 +56,7 @@ export function cloneModel(model: Model): Model {
     } : {}),
     ...(model.availability_note ? { availability_note: model.availability_note } : {}),
     ...(model.usage_note ? { usage_note: model.usage_note } : {}),
+    ...(model.hidden_by_default ? { hidden_by_default: true } : {}),
     context: {
       default: model.context.default,
       max: model.context.max,
@@ -83,21 +84,28 @@ export function cloneModels(models: Model[]): Model[] {
   return models.map(cloneModel);
 }
 
-function clonePlan(plan: Plan): Plan {
+export function clonePlan(plan: Plan): Plan {
   return {
     name: plan.name,
     monthly_cost: plan.monthly_cost,
     api_pool: plan.api_pool,
     description: plan.description,
+    ...(plan.audience ? { audience: plan.audience } : {}),
+    ...(plan.recommendable !== undefined ? { recommendable: plan.recommendable } : {}),
+    ...(plan.other_models_allowance_status
+      ? { other_models_allowance_status: plan.other_models_allowance_status }
+      : {}),
+    ...(plan.other_models_allowance_label
+      ? { other_models_allowance_label: plan.other_models_allowance_label }
+      : {}),
+    ...(plan.monthly_cost_note ? { monthly_cost_note: plan.monthly_cost_note } : {}),
   };
 }
 
-export function clonePlans(plans: Record<PlanKey, Plan>): Record<PlanKey, Plan> {
-  return {
-    pro: clonePlan(plans.pro),
-    pro_plus: clonePlan(plans.pro_plus),
-    ultra: clonePlan(plans.ultra),
-  };
+export function clonePlans<T extends Partial<Record<PlanKey, Plan>>>(plans: T): T {
+  return Object.fromEntries(
+    Object.entries(plans).map(([key, plan]) => [key, clonePlan(plan as Plan)]),
+  ) as T;
 }
 
 export function clonePricingData(pricing: PricingData): PricingData {

@@ -3,13 +3,14 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { Sidebar } from '../Sidebar';
 
 describe('Sidebar', () => {
-  it('renders all three nav items', () => {
+  it('renders all calculator nav items', () => {
     const html = renderToStaticMarkup(
       <Sidebar activeTarget="budget" onNavigate={vi.fn()} pricingDate="2026-03-12" />,
     );
     expect(html).toContain('I have a budget');
     expect(html).toContain('I know my usage');
     expect(html).toContain('I have a CSV');
+    expect(html).toContain('Cloud and automations');
   });
 
   it('renders app branding', () => {
@@ -23,7 +24,8 @@ describe('Sidebar', () => {
     const html = renderToStaticMarkup(
       <Sidebar activeTarget="budget" onNavigate={vi.fn()} pricingDate="2026-03-12" />,
     );
-    expect(html).toContain('two usage pools');
+    expect(html).toContain('Cursor Models');
+    expect(html).toContain('Other Models');
     expect(html).toContain('Max Mode');
     expect(html).toContain('Disclaimer');
     expect(html).toContain('2026-03-12');
