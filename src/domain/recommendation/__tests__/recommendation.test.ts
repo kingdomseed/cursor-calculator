@@ -54,7 +54,7 @@ const baseConfig: ModelConfig = {
   cacheHitRate: 0,
 };
 
-const testPlans: PricingData['plans'] = {
+const testPlans: Partial<PricingData['plans']> = {
   pro: { name: 'Pro', monthly_cost: 20, api_pool: 20, description: '' },
   pro_plus: { name: 'Pro Plus', monthly_cost: 60, api_pool: 70, description: '' },
   ultra: { name: 'Ultra', monthly_cost: 200, api_pool: 400, description: '' },
@@ -232,7 +232,7 @@ describe('computeRecommendation - budget mode', () => {
   });
 
   it('prefers the plan with more API pool headroom on a budget-mode tie', () => {
-    const tiePlans: PricingData['plans'] = {
+    const tiePlans: Partial<PricingData['plans']> = {
       pro: { name: 'Pro', monthly_cost: 10, api_pool: 15, description: '' },
       pro_plus: { name: 'Pro Plus', monthly_cost: 20, api_pool: 25, description: '' },
       ultra: { name: 'Ultra', monthly_cost: 200, api_pool: 400, description: '' },
@@ -269,7 +269,7 @@ describe('computeRecommendation - token mode', () => {
   });
 
   it('prefers the plan with more API pool headroom on a token-mode tie', () => {
-    const tiePlans: PricingData['plans'] = {
+    const tiePlans: Partial<PricingData['plans']> = {
       pro: { name: 'Pro', monthly_cost: 20, api_pool: 10, description: '' },
       pro_plus: { name: 'Pro Plus', monthly_cost: 30, api_pool: 20, description: '' },
       ultra: { name: 'Ultra', monthly_cost: 200, api_pool: 400, description: '' },

@@ -30,7 +30,7 @@ const composer25Model: Model = {
   rates: { input: 0.5, cache_write: null, cache_read: 0.2, output: 2.5 },
 };
 
-const plans: PricingData['plans'] = {
+const plans: Partial<PricingData['plans']> = {
   pro: { name: 'Pro', monthly_cost: 20, api_pool: 20, description: '' },
   pro_plus: { name: 'Pro Plus', monthly_cost: 60, api_pool: 70, description: '' },
   ultra: { name: 'Ultra', monthly_cost: 200, api_pool: 400, description: '' },
