@@ -149,3 +149,4 @@ Thinking mode exists for Claude models, current GPT models, Gemini models, and C
 - Do not add unsupported pricing assumptions or undocumented Cursor behavior.
 - Treat imported historical replay behavior as approximate unless backed by current first-party Cursor docs.
 - Preserve the distinction between current manual pricing data and historical replay-only data.
+- Do not write mannered prose in UI copy or agent-facing repo docs. Mannered prose substitutes metaphor and flourish for direct statement. Write "a parameter worth varying," not "a dial worth turning." Write "this point still matters," not "this point earns its keep." Those phrases display the writer instead of stating the idea. They also import connotations you did not choose. When a literal phrase is available, use it.

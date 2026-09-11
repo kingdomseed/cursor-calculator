@@ -24,6 +24,7 @@ describe('GrokBotGrantCard', () => {
     expect(html).toContain('hover:translate-y-0');
     expect(html).toContain('focus:translate-y-0');
     expect(html).toContain('focus-within:translate-y-0');
+    expect(html).toContain('h-16');
     expect(html).not.toContain('grant');
   });
 });

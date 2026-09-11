@@ -8,6 +8,7 @@ import type {
 } from '../domain/cloudAutomations/types';
 import { getCloudProductLabel } from '../domain/cloudAutomations/pricing';
 import { PROVIDER_COLORS } from '../lib/constants';
+import { AudienceToggle } from './AudienceToggle';
 
 interface Props {
   audience: Audience;
@@ -21,6 +22,7 @@ interface Props {
   fast: boolean;
   models: Model[];
   result: CloudAutomationsResult;
+  onAudienceChange: (audience: Audience) => void;
   onProductChange: (product: CloudProductKind) => void;
   onRuntimeChange: (runtime: CloudRuntimeKind) => void;
   onAutomationScopeChange: (scope: CloudAutomationScope) => void;
@@ -53,6 +55,7 @@ export function CloudAutomationsPanel({
   fast,
   models,
   result,
+  onAudienceChange,
   onProductChange,
   onRuntimeChange,
   onAutomationScopeChange,
@@ -77,6 +80,8 @@ export function CloudAutomationsPanel({
       </p>
 
       <div className="mt-4 p-4 bg-white rounded-xl border border-[#e0e0d8] space-y-4">
+        <AudienceToggle audience={audience} onChange={onAudienceChange} />
+        <div className="border-t border-[#e0e0d8]" />
         <Field label="Product" htmlFor="cloud-product">
           <select
             id="cloud-product"

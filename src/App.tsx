@@ -95,12 +95,10 @@ function App() {
       <WelcomeModal />
       <SidebarLayout activeTarget={navigationTarget} onNavigate={navigate} pricingDate={PRICING.meta.retrieved_at}>
         <div>
-          <div className="mb-6">
-            <AudienceToggle audience={audience} onChange={setAudience} />
-          </div>
           {isCloudView ? (
             <CloudAutomationsPanel
               audience={audience}
+              onAudienceChange={setAudience}
               product={cloudProduct}
               runtime={cloudRuntime}
               automationScope={cloudAutomationScope}
@@ -208,20 +206,26 @@ function App() {
               </div>
             )}
 
-            {(mode === 'budget' || (mode === 'tokens' && tokenSource === 'manual' && manualTokenInputMode === 'simple')) && (
-              <div className="mt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowAdvanced(!showAdvanced)}
-                  className="flex items-center gap-2 text-sm text-[#14120b]/60 hover:text-[#14120b]"
-                >
-                  <svg className={`w-4 h-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                  Advanced options
-                </button>
-                <Collapsible open={showAdvanced}>
-                  <div className="mt-4 p-4 bg-white rounded-xl border border-[#e0e0d8]">
+          </>
+        )}
+
+        {!isCloudView && (
+          <div className="mt-4">
+            <button
+              type="button"
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className="flex items-center gap-2 text-sm text-[#14120b]/60 hover:text-[#14120b]"
+            >
+              <svg className={`w-4 h-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+              Advanced options
+            </button>
+            <Collapsible open={showAdvanced}>
+              <div className="mt-4 p-4 bg-white rounded-xl border border-[#e0e0d8] space-y-4">
+                <AudienceToggle audience={audience} onChange={setAudience} />
+                {(mode === 'budget' || (mode === 'tokens' && tokenSource === 'manual' && manualTokenInputMode === 'simple')) ? (
+                  <div className="border-t border-[#e0e0d8] pt-4">
                     <div className="flex items-center justify-between mb-2">
                       <label htmlFor={INPUT_OUTPUT_RATIO_ID} className="text-sm font-medium">
                         {mode === 'tokens' ? 'Non-cache Input : Output Ratio' : 'Input : Output Ratio'}
@@ -242,10 +246,10 @@ function App() {
                       <span>1:1</span><span>3:1 typical</span><span>10:1</span>
                     </div>
                   </div>
-                </Collapsible>
+                ) : null}
               </div>
-            )}
-          </>
+            </Collapsible>
+          </div>
         )}
 
         {!isCloudView && recommendation && recommendationPresentation && (
