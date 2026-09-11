@@ -163,7 +163,12 @@ export function CloudAutomationsPanel({
                 min="0"
                 step="1000"
                 value={tokens}
-                onChange={(event) => onTokensChange(Number(event.target.value))}
+                onChange={(event) => {
+                  const nextTokens = event.currentTarget.valueAsNumber;
+                  if (Number.isFinite(nextTokens)) {
+                    onTokensChange(nextTokens);
+                  }
+                }}
                 className="w-full bg-[#f7f7f4] border border-[#e0e0d8] rounded-lg px-3 py-2 text-sm"
               />
             </Field>
