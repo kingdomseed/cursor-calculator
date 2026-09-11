@@ -1,5 +1,6 @@
 import { getActiveModelConfigBadges, getModelConfigCapabilities } from '../domain/modelConfig/capabilities';
 import { useMemo, useState } from 'react';
+import type { Audience } from '../domain/catalog/types';
 import type { Model, ModelConfig } from '../lib/types';
 import { formatRate } from '../domain/recommendation/formatters';
 import { computeEffectiveRates, isPoolUsagePromotionActive, isRatePromotionActive } from '../domain/recommendation/rates';
@@ -10,21 +11,22 @@ interface Props {
   model: Model;
   config: ModelConfig;
   onChange: (config: ModelConfig) => void;
+  audience?: Audience;
 }
 
-export function ModelConfigRow({ model, config, onChange }: Props) {
+export function ModelConfigRow({ model, config, onChange, audience = 'personal' }: Props) {
   const [expanded, setExpanded] = useState(false);
   const effectiveRates = useMemo(
-    () => computeEffectiveRates(model, config),
-    [model, config]
+    () => computeEffectiveRates(model, config, undefined, audience),
+    [audience, model, config]
   );
 
   const {
-    hasMaxMode,
     hasFast,
     hasThinking,
     hasCaching,
   } = getModelConfigCapabilities(model);
+  const hasMaxMode = false;
   const activeBadges = getActiveModelConfigBadges(config);
   const fastAndMaxAreSeparate = !!model.variants?.max_mode?.rates;
 

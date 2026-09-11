@@ -124,7 +124,7 @@ describe('priceImportedRow', () => {
     const priced = priceImportedRow(model!, normalized, tokens, IMPORT_REPLAY_MODEL_BY_ID);
 
     expect(priced.approximated).toBe(true);
-    expect(priced.exactCost.total).toBe(110);
+    expect(priced.exactCost.total).toBe(76);
   });
 
   it('carries approximate Fast + Max costs through plan recommendation', () => {
@@ -141,7 +141,7 @@ describe('priceImportedRow', () => {
       fast: true,
       maxMode: true,
       approximated: true,
-      exactCost: { total: 110 },
+      exactCost: { total: 76 },
     });
     expect(() => computeExactUsageRecommendation(
       report.pricedEntries,

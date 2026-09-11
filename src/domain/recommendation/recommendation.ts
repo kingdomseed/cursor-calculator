@@ -1,4 +1,5 @@
-import type { Model, Plan, PlanKey, PricingData } from '../catalog/types';
+import type { Audience, Model, Plan, PlanKey, PricingData } from '../catalog/types';
+import { filterPlanKeys, isCursorModelsPool, isOtherModelsPool, isPlanRecommendable } from '../catalog/pools';
 import { dollarsToExactTokens } from './budgetUsage';
 import { directBreakdownToDollars, exactTokensToDollars, tokensToDollars } from './conversions';
 import { computeBillableRates, computeEffectiveRates, effectiveRatesFromExactCost, effectiveRatesFromExactTokens, getPoolUsageAllowanceMultiplier } from './rates';
@@ -9,11 +10,10 @@ import type {
   PlanLineItem,
   PlanResult,
   Recommendation,
+  RecommendationOptions,
   TokenBreakdown,
   UsageLineItemInput,
 } from './types';
-
-const PLAN_KEYS: PlanKey[] = ['pro', 'pro_plus', 'ultra'];
 
 export function computeRecommendation(
   mode: Mode,
@@ -21,24 +21,42 @@ export function computeRecommendation(
   totalTokens: number,
   models: Model[],
   configs: ModelConfig[],
-  plans: PricingData['plans'],
+  plans: Partial<PricingData['plans']>,
   inputOutputRatio: number,
   cacheReadShare: number = 0,
+  options: RecommendationOptions = {},
 ): Recommendation {
   const weightSum = configs.reduce((sum, config) => sum + config.weight, 0);
   const normalizedConfigs = weightSum > 0
     ? configs.map((config) => ({ ...config, weight: (config.weight / weightSum) * 100 }))
     : configs;
+  const audience = options.audience ?? 'personal';
 
-  const allResults = PLAN_KEYS.map((key) => {
+  const allResults = filterPlanKeys(plans, audience).map((key) => {
     const plan = plans[key];
-    const affordable = mode === 'budget' ? plan.monthly_cost <= budget : true;
+    if (!plan) {
+      throw new Error(`Missing plan "${key}"`);
+    }
+    const monthlyCost = plan.monthly_cost;
+    const affordable = mode === 'budget'
+      ? monthlyCost != null && monthlyCost <= budget
+      : true;
 
     if (mode === 'budget') {
-      return computeBudgetPlanResult(key, plan, budget, models, normalizedConfigs, inputOutputRatio, affordable, cacheReadShare);
+      return computeBudgetPlanResult(
+        key,
+        plan,
+        budget,
+        models,
+        normalizedConfigs,
+        inputOutputRatio,
+        affordable,
+        cacheReadShare,
+        audience,
+      );
     }
 
-    return computeTokenPlanResult(key, plan, totalTokens, models, normalizedConfigs, inputOutputRatio);
+    return computeTokenPlanResult(key, plan, totalTokens, models, normalizedConfigs, inputOutputRatio, audience);
   });
 
   return {
@@ -50,12 +68,18 @@ export function computeRecommendation(
 export function computeExactUsageRecommendation(
   usageItems: UsageLineItemInput[],
   models: Model[],
-  plans: PricingData['plans'],
+  plans: Partial<PricingData['plans']>,
   includedPoolEstimate?: IncludedPoolEstimateConfig,
+  options: RecommendationOptions = {},
 ): Recommendation {
-  const allResults = PLAN_KEYS.map((key) =>
-    computeExactUsagePlanResult(key, plans[key], usageItems, models, includedPoolEstimate),
-  );
+  const audience = options.audience ?? 'personal';
+  const allResults = filterPlanKeys(plans, audience).map((key) => {
+    const plan = plans[key];
+    if (!plan) {
+      throw new Error(`Missing plan "${key}"`);
+    }
+    return computeExactUsagePlanResult(key, plan, usageItems, models, includedPoolEstimate, audience);
+  });
 
   return {
     best: pickBestPlanResult(allResults, 'tokens'),
@@ -64,27 +88,30 @@ export function computeExactUsageRecommendation(
 }
 
 function pickBestPlanResult(results: PlanResult[], mode: Mode): PlanResult {
-  const affordableResults = results.filter((result) => result.affordable);
-  if (affordableResults.length === 0) {
+  const comparableResults = results.filter((result) => result.recommendable !== false && result.affordable);
+  const fallbackResults = comparableResults.length > 0
+    ? comparableResults
+    : results.filter((result) => result.recommendable !== false);
+  if (fallbackResults.length === 0) {
     return results[0];
   }
 
   if (mode === 'budget') {
-    return affordableResults.reduce((left, right) => {
+    return fallbackResults.reduce((left, right) => {
       const leftTokens = left.perModel.reduce((sum, item) => sum + item.tokens.total, 0);
       const rightTokens = right.perModel.reduce((sum, item) => sum + item.tokens.total, 0);
 
       if (leftTokens === rightTokens) {
-        return left.apiPool > right.apiPool ? left : right;
+        return (left.apiPool ?? -1) > (right.apiPool ?? -1) ? left : right;
       }
 
       return leftTokens > rightTokens ? left : right;
     });
   }
 
-  return affordableResults.reduce((left, right) => {
+  return fallbackResults.reduce((left, right) => {
     if (left.totalCost === right.totalCost) {
-      return left.apiPool > right.apiPool ? left : right;
+      return (left.apiPool ?? -1) > (right.apiPool ?? -1) ? left : right;
     }
 
     return left.totalCost < right.totalCost ? left : right;
@@ -100,15 +127,17 @@ function computeBudgetPlanResult(
   ratio: number,
   affordable: boolean,
   cacheReadShare: number = 0,
+  audience?: Audience,
 ): PlanResult {
-  const apiBudget = Math.max(plan.api_pool, budget);
+  const includedPool = plan.api_pool;
+  const apiBudget = includedPool == null ? budget : Math.max(includedPool, budget);
 
   const perModel = configs
     .map((config) => {
       const model = models.find((candidate) => candidate.id === config.modelId);
       if (!model) return null;
 
-      const billableRates = computeBillableRates(model, config);
+      const billableRates = computeBillableRates(model, config, new Date(), audience);
       const modelDollars = apiBudget * (config.weight / 100);
       const modelCacheShare = Math.min(100, Math.max(0, config.caching ? config.cacheHitRate : cacheReadShare));
       const exactTokens = dollarsToExactTokens(modelDollars, billableRates, modelCacheShare, ratio);
@@ -143,25 +172,7 @@ function computeBudgetPlanResult(
     })
     .filter((item): item is PlanLineItem => item !== null);
 
-  const totalApiUsage = perModel.reduce((sum, item) => sum + item.apiCost, 0);
-  const overage = Math.max(0, totalApiUsage - plan.api_pool);
-  const unusedPool = Math.max(0, plan.api_pool - totalApiUsage);
-
-  return {
-    plan: key,
-    subscription: plan.monthly_cost,
-    apiPool: plan.api_pool,
-    apiBudget,
-    apiUsage: totalApiUsage,
-    estimatedIncludedPoolAllowanceTokens: null,
-    estimatedIncludedPoolOverageTokens: 0,
-    estimatedIncludedPoolOverageCost: 0,
-    overage,
-    unusedPool,
-    totalCost: plan.monthly_cost + overage,
-    affordable,
-    perModel,
-  };
+  return finishPlanResult(key, plan, perModel, apiBudget, affordable, audience);
 }
 
 function computeTokenPlanResult(
@@ -171,13 +182,14 @@ function computeTokenPlanResult(
   models: Model[],
   configs: ModelConfig[],
   ratio: number,
+  audience?: Audience,
 ): PlanResult {
   const perModel = configs
     .map((config) => {
       const model = models.find((candidate) => candidate.id === config.modelId);
       if (!model) return null;
 
-      const effectiveRates = computeEffectiveRates(model, config);
+      const effectiveRates = computeEffectiveRates(model, config, undefined, audience);
       const modelTokens = Math.floor(totalTokens * (config.weight / 100));
       const apiCost = tokensToDollars(modelTokens, effectiveRates, ratio);
       const weightInput = ratio / (ratio + 1);
@@ -205,25 +217,7 @@ function computeTokenPlanResult(
     })
     .filter((item): item is PlanLineItem => item !== null);
 
-  const totalApiCost = perModel.reduce((sum, item) => sum + item.apiCost, 0);
-  const overage = Math.max(0, totalApiCost - plan.api_pool);
-  const unusedPool = Math.max(0, plan.api_pool - totalApiCost);
-
-  return {
-    plan: key,
-    subscription: plan.monthly_cost,
-    apiPool: plan.api_pool,
-    apiBudget: plan.api_pool,
-    apiUsage: totalApiCost,
-    estimatedIncludedPoolAllowanceTokens: null,
-    estimatedIncludedPoolOverageTokens: 0,
-    estimatedIncludedPoolOverageCost: 0,
-    overage,
-    unusedPool,
-    totalCost: plan.monthly_cost + overage,
-    affordable: true,
-    perModel,
-  };
+  return finishPlanResult(key, plan, perModel, plan.api_pool ?? 0, true, audience);
 }
 
 function computeExactUsagePlanResult(
@@ -232,6 +226,7 @@ function computeExactUsagePlanResult(
   usageItems: UsageLineItemInput[],
   models: Model[],
   includedPoolEstimate?: IncludedPoolEstimateConfig,
+  audience?: Audience,
 ): PlanResult {
   const referenceModel = includedPoolEstimate
     ? models.find((model) => model.id === includedPoolEstimate.referenceModelId)
@@ -243,8 +238,8 @@ function computeExactUsagePlanResult(
     const model = models.find((candidate) => candidate.id === usage.modelId);
     if (!model) return [];
 
-    const pricing = priceUsageItem(usage, model);
-    if (usage.pool !== 'first_party' || !referenceModel) {
+    const pricing = priceUsageItem(usage, model, audience);
+    if (!isCursorModelsPool(usage.pool) || !referenceModel) {
       return [{ usage, ...pricing, equivalentTokens: usage.tokens.total }];
     }
 
@@ -257,6 +252,7 @@ function computeExactUsagePlanResult(
         exactCost: undefined,
       },
       referenceModel,
+      audience,
     );
     const allowanceMultiplier = getPoolUsageAllowanceMultiplier(
       model,
@@ -269,7 +265,7 @@ function computeExactUsagePlanResult(
     return [{ usage, ...pricing, equivalentTokens }];
   });
   const includedPoolTokens = pricedUsageItems.reduce(
-    (sum, item) => item.usage.pool === 'first_party' ? sum + item.equivalentTokens : sum,
+    (sum, item) => isCursorModelsPool(item.usage.pool) ? sum + item.equivalentTokens : sum,
     0,
   );
   const includedPoolOverageTokens = includedPoolAllowance == null
@@ -281,11 +277,11 @@ function computeExactUsagePlanResult(
 
   const perModel = pricedUsageItems
     .map(({ usage, effectiveRates, apiCost }) => {
-      if (usage.pool !== 'api' && (usage.pool !== 'first_party' || !includedPoolEstimate)) {
+      if (!isOtherModelsPool(usage.pool) && (!isCursorModelsPool(usage.pool) || !includedPoolEstimate)) {
         return null;
       }
 
-      if (usage.pool === 'first_party' && includedPoolEstimate) {
+      if (isCursorModelsPool(usage.pool) && includedPoolEstimate) {
         return buildPlanLineItem(
           {
             ...usage,
@@ -303,29 +299,59 @@ function computeExactUsagePlanResult(
     .filter((item): item is PlanLineItem => item !== null);
 
   const totalApiUsage = perModel.reduce(
-    (sum, item) => item.pool === 'api' ? sum + item.apiCost : sum,
+    (sum, item) => isOtherModelsPool(item.pool) ? sum + item.apiCost : sum,
     0,
   );
   const includedPoolOverageCost = perModel.reduce(
-    (sum, item) => item.pool === 'first_party' ? sum + item.apiCost : sum,
+    (sum, item) => isCursorModelsPool(item.pool) ? sum + item.apiCost : sum,
     0,
   );
-  const overage = Math.max(0, totalApiUsage - plan.api_pool);
-  const unusedPool = Math.max(0, plan.api_pool - totalApiUsage);
-
-  return {
-    plan: key,
-    subscription: plan.monthly_cost,
-    apiPool: plan.api_pool,
-    apiBudget: plan.api_pool,
+  const finished = finishPlanResult(key, plan, perModel, plan.api_pool ?? 0, true, audience, {
     apiUsage: totalApiUsage,
     estimatedIncludedPoolAllowanceTokens: includedPoolAllowance,
     estimatedIncludedPoolOverageTokens: includedPoolOverageTokens,
     estimatedIncludedPoolOverageCost: includedPoolOverageCost,
+  });
+
+  return {
+    ...finished,
+    totalCost: finished.totalCost + includedPoolOverageCost,
+  };
+}
+
+function finishPlanResult(
+  key: PlanKey,
+  plan: Plan,
+  perModel: PlanLineItem[],
+  apiBudget: number,
+  affordable: boolean,
+  audience?: Audience,
+  overrides: Partial<PlanResult> = {},
+): PlanResult {
+  const totalApiUsage = overrides.apiUsage ?? perModel.reduce((sum, item) => sum + item.apiCost, 0);
+  const includedPool = plan.api_pool;
+  const overage = includedPool == null ? 0 : Math.max(0, totalApiUsage - includedPool);
+  const unusedPool = includedPool == null ? 0 : Math.max(0, includedPool - totalApiUsage);
+  const subscription = plan.monthly_cost ?? 0;
+
+  return {
+    plan: key,
+    subscription,
+    ...(plan.monthly_cost_note ? { subscriptionNote: plan.monthly_cost_note } : {}),
+    apiPool: includedPool,
+    otherModelsAllowanceStatus: plan.other_models_allowance_status,
+    otherModelsAllowanceLabel: plan.other_models_allowance_label,
+    apiBudget,
+    apiUsage: totalApiUsage,
+    estimatedIncludedPoolAllowanceTokens: overrides.estimatedIncludedPoolAllowanceTokens ?? null,
+    estimatedIncludedPoolOverageTokens: overrides.estimatedIncludedPoolOverageTokens ?? 0,
+    estimatedIncludedPoolOverageCost: overrides.estimatedIncludedPoolOverageCost ?? 0,
     overage,
     unusedPool,
-    totalCost: plan.monthly_cost + overage + includedPoolOverageCost,
-    affordable: true,
+    totalCost: subscription + overage,
+    affordable,
+    recommendable: isPlanRecommendable(plan),
+    cursorTokenRateApplied: audience === 'teams_enterprise',
     perModel,
   };
 }
@@ -333,6 +359,7 @@ function computeExactUsagePlanResult(
 function priceUsageItem(
   usage: UsageLineItemInput,
   model: Model,
+  audience?: Audience,
 ): Pick<PlanLineItem, 'effectiveRates' | 'apiCost'> {
   if (usage.exactCost) {
     return {
@@ -342,7 +369,7 @@ function priceUsageItem(
   }
 
   const config = createConfigFromUsage(usage);
-  const billableRates = computeBillableRates(model, config);
+  const billableRates = computeBillableRates(model, config, new Date(), audience);
   const effectiveRates = usage.exactTokens
       ? effectiveRatesFromExactTokens(usage.exactTokens, billableRates)
       : {

@@ -64,8 +64,8 @@ export function parseCursorUsageFiles(
         continue;
       }
 
-      if (model.pool !== 'api') {
-        recordIssue(nonApiIncluded, row.model, totalTokens, 'Included usage pool, not API-priced');
+      if (model.pool !== 'other_models') {
+        recordIssue(nonApiIncluded, row.model, totalTokens, 'Included usage pool, not Other Models priced');
         continue;
       }
 

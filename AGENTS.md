@@ -84,16 +84,13 @@ All pricing facts should be verified against Cursor docs before changing the cat
 
 ### Usage pools
 
-- **First-party models pool** — used by Auto, Composer 2.5, and Grok 4.5 on individual plans. Cursor describes this as generous included usage, but does not disclose a dollar value.
-- **API pool** — charged at each model's API rate:
-  - Pro: `$20/mo` → `$20` API pool
-  - Pro Plus: `$60/mo` → `$70` API pool
-  - Ultra: `$200/mo` → `$400` API pool
-- Overage beyond the API pool is billed at the same API rates.
+- **Cursor Models** — Composer 2.5, Grok 4.6, and Grok 4.5. Generous included usage; no published dollar amount. Auto is a router, not a pool.
+- **Other Models** — third-party models at API rates. Last published official floors: Pro at least `$20`, Pro Plus `$70`, Ultra `$400`. Live docs now say only “Included.” Teams dollars unpublished.
+- Overage beyond the last published Other Models floor is billed at the same API rates. Teams/Enterprise add `$0.25/M` on third-party tokens.
 
 ### Max Mode
 
-Max Mode extends context to the model maximum when Cursor supports it. On current individual plans, Max Mode is billed at the model's API rate. Some model pages publish separate long-context rates when input exceeds the default context window.
+Max Mode is available only on legacy request-based plans, at API rate plus 20%. Current usage-based plans do not include Max Mode, so the +20% upcharge is hidden. Some model pages publish separate long-context rates when input exceeds the default context window.
 
 Current documented examples:
 

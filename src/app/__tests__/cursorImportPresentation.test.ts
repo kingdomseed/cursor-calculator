@@ -20,7 +20,7 @@ function createReport(overrides: Partial<CursorImportReport['summary']> = {}): C
         modelId: 'gpt-5.4',
         label: 'GPT-5.4',
         provider: 'openai',
-        pool: 'api',
+        pool: 'other_models',
         tokens: { total: 250_000, input: 240_000, output: 10_000 },
         exactTokens: {
           inputWithCacheWrite: 20_000,
@@ -42,7 +42,7 @@ function createReport(overrides: Partial<CursorImportReport['summary']> = {}): C
         modelId: 'claude-4-6-sonnet',
         label: 'Claude 4.6 Sonnet',
         provider: 'anthropic',
-        pool: 'api',
+        pool: 'other_models',
         tokens: { total: 60_000, input: 50_000, output: 10_000 },
         exactTokens: {
           inputWithCacheWrite: 5_000,

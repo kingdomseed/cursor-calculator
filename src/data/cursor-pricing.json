@@ -1,79 +1,117 @@
 {
   "meta": {
-    "version": "4.0.0",
-    "source_url": "https://cursor.com/docs",
-    "retrieved_at": "2026-07-13"
+    "version": "5.0.0",
+    "source_url": "https://cursor.com/docs/models-and-pricing",
+    "retrieved_at": "2026-09-11"
   },
   "plans": {
+    "hobby": {
+      "name": "Hobby",
+      "audience": "personal",
+      "monthly_cost": 0,
+      "monthly_cost_note": "Free",
+      "api_pool": null,
+      "other_models_allowance_status": "unpublished",
+      "other_models_allowance_label": "Other Models dollars unpublished",
+      "recommendable": false,
+      "description": "Limited Agent and Composer. Other Models dollars unpublished. No Cloud Agents or Bugbot."
+    },
+    "start": {
+      "name": "Start",
+      "audience": "personal",
+      "monthly_cost": null,
+      "monthly_cost_note": "₹649/mo, tax inclusive, India only",
+      "api_pool": 0,
+      "other_models_allowance_status": "not_included",
+      "other_models_allowance_label": "Other Models not included",
+      "recommendable": false,
+      "description": "Cursor Models only: Grok 4.6, Grok 4.5, and Composer 2.5, all non-fast. No Auto, Fast, or Other Models."
+    },
     "pro": {
       "name": "Pro",
+      "audience": "personal",
       "monthly_cost": 20,
       "api_pool": 20,
-      "description": "Best for daily tab users and limited agent users"
+      "other_models_allowance_status": "last_published_official_floor",
+      "other_models_allowance_label": "At least $20 (last published official floor)",
+      "recommendable": true,
+      "description": "Daily tab users and limited agent users. Other Models last published official floor: at least $20."
     },
     "pro_plus": {
       "name": "Pro Plus",
+      "audience": "personal",
       "monthly_cost": 60,
       "api_pool": 70,
-      "description": "Best for daily agent users ($60-100 total usage)"
+      "other_models_allowance_status": "last_published_official_floor",
+      "other_models_allowance_label": "Last published $70",
+      "recommendable": true,
+      "description": "Daily agent users. Other Models last published official floor: $70. Agent limits 3× Pro."
     },
     "ultra": {
       "name": "Ultra",
+      "audience": "personal",
       "monthly_cost": 200,
       "api_pool": 400,
-      "description": "Best for power users with multiple agents/automation"
+      "other_models_allowance_status": "last_published_official_floor",
+      "other_models_allowance_label": "Last published $400",
+      "recommendable": true,
+      "description": "Power users. Other Models last published official floor: $400. Agent limits 20× Pro."
+    },
+    "teams_standard": {
+      "name": "Teams Standard",
+      "audience": "teams_enterprise",
+      "monthly_cost": 40,
+      "api_pool": null,
+      "other_models_allowance_status": "unpublished",
+      "other_models_allowance_label": "Other Models dollars unpublished",
+      "recommendable": true,
+      "description": "Per-user Cursor Models and Other Models. Current Other Models dollars unpublished. Cursor Token Rate $0.25/M on third-party tokens."
+    },
+    "teams_premium": {
+      "name": "Teams Premium",
+      "audience": "teams_enterprise",
+      "monthly_cost": 120,
+      "api_pool": null,
+      "other_models_allowance_status": "unpublished",
+      "other_models_allowance_label": "Other Models dollars unpublished",
+      "recommendable": true,
+      "description": "5× Standard included usage. Current Other Models dollars unpublished. Cursor Token Rate $0.25/M on third-party tokens."
+    },
+    "enterprise": {
+      "name": "Enterprise",
+      "audience": "teams_enterprise",
+      "monthly_cost": null,
+      "monthly_cost_note": "Custom. Quote via sales.",
+      "api_pool": null,
+      "other_models_allowance_status": "unpublished",
+      "other_models_allowance_label": "Pooled usage. Dollars unpublished",
+      "recommendable": false,
+      "description": "Shared pool across the contract term. Seat and pool dollars unpublished. Consult the account executive for Grok Bot."
     }
   },
   "models": [
     {
-      "id": "claude-4-sonnet",
-      "name": "Claude 4 Sonnet",
-      "provider": "anthropic",
-      "pool": "api",
+      "id": "auto",
+      "name": "Auto",
+      "provider": "cursor",
+      "pool": "auto_router",
       "context": {
         "default": 200000,
-        "max": 1000000
-      },
-      "rates": {
-        "input": 3,
-        "cache_write": 3.75,
-        "cache_read": 0.3,
-        "output": 15
-      },
-      "variants": {
-        "max_mode": {
-          "cursor_upcharge": 0
-        },
-        "thinking": true
-      }
-    },
-    {
-      "id": "claude-4-sonnet-1m",
-      "name": "Claude 4 Sonnet 1M",
-      "provider": "anthropic",
-      "pool": "api",
-      "context": {
-        "default": 1000000,
         "max": null
       },
       "rates": {
-        "input": 6,
-        "cache_write": 7.5,
-        "cache_read": 0.6,
-        "output": 22.5
+        "input": 1.25,
+        "cache_write": null,
+        "cache_read": 0.25,
+        "output": 6
       },
-      "variants": {
-        "thinking": true
-      },
-      "auto_checks": {
-        "max_mode": true
-      }
+      "usage_note": "Auto is a router, not a usage pool. It bills at the routed model’s list price and may draw from Cursor Models or Other Models."
     },
     {
       "id": "claude-4-5-haiku",
       "name": "Claude 4.5 Haiku",
       "provider": "anthropic",
-      "pool": "api",
+      "pool": "other_models",
       "context": {
         "default": 200000,
         "max": 1000000
@@ -89,13 +127,14 @@
           "cursor_upcharge": 0
         },
         "thinking": true
-      }
+      },
+      "hidden_by_default": true
     },
     {
       "id": "claude-4-5-opus",
       "name": "Claude 4.5 Opus",
       "provider": "anthropic",
-      "pool": "api",
+      "pool": "other_models",
       "context": {
         "default": 200000,
         "max": 1000000
@@ -111,13 +150,14 @@
           "cursor_upcharge": 0
         },
         "thinking": true
-      }
+      },
+      "hidden_by_default": true
     },
     {
       "id": "claude-4-5-sonnet",
       "name": "Claude 4.5 Sonnet",
       "provider": "anthropic",
-      "pool": "api",
+      "pool": "other_models",
       "context": {
         "default": 200000,
         "max": 1000000
@@ -133,13 +173,134 @@
           "cursor_upcharge": 0
         },
         "thinking": true
+      },
+      "docs_url": "https://cursor.com/docs/models/claude-4-5-sonnet",
+      "hidden_by_default": true
+    },
+    {
+      "id": "claude-4-6-sonnet",
+      "name": "Claude 4.6 Sonnet",
+      "provider": "anthropic",
+      "pool": "other_models",
+      "context": {
+        "default": 200000,
+        "max": 1000000
+      },
+      "rates": {
+        "input": 3,
+        "cache_write": 3.75,
+        "cache_read": 0.3,
+        "output": 15
+      },
+      "variants": {
+        "max_mode": {
+          "cursor_upcharge": 0
+        },
+        "thinking": true
+      },
+      "docs_url": "https://cursor.com/docs/models/claude-4-6-sonnet",
+      "hidden_by_default": true
+    },
+    {
+      "id": "claude-4-sonnet",
+      "name": "Claude 4 Sonnet",
+      "provider": "anthropic",
+      "pool": "other_models",
+      "context": {
+        "default": 200000,
+        "max": 1000000
+      },
+      "rates": {
+        "input": 3,
+        "cache_write": 3.75,
+        "cache_read": 0.3,
+        "output": 15
+      },
+      "variants": {
+        "max_mode": {
+          "cursor_upcharge": 0
+        },
+        "thinking": true
+      },
+      "hidden_by_default": true
+    },
+    {
+      "id": "claude-4-sonnet-1m",
+      "name": "Claude 4 Sonnet 1M",
+      "provider": "anthropic",
+      "pool": "other_models",
+      "context": {
+        "default": 1000000,
+        "max": null
+      },
+      "rates": {
+        "input": 6,
+        "cache_write": 7.5,
+        "cache_read": 0.6,
+        "output": 22.5
+      },
+      "variants": {
+        "thinking": true
+      },
+      "auto_checks": {
+        "max_mode": true
+      },
+      "hidden_by_default": true
+    },
+    {
+      "id": "claude-fable-5",
+      "name": "Claude Fable 5",
+      "provider": "anthropic",
+      "pool": "other_models",
+      "context": {
+        "default": 300000,
+        "max": 1000000
+      },
+      "rates": {
+        "input": 10,
+        "cache_write": 12.5,
+        "cache_read": 1,
+        "output": 50
+      },
+      "variants": {
+        "max_mode": {
+          "cursor_upcharge": 0
+        },
+        "thinking": true
+      },
+      "docs_url": "https://cursor.com/docs/models/claude-fable-5",
+      "hidden_by_default": true
+    },
+    {
+      "id": "claude-fable-5-1",
+      "name": "Claude Fable 5.1",
+      "provider": "anthropic",
+      "pool": "other_models",
+      "docs_url": "https://cursor.com/docs/models/claude-fable-5-1",
+      "usage_note": "Cache read is 75% below Fable 5. Privacy-mode and Enterprise opt-in.",
+      "hidden_by_default": true,
+      "context": {
+        "default": 300000,
+        "max": 1000000
+      },
+      "rates": {
+        "input": 10,
+        "cache_write": 12.5,
+        "cache_read": 0.25,
+        "output": 50
+      },
+      "variants": {
+        "max_mode": {
+          "cursor_upcharge": 0
+        },
+        "thinking": true
       }
     },
     {
       "id": "claude-opus-4-6",
       "name": "Claude 4.6 Opus",
       "provider": "anthropic",
-      "pool": "api",
+      "pool": "other_models",
       "context": {
         "default": 200000,
         "max": 1000000
@@ -155,13 +316,14 @@
           "cursor_upcharge": 0
         },
         "thinking": true
-      }
+      },
+      "hidden_by_default": true
     },
     {
       "id": "claude-opus-4-7",
       "name": "Claude 4.7 Opus",
       "provider": "anthropic",
-      "pool": "api",
+      "pool": "other_models",
       "context": {
         "default": 300000,
         "max": 1000000
@@ -186,13 +348,14 @@
           }
         },
         "thinking": true
-      }
+      },
+      "hidden_by_default": true
     },
     {
       "id": "claude-opus-4-8",
       "name": "Claude Opus 4.8",
       "provider": "anthropic",
-      "pool": "api",
+      "pool": "other_models",
       "context": {
         "default": 300000,
         "max": 1000000
@@ -217,48 +380,39 @@
           }
         },
         "thinking": true
-      }
+      },
+      "docs_url": "https://cursor.com/docs/models/claude-opus-4-8",
+      "hidden_by_default": true
     },
     {
-      "id": "claude-fable-5",
-      "name": "Claude Fable 5",
+      "id": "claude-opus-5",
+      "name": "Claude Opus 5",
       "provider": "anthropic",
-      "pool": "api",
+      "pool": "other_models",
+      "docs_url": "https://cursor.com/docs/models/claude-opus-5",
+      "usage_note": "Replaces Opus 4.8. Same rates above 300k. Fast requires legacy Max Mode.",
       "context": {
         "default": 300000,
         "max": 1000000
       },
       "rates": {
-        "input": 10,
-        "cache_write": 12.5,
-        "cache_read": 1,
-        "output": 50
+        "input": 5,
+        "cache_write": 6.25,
+        "cache_read": 0.5,
+        "output": 25
       },
       "variants": {
         "max_mode": {
           "cursor_upcharge": 0
         },
-        "thinking": true
-      }
-    },
-    {
-      "id": "claude-4-6-sonnet",
-      "name": "Claude 4.6 Sonnet",
-      "provider": "anthropic",
-      "pool": "api",
-      "context": {
-        "default": 200000,
-        "max": 1000000
-      },
-      "rates": {
-        "input": 3,
-        "cache_write": 3.75,
-        "cache_read": 0.3,
-        "output": 15
-      },
-      "variants": {
-        "max_mode": {
-          "cursor_upcharge": 0
+        "fast": {
+          "model_id": "claude-opus-5-fast",
+          "rates": {
+            "input": 10,
+            "cache_write": 12.5,
+            "cache_read": 1,
+            "output": 50
+          }
         },
         "thinking": true
       }
@@ -267,25 +421,17 @@
       "id": "claude-sonnet-5",
       "name": "Claude Sonnet 5",
       "provider": "anthropic",
-      "pool": "api",
+      "pool": "other_models",
       "docs_url": "https://cursor.com/docs/models/claude-sonnet-5",
-      "rate_promotion": {
-        "ends_on": "2026-08-31",
-        "rates": {
-          "input": 2,
-          "output": 10
-        },
-        "label": "$2/M input and $10/M output through August 31, 2026"
-      },
       "context": {
         "default": 200000,
         "max": 1000000
       },
       "rates": {
-        "input": 3,
-        "cache_write": 3.75,
-        "cache_read": 0.3,
-        "output": 15
+        "input": 2,
+        "cache_write": 2.5,
+        "cache_read": 0.2,
+        "output": 10
       },
       "variants": {
         "max_mode": {
@@ -298,7 +444,7 @@
       "id": "composer-1",
       "name": "Composer 1",
       "provider": "cursor",
-      "pool": "api",
+      "pool": "other_models",
       "context": {
         "default": 200000,
         "max": null
@@ -308,13 +454,16 @@
         "cache_write": null,
         "cache_read": 0.125,
         "output": 10
-      }
+      },
+      "docs_url": "https://cursor.com/docs/models/cursor-composer-1",
+      "usage_note": "Other Models. Appears on the Teams pricing table.",
+      "hidden_by_default": true
     },
     {
       "id": "composer-2.5",
       "name": "Composer 2.5",
       "provider": "cursor",
-      "pool": "first_party",
+      "pool": "cursor_models",
       "context": {
         "default": 200000,
         "max": null
@@ -339,13 +488,14 @@
       },
       "auto_checks": {
         "fast": true
-      }
+      },
+      "docs_url": "https://cursor.com/docs/models/cursor-composer-2-5"
     },
     {
       "id": "gemini-2.5-flash",
       "name": "Gemini 2.5 Flash",
       "provider": "google",
-      "pool": "api",
+      "pool": "other_models",
       "context": {
         "default": 200000,
         "max": 1000000
@@ -361,13 +511,14 @@
           "cursor_upcharge": 0
         },
         "thinking": true
-      }
+      },
+      "hidden_by_default": true
     },
     {
       "id": "gemini-3-flash",
       "name": "Gemini 3 Flash",
       "provider": "google",
-      "pool": "api",
+      "pool": "other_models",
       "context": {
         "default": 200000,
         "max": 1000000
@@ -383,13 +534,14 @@
           "cursor_upcharge": 0
         },
         "thinking": true
-      }
+      },
+      "hidden_by_default": true
     },
     {
       "id": "gemini-3-pro",
       "name": "Gemini 3 Pro",
       "provider": "google",
-      "pool": "api",
+      "pool": "other_models",
       "context": {
         "default": 200000,
         "max": 1000000
@@ -411,13 +563,15 @@
           }
         },
         "thinking": true
-      }
+      },
+      "docs_url": "https://cursor.com/docs/models/gemini-3-pro",
+      "hidden_by_default": true
     },
     {
       "id": "gemini-3-pro-image-preview",
       "name": "Gemini 3 Pro Image Preview",
       "provider": "google",
-      "pool": "api",
+      "pool": "other_models",
       "context": {
         "default": 200000,
         "max": 1000000
@@ -438,13 +592,14 @@
             "output": 18
           }
         }
-      }
+      },
+      "hidden_by_default": true
     },
     {
       "id": "gemini-3.1-pro",
       "name": "Gemini 3.1 Pro",
       "provider": "google",
-      "pool": "api",
+      "pool": "other_models",
       "context": {
         "default": 200000,
         "max": 1000000
@@ -466,13 +621,15 @@
           }
         },
         "thinking": true
-      }
+      },
+      "docs_url": "https://cursor.com/docs/models/gemini-3-1-pro",
+      "usage_note": "Input and output pricing increases above 200k. Live table lists only the base row; stored long-context dollars follow the previously published 2× / 1.5× model-page rule."
     },
     {
       "id": "gemini-3.5-flash",
       "name": "Gemini 3.5 Flash",
       "provider": "google",
-      "pool": "api",
+      "pool": "other_models",
       "context": {
         "default": 200000,
         "max": 1000000
@@ -488,13 +645,87 @@
           "cursor_upcharge": 0
         },
         "thinking": true
+      },
+      "docs_url": "https://cursor.com/docs/models/gemini-3-5-flash",
+      "hidden_by_default": true
+    },
+    {
+      "id": "gemini-3.6-flash",
+      "name": "Gemini 3.6 Flash",
+      "provider": "google",
+      "pool": "other_models",
+      "docs_url": "https://cursor.com/docs/models/gemini-3-6-flash",
+      "hidden_by_default": true,
+      "context": {
+        "default": 200000,
+        "max": 1000000
+      },
+      "rates": {
+        "input": 1.5,
+        "cache_write": null,
+        "cache_read": 0.15,
+        "output": 7.5
+      },
+      "variants": {
+        "max_mode": {
+          "cursor_upcharge": 0
+        },
+        "thinking": true
+      }
+    },
+    {
+      "id": "gemini-3.7-flash",
+      "name": "Gemini 3.7 Flash",
+      "provider": "google",
+      "pool": "other_models",
+      "docs_url": "https://cursor.com/docs/models/gemini-3-7-flash",
+      "hidden_by_default": true,
+      "context": {
+        "default": 200000,
+        "max": 1000000
+      },
+      "rates": {
+        "input": 0.75,
+        "cache_write": null,
+        "cache_read": 0.075,
+        "output": 3.5
+      },
+      "variants": {
+        "max_mode": {
+          "cursor_upcharge": 0
+        },
+        "thinking": true
+      }
+    },
+    {
+      "id": "gemini-3.8-flash",
+      "name": "Gemini 3.8 Flash",
+      "provider": "google",
+      "pool": "other_models",
+      "docs_url": "https://cursor.com/docs/models/gemini-3-8-flash",
+      "usage_note": "90% cache discount. Effort high (default), medium, low.",
+      "context": {
+        "default": 200000,
+        "max": 1000000
+      },
+      "rates": {
+        "input": 0.75,
+        "cache_write": null,
+        "cache_read": 0.075,
+        "output": 3.5
+      },
+      "variants": {
+        "max_mode": {
+          "cursor_upcharge": 0
+        },
+        "thinking": true
       }
     },
     {
       "id": "glm-5.2",
       "name": "GLM 5.2",
       "provider": "zai",
-      "pool": "api",
+      "pool": "other_models",
       "docs_url": "https://cursor.com/docs/models/glm-5-2",
       "context": {
         "default": 200000,
@@ -505,13 +736,14 @@
         "cache_write": null,
         "cache_read": 0.26,
         "output": 4.4
-      }
+      },
+      "hidden_by_default": true
     },
     {
       "id": "gpt-5",
       "name": "GPT-5",
       "provider": "openai",
-      "pool": "api",
+      "pool": "other_models",
       "context": {
         "default": 272000,
         "max": 1000000
@@ -536,29 +768,15 @@
           }
         },
         "thinking": true
-      }
-    },
-    {
-      "id": "gpt-5-mini",
-      "name": "GPT-5 Mini",
-      "provider": "openai",
-      "pool": "api",
-      "context": {
-        "default": 272000,
-        "max": null
       },
-      "rates": {
-        "input": 0.25,
-        "cache_write": null,
-        "cache_read": 0.025,
-        "output": 2
-      }
+      "docs_url": "https://cursor.com/docs/models/gpt-5",
+      "hidden_by_default": true
     },
     {
       "id": "gpt-5-codex",
       "name": "GPT-5-Codex",
       "provider": "openai",
-      "pool": "api",
+      "pool": "other_models",
       "context": {
         "default": 272000,
         "max": null
@@ -571,13 +789,31 @@
       },
       "variants": {
         "thinking": true
-      }
+      },
+      "hidden_by_default": true
+    },
+    {
+      "id": "gpt-5-mini",
+      "name": "GPT-5 Mini",
+      "provider": "openai",
+      "pool": "other_models",
+      "context": {
+        "default": 272000,
+        "max": null
+      },
+      "rates": {
+        "input": 0.25,
+        "cache_write": null,
+        "cache_read": 0.025,
+        "output": 2
+      },
+      "hidden_by_default": true
     },
     {
       "id": "gpt-5.1-codex",
       "name": "GPT-5.1 Codex",
       "provider": "openai",
-      "pool": "api",
+      "pool": "other_models",
       "context": {
         "default": 272000,
         "max": 1000000
@@ -593,13 +829,14 @@
           "cursor_upcharge": 0
         },
         "thinking": true
-      }
+      },
+      "hidden_by_default": true
     },
     {
       "id": "gpt-5.1-codex-max",
       "name": "GPT-5.1 Codex Max",
       "provider": "openai",
-      "pool": "api",
+      "pool": "other_models",
       "context": {
         "default": 1000000,
         "max": null
@@ -615,13 +852,14 @@
       },
       "auto_checks": {
         "max_mode": true
-      }
+      },
+      "hidden_by_default": true
     },
     {
       "id": "gpt-5.1-codex-mini",
       "name": "GPT-5.1 Codex Mini",
       "provider": "openai",
-      "pool": "api",
+      "pool": "other_models",
       "context": {
         "default": 272000,
         "max": null
@@ -634,13 +872,14 @@
       },
       "variants": {
         "thinking": true
-      }
+      },
+      "hidden_by_default": true
     },
     {
       "id": "gpt-5.2",
       "name": "GPT-5.2",
       "provider": "openai",
-      "pool": "api",
+      "pool": "other_models",
       "context": {
         "default": 272000,
         "max": 1000000
@@ -656,13 +895,15 @@
           "cursor_upcharge": 0
         },
         "thinking": true
-      }
+      },
+      "docs_url": "https://cursor.com/docs/models/gpt-5-2",
+      "hidden_by_default": true
     },
     {
       "id": "gpt-5.2-codex",
       "name": "GPT-5.2 Codex",
       "provider": "openai",
-      "pool": "api",
+      "pool": "other_models",
       "context": {
         "default": 272000,
         "max": 1000000
@@ -678,146 +919,14 @@
           "cursor_upcharge": 0
         },
         "thinking": true
-      }
-    },
-    {
-      "id": "gpt-5.5",
-      "name": "GPT-5.5",
-      "provider": "openai",
-      "pool": "api",
-      "context": {
-        "default": 272000,
-        "max": 1000000
       },
-      "rates": {
-        "input": 5,
-        "cache_write": null,
-        "cache_read": 0.5,
-        "output": 30
-      },
-      "variants": {
-        "max_mode": {
-          "cursor_upcharge": 0,
-          "rates": {
-            "input": 10,
-            "cache_write": null,
-            "cache_read": 1,
-            "output": 45
-          }
-        },
-        "fast": {
-          "model_id": "gpt-5.5-fast",
-          "rates": {
-            "input": 12.5,
-            "cache_write": null,
-            "cache_read": 1.25,
-            "output": 75
-          }
-        },
-        "thinking": true
-      }
-    },
-    {
-      "id": "gpt-5.6-sol",
-      "name": "GPT-5.6 Sol",
-      "provider": "openai",
-      "pool": "api",
-      "docs_url": "https://cursor.com/docs/models/gpt-5-6-sol",
-      "context": {
-        "default": 272000,
-        "max": 1000000
-      },
-      "rates": {
-        "input": 5,
-        "cache_write": 6.25,
-        "cache_read": 0.5,
-        "output": 30
-      },
-      "variants": {
-        "max_mode": {
-          "cursor_upcharge": 0,
-          "rates": {
-            "input": 10,
-            "cache_write": 12.5,
-            "cache_read": 1,
-            "output": 45
-          }
-        },
-        "fast": {
-          "model_id": "gpt-5.6-sol-fast",
-          "rates": {
-            "input": 10,
-            "cache_write": 12.5,
-            "cache_read": 1,
-            "output": 60
-          }
-        },
-        "thinking": true
-      }
-    },
-    {
-      "id": "gpt-5.6-terra",
-      "name": "GPT-5.6 Terra",
-      "provider": "openai",
-      "pool": "api",
-      "docs_url": "https://cursor.com/docs/models/gpt-5-6-terra",
-      "context": {
-        "default": 272000,
-        "max": null
-      },
-      "rates": {
-        "input": 2.5,
-        "cache_write": 3.125,
-        "cache_read": 0.25,
-        "output": 15
-      },
-      "variants": {
-        "fast": {
-          "model_id": "gpt-5.6-terra-fast",
-          "rates": {
-            "input": 5,
-            "cache_write": 6.25,
-            "cache_read": 0.5,
-            "output": 30
-          }
-        },
-        "thinking": true
-      }
-    },
-    {
-      "id": "gpt-5.6-luna",
-      "name": "GPT-5.6 Luna",
-      "provider": "openai",
-      "pool": "api",
-      "docs_url": "https://cursor.com/docs/models/gpt-5-6-luna",
-      "context": {
-        "default": 272000,
-        "max": null
-      },
-      "rates": {
-        "input": 1,
-        "cache_write": 1.25,
-        "cache_read": 0.1,
-        "output": 6
-      },
-      "variants": {
-        "fast": {
-          "model_id": "gpt-5.6-luna-fast",
-          "rates": {
-            "input": 2,
-            "cache_write": 2.5,
-            "cache_read": 0.2,
-            "output": 12
-          }
-        },
-        "thinking": true
-      }
+      "hidden_by_default": true
     },
     {
       "id": "gpt-5.3-codex",
       "name": "GPT-5.3 Codex",
       "provider": "openai",
-      "pool": "api",
+      "pool": "other_models",
       "context": {
         "default": 272000,
         "max": null
@@ -830,13 +939,15 @@
       },
       "variants": {
         "thinking": true
-      }
+      },
+      "docs_url": "https://cursor.com/docs/models/gpt-5-3-codex",
+      "hidden_by_default": true
     },
     {
       "id": "gpt-5.4",
       "name": "GPT-5.4",
       "provider": "openai",
-      "pool": "api",
+      "pool": "other_models",
       "context": {
         "default": 272000,
         "max": 1000000
@@ -870,13 +981,15 @@
       },
       "auto_checks": {
         "max_mode": true
-      }
+      },
+      "docs_url": "https://cursor.com/docs/models/gpt-5-4",
+      "hidden_by_default": true
     },
     {
       "id": "gpt-5.4-mini",
       "name": "GPT-5.4 Mini",
       "provider": "openai",
-      "pool": "api",
+      "pool": "other_models",
       "context": {
         "default": 272000,
         "max": null
@@ -889,13 +1002,14 @@
       },
       "variants": {
         "thinking": true
-      }
+      },
+      "hidden_by_default": true
     },
     {
       "id": "gpt-5.4-nano",
       "name": "GPT-5.4 Nano",
       "provider": "openai",
-      "pool": "api",
+      "pool": "other_models",
       "context": {
         "default": 272000,
         "max": null
@@ -908,20 +1022,170 @@
       },
       "variants": {
         "thinking": true
+      },
+      "hidden_by_default": true
+    },
+    {
+      "id": "gpt-5.5",
+      "name": "GPT-5.5",
+      "provider": "openai",
+      "pool": "other_models",
+      "context": {
+        "default": 272000,
+        "max": 1000000
+      },
+      "rates": {
+        "input": 5,
+        "cache_write": null,
+        "cache_read": 0.5,
+        "output": 30
+      },
+      "variants": {
+        "max_mode": {
+          "cursor_upcharge": 0,
+          "rates": {
+            "input": 10,
+            "cache_write": null,
+            "cache_read": 1,
+            "output": 45
+          }
+        },
+        "fast": {
+          "model_id": "gpt-5.5-fast",
+          "rates": {
+            "input": 12.5,
+            "cache_write": null,
+            "cache_read": 1.25,
+            "output": 75
+          }
+        },
+        "thinking": true
+      },
+      "docs_url": "https://cursor.com/docs/models/gpt-5-5",
+      "hidden_by_default": true
+    },
+    {
+      "id": "gpt-5.6-luna",
+      "name": "GPT-5.6 Luna",
+      "provider": "openai",
+      "pool": "other_models",
+      "docs_url": "https://cursor.com/docs/models/gpt-5-6-luna",
+      "context": {
+        "default": 272000,
+        "max": 1000000
+      },
+      "rates": {
+        "input": 0.2,
+        "cache_write": 0.25,
+        "cache_read": 0.02,
+        "output": 1.2
+      },
+      "variants": {
+        "max_mode": {
+          "cursor_upcharge": 0,
+          "rates": {
+            "input": 0.4,
+            "cache_write": 0.5,
+            "cache_read": 0.04,
+            "output": 1.8
+          }
+        },
+        "fast": {
+          "model_id": "gpt-5.6-luna-fast",
+          "rates": {
+            "input": 0.4,
+            "cache_write": 0.5,
+            "cache_read": 0.04,
+            "output": 2.4
+          }
+        },
+        "thinking": true
+      }
+    },
+    {
+      "id": "gpt-5.6-sol",
+      "name": "GPT-5.6 Sol",
+      "provider": "openai",
+      "pool": "other_models",
+      "docs_url": "https://cursor.com/docs/models/gpt-5-6-sol",
+      "context": {
+        "default": 272000,
+        "max": 1000000
+      },
+      "rates": {
+        "input": 4,
+        "cache_write": 5,
+        "cache_read": 0.4,
+        "output": 20
+      },
+      "variants": {
+        "max_mode": {
+          "cursor_upcharge": 0,
+          "rates": {
+            "input": 8,
+            "cache_write": 10,
+            "cache_read": 0.8,
+            "output": 30
+          }
+        },
+        "fast": {
+          "model_id": "gpt-5.6-sol-fast",
+          "rates": {
+            "input": 8,
+            "cache_write": 10,
+            "cache_read": 0.8,
+            "output": 40
+          }
+        },
+        "thinking": true
+      },
+      "usage_note": "Promotional pricing through 2026-11-21."
+    },
+    {
+      "id": "gpt-5.6-terra",
+      "name": "GPT-5.6 Terra",
+      "provider": "openai",
+      "pool": "other_models",
+      "docs_url": "https://cursor.com/docs/models/gpt-5-6-terra",
+      "context": {
+        "default": 272000,
+        "max": 1000000
+      },
+      "rates": {
+        "input": 2,
+        "cache_write": 2.5,
+        "cache_read": 0.2,
+        "output": 12
+      },
+      "variants": {
+        "max_mode": {
+          "cursor_upcharge": 0,
+          "rates": {
+            "input": 4,
+            "cache_write": 5,
+            "cache_read": 0.4,
+            "output": 18
+          }
+        },
+        "fast": {
+          "model_id": "gpt-5.6-terra-fast",
+          "rates": {
+            "input": 4,
+            "cache_write": 5,
+            "cache_read": 0.4,
+            "output": 24
+          }
+        },
+        "thinking": true
       }
     },
     {
       "id": "grok-4.5",
       "name": "Grok 4.5",
       "provider": "cursor",
-      "pool": "first_party",
+      "pool": "cursor_models",
       "docs_url": "https://cursor.com/docs/models/grok-4-5",
       "availability_note": "Not yet available in the European Union",
-      "pool_usage_promotion": {
-        "ends_on": "2026-07-15",
-        "allowance_multiplier": 2,
-        "label": "Included first-party usage is doubled through July 15, 2026"
-      },
       "context": {
         "default": 256000,
         "max": null
@@ -942,13 +1206,46 @@
             "output": 18
           }
         }
+      },
+      "usage_note": "Jointly trained by Cursor and SpaceXAI."
+    },
+    {
+      "id": "grok-4.6",
+      "name": "Cursor Grok 4.6",
+      "provider": "cursor",
+      "pool": "cursor_models",
+      "docs_url": "https://cursor.com/docs/models/grok-4-6",
+      "usage_note": "Jointly trained by Cursor and SpaceXAI. Fast is the default on Pro and higher. Start keeps Grok at medium, non-fast.",
+      "context": {
+        "default": 256000,
+        "max": null
+      },
+      "rates": {
+        "input": 2,
+        "cache_write": null,
+        "cache_read": 0.5,
+        "output": 6
+      },
+      "variants": {
+        "fast": {
+          "model_id": "grok-4.6-fast",
+          "rates": {
+            "input": 4,
+            "cache_write": null,
+            "cache_read": 1,
+            "output": 12
+          }
+        }
+      },
+      "auto_checks": {
+        "fast": true
       }
     },
     {
       "id": "kimi-k2.7-code",
       "name": "Kimi K2.7 Code",
       "provider": "moonshot",
-      "pool": "api",
+      "pool": "other_models",
       "docs_url": "https://cursor.com/docs/models/kimi-k2-7-code",
       "context": {
         "default": 262000,
@@ -959,22 +1256,54 @@
         "cache_write": null,
         "cache_read": 0.19,
         "output": 4
+      },
+      "hidden_by_default": true
+    },
+    {
+      "id": "kimi-k3",
+      "name": "Kimi K3",
+      "provider": "moonshot",
+      "pool": "other_models",
+      "docs_url": "https://cursor.com/docs/models/kimi-k3",
+      "usage_note": "Flat across the full window. No long-context surcharge. Legacy extended context needs Max Mode.",
+      "hidden_by_default": true,
+      "context": {
+        "default": 200000,
+        "max": 1000000
+      },
+      "rates": {
+        "input": 3,
+        "cache_write": null,
+        "cache_read": 0.3,
+        "output": 15
+      },
+      "variants": {
+        "max_mode": {
+          "cursor_upcharge": 0
+        }
       }
     },
     {
-      "id": "auto",
-      "name": "Auto",
-      "provider": "cursor",
-      "pool": "first_party",
+      "id": "muse-spark-1.3",
+      "name": "Muse Spark 1.3",
+      "provider": "meta",
+      "pool": "other_models",
+      "docs_url": "https://cursor.com/docs/models/muse-spark-1-3",
+      "usage_note": "First Meta model in Cursor. Same rates at 1M. Teams and Enterprise admins who configured model access before Meta existed must enable the Meta provider.",
       "context": {
-        "default": 200000,
-        "max": null
+        "default": 300000,
+        "max": 1000000
       },
       "rates": {
         "input": 1.25,
         "cache_write": null,
-        "cache_read": 0.25,
-        "output": 6
+        "cache_read": 0.15,
+        "output": 4.25
+      },
+      "variants": {
+        "max_mode": {
+          "cursor_upcharge": 0
+        }
       }
     }
   ]

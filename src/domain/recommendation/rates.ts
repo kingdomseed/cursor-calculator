@@ -1,4 +1,5 @@
-import type { Model, ModelRates } from '../catalog/types';
+import type { Audience, Model, ModelRates } from '../catalog/types';
+import { resolveCursorTokenRateUsdPerMillion } from '../catalog/pools';
 import type { EffectiveRates, ExactCostBreakdown, ExactTokenBreakdown, ModelConfig, TokenBreakdown } from './types';
 
 const DEFAULT_RE_READS = 3;
@@ -30,36 +31,56 @@ export function getPoolUsageAllowanceMultiplier(model: Model, at = new Date()): 
   return Math.max(1, promotion.allowance_multiplier);
 }
 
-export function computeBillableRates(model: Model, config: ModelConfig, at = new Date()): ModelRates {
+export function applyCursorTokenRate(rates: ModelRates, model: Model, audience?: Audience): ModelRates {
+  const tokenRate = resolveCursorTokenRateUsdPerMillion(model, audience);
+  if (tokenRate <= 0) {
+    return rates;
+  }
+
+  return {
+    input: rates.input + tokenRate,
+    output: rates.output + tokenRate,
+    cache_write: rates.cache_write == null ? null : rates.cache_write + tokenRate,
+    cache_read: rates.cache_read == null ? null : rates.cache_read + tokenRate,
+  };
+}
+
+export function computeBillableRates(
+  model: Model,
+  config: ModelConfig,
+  at = new Date(),
+  audience?: Audience,
+): ModelRates {
   if (config.fast && config.maxMode && model.variants?.fast && model.variants.max_mode?.rates) {
     throw new Error(`Cursor does not publish combined Fast + Max rates for ${model.name}`);
   }
 
-  const rates: ModelRates = config.fast && model.variants?.fast
+  let rates: ModelRates = config.fast && model.variants?.fast
     ? { ...model.variants.fast.rates }
     : getCurrentBaseRates(model, at);
 
   if (config.maxMode && model.variants?.max_mode) {
     if (model.variants.max_mode.rates) {
-      return { ...model.variants.max_mode.rates };
+      rates = { ...model.variants.max_mode.rates };
+    } else {
+      const upcharge = 1 + model.variants.max_mode.cursor_upcharge;
+      rates.input *= upcharge;
+      rates.output *= upcharge;
+      if (rates.cache_write !== null) rates.cache_write *= upcharge;
+      if (rates.cache_read !== null) rates.cache_read *= upcharge;
     }
-
-    const upcharge = 1 + model.variants.max_mode.cursor_upcharge;
-    rates.input *= upcharge;
-    rates.output *= upcharge;
-    if (rates.cache_write !== null) rates.cache_write *= upcharge;
-    if (rates.cache_read !== null) rates.cache_read *= upcharge;
   }
 
-  return rates;
+  return applyCursorTokenRate(rates, model, audience);
 }
 
 export function computeEffectiveRates(
   model: Model,
   config: ModelConfig,
   reReads = DEFAULT_RE_READS,
+  audience?: Audience,
 ): EffectiveRates {
-  const rates = computeBillableRates(model, config);
+  const rates = computeBillableRates(model, config, new Date(), audience);
 
   return {
     input: applyCaching(rates.input, rates.cache_write, rates.cache_read, config, reReads),

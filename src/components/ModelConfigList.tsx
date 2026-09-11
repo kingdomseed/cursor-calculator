@@ -1,3 +1,4 @@
+import type { Audience } from '../domain/catalog/types';
 import { getWeightSummary } from '../domain/modelConfig/weights';
 import type { Model, ModelConfig } from '../lib/types';
 import { ModelConfigRow } from './ModelConfigRow';
@@ -6,9 +7,10 @@ interface Props {
   models: Model[];
   configs: ModelConfig[];
   onChange: (configs: ModelConfig[]) => void;
+  audience?: Audience;
 }
 
-export function ModelConfigList({ models, configs, onChange }: Props) {
+export function ModelConfigList({ models, configs, onChange, audience = 'personal' }: Props) {
   const { weightSum, needsNormalization } = getWeightSummary(configs);
 
   function handleConfigChange(index: number, updated: ModelConfig) {
@@ -27,6 +29,7 @@ export function ModelConfigList({ models, configs, onChange }: Props) {
             key={config.modelId}
             model={model}
             config={config}
+            audience={audience}
             onChange={(updated) => handleConfigChange(i, updated)}
           />
         );

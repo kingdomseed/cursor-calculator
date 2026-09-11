@@ -1,14 +1,18 @@
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { getPricingCatalog } from './domain/catalog/currentCatalog';
+import { isCursorModelsPool, isOtherModelsPool } from './domain/catalog/pools';
 import { useCalculatorController } from './app/useCalculatorController';
 import { SidebarLayout } from './components/SidebarLayout';
+import { AudienceToggle } from './components/AudienceToggle';
 import { BudgetInput } from './components/BudgetInput';
 import { TokenInput } from './components/TokenInput';
 import { ModelSelector } from './components/ModelSelector';
 import { ModelConfigList } from './components/ModelConfigList';
 import { BestPlanCard } from './components/BestPlanCard';
 import { PlanComparison } from './components/PlanComparison';
+import { GrokBotGrantCard } from './components/GrokBotGrantCard';
+import { CloudAutomationsPanel } from './components/CloudAutomationsPanel';
 import { CursorImportPanel } from './components/CursorImportPanel';
 import { Collapsible } from './components/Collapsible';
 import { WelcomeModal } from './components/WelcomeModal';
@@ -22,6 +26,7 @@ const INPUT_OUTPUT_RATIO_ID = 'input-output-ratio';
 function App() {
   const {
     state: {
+      audience,
       mode,
       tokenSource,
       budget,
@@ -36,6 +41,14 @@ function App() {
       isImporting,
       cursorImportOptions,
       modelConfigs,
+      cloudProduct,
+      cloudRuntime,
+      cloudAutomationScope,
+      cloudModelId,
+      cloudTokens,
+      cloudCacheReadShare,
+      cloudInputRatio,
+      cloudFast,
     },
     manualModels,
     selectedModelIds,
@@ -45,8 +58,18 @@ function App() {
     cursorImportReport,
     recommendation,
     recommendationPresentation,
+    cloudAutomationsResult,
     navigationTarget,
     navigate,
+    setAudience,
+    setCloudProduct,
+    setCloudRuntime,
+    setCloudAutomationScope,
+    setCloudModelId,
+    setCloudTokens,
+    setCloudCacheReadShare,
+    setCloudInputRatio,
+    setCloudFast,
     setBudget,
     setTokens,
     setManualTokenInputMode,
@@ -61,17 +84,43 @@ function App() {
     handleApproximationModeChange,
     handleIncludeUserApiKeyChange,
   } = useCalculatorController();
-  const hasSelectedIncludedPoolModel = selectedModels.some((model) => model.pool === 'first_party');
+  const hasSelectedIncludedPoolModel = selectedModels.some((model) => isCursorModelsPool(model.pool));
   const selectableModels = mode === 'budget'
-    ? manualModels.filter((model) => model.pool === 'api')
+    ? manualModels.filter((model) => isOtherModelsPool(model.pool))
     : manualModels;
+  const isCloudView = navigationTarget === 'cloud_automations';
 
   return (
     <>
       <WelcomeModal />
       <SidebarLayout activeTarget={navigationTarget} onNavigate={navigate} pricingDate={PRICING.meta.retrieved_at}>
         <div>
-          {mode === 'budget' ? (
+          <div className="mb-6">
+            <AudienceToggle audience={audience} onChange={setAudience} />
+          </div>
+          {isCloudView ? (
+            <CloudAutomationsPanel
+              audience={audience}
+              product={cloudProduct}
+              runtime={cloudRuntime}
+              automationScope={cloudAutomationScope}
+              modelId={cloudModelId}
+              tokens={cloudTokens}
+              cacheReadShare={cloudCacheReadShare}
+              inputRatio={cloudInputRatio}
+              fast={cloudFast}
+              models={manualModels}
+              result={cloudAutomationsResult}
+              onProductChange={setCloudProduct}
+              onRuntimeChange={setCloudRuntime}
+              onAutomationScopeChange={setCloudAutomationScope}
+              onModelIdChange={setCloudModelId}
+              onTokensChange={setCloudTokens}
+              onCacheReadShareChange={setCloudCacheReadShare}
+              onInputRatioChange={setCloudInputRatio}
+              onFastChange={setCloudFast}
+            />
+          ) : mode === 'budget' ? (
             <>
               <BudgetInput value={budget} onChange={setBudget} />
               <div className="mt-6 p-4 bg-white rounded-xl border border-[#e0e0d8]">
@@ -111,7 +160,7 @@ function App() {
                 exactTokens={manualExactTokens}
                 onExactTokensChange={setManualExactTokens}
               />
-              {(hasSelectedIncludedPoolModel || useAnecdotalIncludedPoolEstimate) && (
+              {audience === 'personal' && (hasSelectedIncludedPoolModel || useAnecdotalIncludedPoolEstimate) && (
                 <AnecdotalIncludedPoolToggle
                   checked={useAnecdotalIncludedPoolEstimate}
                   onChange={setUseAnecdotalIncludedPoolEstimate}
@@ -133,11 +182,11 @@ function App() {
           )}
         </div>
 
-        {showManualControls && (
+        {!isCloudView && showManualControls && (
           <>
             <div className="mt-8">
               <span id={MODEL_SELECTOR_LABEL_ID} className="block text-sm font-medium text-[#14120b]/60 mb-2">
-                {mode === 'budget' ? 'API models to compare' : 'Models to compare'}
+                {mode === 'budget' ? 'Other Models to compare' : 'Models to compare'}
               </span>
               <ModelSelector
                 options={selectableModels}
@@ -154,6 +203,7 @@ function App() {
                   models={selectedModels}
                   configs={modelConfigs}
                   onChange={setModelConfigs}
+                  audience={audience}
                 />
               </div>
             )}
@@ -198,12 +248,13 @@ function App() {
           </>
         )}
 
-        {recommendation && recommendationPresentation && (
+        {!isCloudView && recommendation && recommendationPresentation && (
           <>
             <div className="mt-8">
               <BestPlanCard presentation={recommendationPresentation} />
             </div>
             <PlanComparison presentation={recommendationPresentation} />
+            <GrokBotGrantCard presentation={recommendationPresentation.grokBot} />
           </>
         )}
       </SidebarLayout>

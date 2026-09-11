@@ -11,7 +11,7 @@ function createLineItem(overrides: Partial<PlanLineItem> = {}): PlanLineItem {
     modelId: 'model-1',
     label: 'Model 1',
     provider: 'anthropic',
-    pool: 'api',
+    pool: 'other_models',
     tokens: {
       total: 10_000_000,
       input: 7_500_000,
@@ -278,7 +278,7 @@ describe('PlanComparison', () => {
 
     expect(html).toContain('Auto');
     expect(html).toContain('Composer 2.5');
-    expect(html).toContain('First-party pool');
+    expect(html).toContain('Cursor Models');
     const includedMatches = html.match(/Included<\/td>/g) ?? [];
     expect(includedMatches.length).toBe(4);
   });

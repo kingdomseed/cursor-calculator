@@ -1,5 +1,5 @@
 import type { NavigationTarget } from '../app/calculatorState';
-import { CalculatorIcon, ChartLineIcon, FileCsvIcon, GitHubIcon, JHDIcon, WalletIcon } from './Icons';
+import { CalculatorIcon, ChartLineIcon, CloudIcon, FileCsvIcon, GitHubIcon, JHDIcon, WalletIcon } from './Icons';
 
 interface SidebarProps {
   activeTarget: NavigationTarget;
@@ -11,6 +11,7 @@ const NAV_ITEMS: { target: NavigationTarget; label: string; icon: typeof WalletI
   { target: 'budget', label: 'I have a budget', icon: WalletIcon },
   { target: 'manual_usage', label: 'I know my usage', icon: ChartLineIcon },
   { target: 'csv_import', label: 'I have a CSV', icon: FileCsvIcon },
+  { target: 'cloud_automations', label: 'Cloud and automations', icon: CloudIcon },
 ];
 
 export function Sidebar({ activeTarget, onNavigate, pricingDate }: SidebarProps) {
@@ -52,22 +53,24 @@ export function Sidebar({ activeTarget, onNavigate, pricingDate }: SidebarProps)
         <p className="text-xs text-white/45 mb-4">
           Budget mode estimates what a monthly spend ceiling gets you. Usage mode estimates total
           usage cost and out-of-pocket spend after plan coverage. Import a Cursor CSV to replay
-          exact token columns from a real month.
+          exact token columns from a real month. Cloud and automations are a separate cost family.
         </p>
 
         <p className="text-xs text-white/45 mb-2 font-medium uppercase tracking-wide">
           How plans work
         </p>
         <p className="text-xs text-white/45 mb-3">
-          Every plan includes two usage pools. Auto, Composer 2.5, and Grok 4.5 draw from the
-          First-party models pool. Explicitly selected API models draw from the API pool. Once a
-          pool is exhausted, on-demand usage uses the documented per-token rates.
+          Official monthly pools are Cursor Models and Other Models. Unused monthly usage does not
+          roll over. Composer 2.5, Grok 4.6, and Grok 4.5 are Cursor Models. Auto is a router, not
+          a pool. Individual Other Models last published official floors: Pro at least $20, Pro Plus
+          $70, Ultra $400. Those are last published, not a current live scrape. Teams Other Models
+          dollars are unpublished. Teams and Enterprise add $0.25/M on third-party tokens.
         </p>
 
         <p className="text-xs text-white/45 mb-2 font-medium">Max Mode</p>
         <p className="text-xs text-white/45 mb-3">
-          Extends context to a model&apos;s maximum when Cursor supports it. Current individual plans
-          use model API rates, and documented long-context rates are applied from each model page.
+          Max Mode is available only on legacy request-based plans, at API rate plus 20%. Current
+          usage-based plans do not include Max Mode, so the +20% upcharge is hidden here.
         </p>
 
         <p className="text-xs text-white/45 mb-2 font-medium">Caching</p>

@@ -18,7 +18,7 @@ describe('AnecdotalIncludedPoolToggle', () => {
       <AnecdotalIncludedPoolToggle checked={false} onChange={vi.fn()} />,
     );
 
-    expect(html).toContain('Anecdotal first-party pool estimate');
+    expect(html).toContain('Anecdotal Cursor Models estimate');
     expect(html).toContain('333.33M');
     expect(html).toContain('1.00B');
     expect(html).toContain('6.67B');

@@ -48,5 +48,6 @@ describe('calculator semantics copy', () => {
 
     expect(html).toContain('Budget mode estimates what a monthly spend ceiling gets you.');
     expect(html).toContain('Usage mode estimates total usage cost and out-of-pocket spend after plan coverage.');
+    expect(html).toContain('Cloud, Bugbot, and automations have their own cost view.');
   });
 });

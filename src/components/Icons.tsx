@@ -56,6 +56,14 @@ export function ChartLineIcon({ className = "w-5 h-5" }: IconProps) {
   );
 }
 
+export function CloudIcon({ className = "w-5 h-5" }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 640 512" fill="currentColor">
+      <path d="M0 336c0 79.5 64.5 144 144 144l368 0c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4 3.7-10.7 5.6-22.2 5.6-34.1C543.2 86 457.2 0 351.2 0c-80.5 0-149.1 49.4-178.5 119.6C162.5 111.3 151.4 108 139.6 108 84.2 108 39.2 153 39.2 208.4c0 8.6 1.1 16.9 3.2 24.8C16.6 247.8 0 277.5 0 312l0 24z" />
+    </svg>
+  );
+}
+
 export function FileCsvIcon({ className = "w-5 h-5" }: IconProps) {
   return (
     <svg className={className} viewBox="0 0 576 512" fill="currentColor">

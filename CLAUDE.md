@@ -100,26 +100,15 @@ All facts below sourced from https://cursor.com/docs/models-and-pricing and indi
 - CSV replay may use import-only provider-backed estimates for retired labels that appear in historical exports, but those rows must remain clearly marked as approximate.
 - Do not move provider-backed replay estimates into the main pricing JSON unless Cursor publishes a current first-party pricing entry for them.
 
-### Two separate usage pools
+### Usage pools
 
-- **Auto + Composer pool**: Used by Auto and Composer 1.5 on individual plans. "Generous included usage" on all plans — no disclosed dollar amount. On Teams/Enterprise, Composer 1.5 charges at API rates instead.
-- **API pool**: Charged at each model's API rate. Plan amounts:
-  - Includes API-priced models such as Composer 1
-  - Pro $20/mo → $20 API pool
-  - Pro Plus $60/mo → $70 API pool
-  - Ultra $200/mo → $400 API pool
-- Overage beyond the pool is at the same API rates, billed monthly.
+- **Cursor Models** — Composer 2.5, Grok 4.6, and Grok 4.5. Generous included usage; no published dollar amount. Auto is a router, not a pool.
+- **Other Models** — third-party models at API rates. Last published official floors: Pro at least `$20`, Pro Plus `$70`, Ultra `$400`. Live docs now say only “Included.” Teams dollars unpublished.
+- Overage beyond the last published Other Models floor is billed at the same API rates. Teams/Enterprise add `$0.25/M` on third-party tokens.
 
-### Max Mode (extended context)
+### Max Mode
 
-Max Mode extends context to a model's maximum (e.g. 200k → 1M for Claude). Two cost layers stack:
-1. **Cursor upcharge**: +20% on individual plans
-2. **Provider long context rates** (when input exceeds default context window):
-   - Claude 4.6 Opus: **no long-context surcharge** — same per-token rates at 1M context as shorter context (confirmed 2026-03-14)
-   - Other Claude models: 2x standard rate when input >200k
-   - GPT-5.4: input 2x, output 1.5x when input >272k
-
-For models with provider surcharges, these are cumulative with the Cursor upcharge — Max Mode with long context can mean 2.4x input cost, not just +20%. Claude 4.6 Opus is the exception: Max Mode only adds the Cursor upcharge.
+Max Mode is available only on legacy request-based plans, at API rate plus 20%. Current usage-based plans do not include Max Mode, so the +20% upcharge is hidden. Model-specific long-context rates belong in the catalog as documented overrides. Do not infer a blanket Max Mode multiplier.
 
 ### Fast mode
 

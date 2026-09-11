@@ -1,5 +1,13 @@
 import { useCallback, useMemo, useReducer } from 'react';
 import { getIncludedPoolModels, getManualSelectableModels, getPlans } from '../domain/catalog/currentCatalog';
+import type { Audience } from '../domain/catalog/types';
+import { isOtherModelsPool } from '../domain/catalog/pools';
+import type {
+  CloudAutomationScope,
+  CloudAutomationsResult,
+  CloudProductKind,
+  CloudRuntimeKind,
+} from '../domain/cloudAutomations/types';
 import { getImportReplayModels } from '../domain/importReplay/catalog';
 import type {
   ApproximationMode,
@@ -19,6 +27,7 @@ import {
 } from './calculatorState';
 import {
   deriveCursorImportReport,
+  selectCloudAutomationsResult,
   selectIsImportMode,
   selectRecommendation,
   selectRecommendationPresentation,
@@ -46,8 +55,18 @@ interface CalculatorController {
   cursorImportReport: CursorImportReport | null;
   recommendation: Recommendation | null;
   recommendationPresentation: RecommendationPresentation | null;
+  cloudAutomationsResult: CloudAutomationsResult;
   navigationTarget: NavigationTarget;
   navigate: (target: NavigationTarget) => void;
+  setAudience: (audience: Audience) => void;
+  setCloudProduct: (cloudProduct: CloudProductKind) => void;
+  setCloudRuntime: (cloudRuntime: CloudRuntimeKind) => void;
+  setCloudAutomationScope: (cloudAutomationScope: CloudAutomationScope) => void;
+  setCloudModelId: (cloudModelId: string) => void;
+  setCloudTokens: (cloudTokens: number) => void;
+  setCloudCacheReadShare: (cloudCacheReadShare: number) => void;
+  setCloudInputRatio: (cloudInputRatio: number) => void;
+  setCloudFast: (cloudFast: boolean) => void;
   setMode: (mode: CalculatorState['mode']) => void;
   setTokenSource: (tokenSource: TokenSource) => void;
   setBudget: (budget: number) => void;
@@ -85,7 +104,7 @@ export function useCalculatorController(
     [],
   );
   const apiModels = useMemo(
-    () => manualModels.filter((model) => model.pool === 'api'),
+    () => manualModels.filter((model) => isOtherModelsPool(model.pool)),
     [manualModels],
   );
   const apiModelIds = useMemo(
@@ -111,12 +130,12 @@ export function useCalculatorController(
     () => selectRecommendationPresentation(state, recommendation, includedPoolModels),
     [includedPoolModels, recommendation, state],
   );
+  const cloudAutomationsResult = useMemo(
+    () => selectCloudAutomationsResult(state, manualModels),
+    [manualModels, state],
+  );
 
-  const navigationTarget: NavigationTarget = useMemo(() => {
-    if (state.mode === 'budget') return 'budget';
-    if (state.tokenSource === 'cursor_import') return 'csv_import';
-    return 'manual_usage';
-  }, [state.mode, state.tokenSource]);
+  const navigationTarget: NavigationTarget = state.view;
 
   const navigate = useCallback((target: NavigationTarget) => {
     dispatch({ type: 'navigate', target });
@@ -142,6 +161,42 @@ export function useCalculatorController(
 
   const setTokenSource = useCallback((tokenSource: TokenSource) => {
     dispatch({ type: 'set_token_source', tokenSource });
+  }, []);
+
+  const setAudience = useCallback((audience: Audience) => {
+    dispatch({ type: 'set_audience', audience });
+  }, []);
+
+  const setCloudProduct = useCallback((cloudProduct: CloudProductKind) => {
+    dispatch({ type: 'set_cloud_product', cloudProduct });
+  }, []);
+
+  const setCloudRuntime = useCallback((cloudRuntime: CloudRuntimeKind) => {
+    dispatch({ type: 'set_cloud_runtime', cloudRuntime });
+  }, []);
+
+  const setCloudAutomationScope = useCallback((cloudAutomationScope: CloudAutomationScope) => {
+    dispatch({ type: 'set_cloud_automation_scope', cloudAutomationScope });
+  }, []);
+
+  const setCloudModelId = useCallback((cloudModelId: string) => {
+    dispatch({ type: 'set_cloud_model_id', cloudModelId });
+  }, []);
+
+  const setCloudTokens = useCallback((cloudTokens: number) => {
+    dispatch({ type: 'set_cloud_tokens', cloudTokens });
+  }, []);
+
+  const setCloudCacheReadShare = useCallback((cloudCacheReadShare: number) => {
+    dispatch({ type: 'set_cloud_cache_read_share', cloudCacheReadShare });
+  }, []);
+
+  const setCloudInputRatio = useCallback((cloudInputRatio: number) => {
+    dispatch({ type: 'set_cloud_input_ratio', cloudInputRatio });
+  }, []);
+
+  const setCloudFast = useCallback((cloudFast: boolean) => {
+    dispatch({ type: 'set_cloud_fast', cloudFast });
   }, []);
 
   const setBudget = useCallback((budget: number) => {
@@ -228,8 +283,18 @@ export function useCalculatorController(
     cursorImportReport,
     recommendation,
     recommendationPresentation,
+    cloudAutomationsResult,
     navigationTarget,
     navigate,
+    setAudience,
+    setCloudProduct,
+    setCloudRuntime,
+    setCloudAutomationScope,
+    setCloudModelId,
+    setCloudTokens,
+    setCloudCacheReadShare,
+    setCloudInputRatio,
+    setCloudFast,
     setMode,
     setTokenSource,
     setBudget,

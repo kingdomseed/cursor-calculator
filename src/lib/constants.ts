@@ -6,4 +6,5 @@ export const PROVIDER_COLORS: Record<string, string> = {
   moonshot: "bg-purple-500",
   zai: "bg-cyan-600",
   cursor: "bg-[#14120b]",
+  meta: "bg-indigo-500",
 };

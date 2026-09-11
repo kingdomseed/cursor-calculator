@@ -9,7 +9,7 @@ function createLineItem(overrides: Partial<PlanLineItem> = {}): PlanLineItem {
     modelId: 'model-1',
     label: 'Model 1',
     provider: 'anthropic',
-    pool: 'api',
+    pool: 'other_models',
     tokens: {
       total: 10_000_000,
       input: 7_500_000,
@@ -172,7 +172,7 @@ describe('recommendation presentation', () => {
           modelId: 'composer-2.5',
           label: 'Composer 2.5',
           provider: 'cursor',
-          pool: 'first_party',
+          pool: 'cursor_models',
           apiCost: 100,
           tokens: { total: 600_000_000, input: 450_000_000, output: 150_000_000 },
         }),
@@ -272,15 +272,42 @@ describe('recommendation presentation', () => {
       tokenSource: 'manual',
       recommendation: createRecommendation(createPlanResult()),
       includedPoolModels: [
-        { id: 'auto', name: 'Auto', provider: 'cursor' },
+        { id: 'grok-4.6', name: 'Cursor Grok 4.6', provider: 'cursor' },
         { id: 'composer-2.5', name: 'Composer 2.5', provider: 'cursor' },
       ],
     });
 
     expect(presentation.includedPoolItems).toEqual([
-      { key: 'auto', label: 'Auto', provider: 'cursor', poolLabel: 'First-party pool' },
-      { key: 'composer-2.5', label: 'Composer 2.5', provider: 'cursor', poolLabel: 'First-party pool' },
+      { key: 'grok-4.6', label: 'Cursor Grok 4.6', provider: 'cursor', poolLabel: 'Cursor Models' },
+      { key: 'composer-2.5', label: 'Composer 2.5', provider: 'cursor', poolLabel: 'Cursor Models' },
     ]);
+  });
+
+  it('labels last published Other Models floors and keeps Grok Bot off the IDE comparison rows', () => {
+    const best = createPlanResult({
+      plan: 'pro',
+      subscription: 20,
+      apiPool: 20,
+      otherModelsAllowanceStatus: 'last_published_official_floor',
+      otherModelsAllowanceLabel: 'At least $20 (last published official floor)',
+    });
+    const presentation = buildRecommendationPresentation({
+      mode: 'tokens',
+      tokenSource: 'manual',
+      audience: 'personal',
+      recommendation: createRecommendation(best),
+    });
+    const includedRow = presentation.comparisonSections
+      .flatMap((section) => section.rows)
+      .find((row) => row.key === 'includedPool');
+
+    expect(includedRow?.label).toBe('Other Models allowance');
+    expect(includedRow?.values[0]?.formattedValue).toBe('At least $20 (last published official floor)');
+    expect(presentation.comparisonSections.every((section) => (
+      !section.rows.some((row) => row.label.includes('Grok Bot'))
+    ))).toBe(true);
+    expect(presentation.grokBot.cadenceLabel).toBe('Weekly grant');
+    expect(presentation.grokBot.grantSummary).toContain('unpublished');
   });
 
   it('defaults to an empty included-pool list when none are provided', () => {

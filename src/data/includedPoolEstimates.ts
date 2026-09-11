@@ -20,7 +20,7 @@ export const ANECDOTAL_INCLUDED_POOL_SOURCES = [
   },
 ] as const;
 
-export const ANECDOTAL_FIRST_PARTY_POOL_TOKEN_ALLOWANCES: Record<PlanKey, number> = {
+export const ANECDOTAL_FIRST_PARTY_POOL_TOKEN_ALLOWANCES: Partial<Record<PlanKey, number>> = {
   pro: 333_333_333,
   pro_plus: 1_000_000_000,
   ultra: 6_666_666_667,

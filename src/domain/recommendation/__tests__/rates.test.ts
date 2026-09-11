@@ -7,7 +7,7 @@ const sonnet5: Model = {
   id: 'claude-sonnet-5',
   name: 'Claude Sonnet 5',
   provider: 'anthropic',
-  pool: 'api',
+  pool: 'other_models',
   context: { default: 200000, max: 1000000 },
   rates: { input: 3, cache_write: 3.75, cache_read: 0.3, output: 15 },
   rate_promotion: {
@@ -79,7 +79,7 @@ describe('first-party usage promotions', () => {
     ...sonnet5,
     id: 'grok-4-5',
     name: 'Grok 4.5',
-    pool: 'first_party',
+    pool: 'cursor_models',
     rate_promotion: undefined,
     pool_usage_promotion: {
       ends_on: '2026-07-15',
@@ -93,5 +93,27 @@ describe('first-party usage promotions', () => {
     expect(getPoolUsageAllowanceMultiplier(grok, new Date('2026-07-15T12:00:00Z'))).toBe(2);
     expect(isPoolUsagePromotionActive(grok, new Date('2026-07-16T00:00:00Z'))).toBe(false);
     expect(getPoolUsageAllowanceMultiplier(grok, new Date('2026-07-16T00:00:00Z'))).toBe(1);
+  });
+});
+
+describe('Cursor Token Rate', () => {
+  it('adds $0.25/M on Teams third-party Other Models and skips Cursor Models', () => {
+    const afterPromo = new Date('2026-09-11T00:00:00Z');
+    expect(computeBillableRates(sonnet5, config, afterPromo, 'teams_enterprise')).toEqual({
+      input: 3.25,
+      cache_write: 4,
+      cache_read: 0.55,
+      output: 15.25,
+    });
+    expect(computeBillableRates(sonnet5, config, afterPromo, 'personal')).toEqual(sonnet5.rates);
+
+    const grok: Model = {
+      ...sonnet5,
+      id: 'grok-4.6',
+      provider: 'cursor',
+      pool: 'cursor_models',
+      rate_promotion: undefined,
+    };
+    expect(computeBillableRates(grok, { ...config, modelId: grok.id }, afterPromo, 'teams_enterprise')).toEqual(grok.rates);
   });
 });

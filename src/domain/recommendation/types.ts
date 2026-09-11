@@ -1,4 +1,4 @@
-import type { Model, PlanKey } from '../catalog/types';
+import type { Audience, Model, OtherModelsAllowanceStatus, PlanKey } from '../catalog/types';
 
 export type Mode = 'budget' | 'tokens';
 
@@ -68,10 +68,17 @@ export interface IncludedPoolEstimateConfig {
   asOf?: Date;
 }
 
+export interface RecommendationOptions {
+  audience?: Audience;
+}
+
 export interface PlanResult {
   plan: PlanKey;
   subscription: number;
-  apiPool: number;
+  subscriptionNote?: string;
+  apiPool: number | null;
+  otherModelsAllowanceStatus?: OtherModelsAllowanceStatus;
+  otherModelsAllowanceLabel?: string;
   apiBudget: number;
   apiUsage: number;
   estimatedIncludedPoolAllowanceTokens?: number | null;
@@ -81,6 +88,8 @@ export interface PlanResult {
   unusedPool: number;
   totalCost: number;
   affordable: boolean;
+  recommendable?: boolean;
+  cursorTokenRateApplied?: boolean;
   perModel: PlanLineItem[];
 }
 

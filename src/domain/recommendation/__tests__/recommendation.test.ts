@@ -12,7 +12,7 @@ const opusModel: Model = {
   id: 'claude-4-6-opus',
   name: 'Claude 4.6 Opus',
   provider: 'anthropic',
-  pool: 'api',
+  pool: 'other_models',
   context: { default: 200000, max: 1000000 },
   rates: { input: 5, cache_write: 6.25, cache_read: 0.5, output: 25 },
     variants: {
@@ -31,7 +31,7 @@ const gpt54Model: Model = {
   id: 'gpt-5-4',
   name: 'GPT-5.4',
   provider: 'openai',
-  pool: 'api',
+  pool: 'other_models',
   context: { default: 272000, max: 1000000 },
   rates: { input: 2.5, cache_write: null, cache_read: 0.25, output: 15 },
     variants: {
@@ -312,7 +312,7 @@ describe('exact usage pricing', () => {
         modelId: 'gpt-5-4',
         label: 'GPT-5.4',
         provider: 'openai',
-        pool: 'api',
+        pool: 'other_models',
         tokens: {
           total: 1_750_000,
           input: 1_250_000,

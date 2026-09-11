@@ -19,7 +19,7 @@ const preferredModel: Model = {
   id: 'gpt-5.3-codex',
   name: 'GPT-5.3 Codex',
   provider: 'openai',
-  pool: 'api',
+  pool: 'other_models',
   context: { default: 272000, max: null },
   rates: { input: 1.75, cache_write: null, cache_read: 0.175, output: 14 },
   variants: {
@@ -31,7 +31,7 @@ const secondaryModel: Model = {
   id: 'gpt-5',
   name: 'GPT-5',
   provider: 'openai',
-  pool: 'api',
+  pool: 'other_models',
   context: { default: 272000, max: 1000000 },
   rates: { input: 1.25, cache_write: null, cache_read: 0.125, output: 10 },
   variants: {
@@ -43,7 +43,7 @@ const preferredComposerModel: Model = {
   id: 'composer-2.5',
   name: 'Composer 2.5',
   provider: 'cursor',
-  pool: 'first_party',
+  pool: 'cursor_models',
   context: { default: 200000, max: null },
   rates: { input: 0.5, cache_write: null, cache_read: 0.2, output: 2.5 },
   variants: {

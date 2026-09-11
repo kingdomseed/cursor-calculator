@@ -43,19 +43,24 @@ export function ModelSelector({ options, selected, onChange, placeholder, labell
     ? unselectedModels.filter((m) => (
         m.name.toLowerCase().includes(query)
         || m.provider.toLowerCase().includes(query)
-        || (m.pool === 'first_party' ? 'first-party models pool' : 'api pool').includes(query)
+        || (m.pool === 'cursor_models' ? 'cursor models' : m.pool === 'auto_router' ? 'auto router' : 'other models').includes(query)
       ))
     : unselectedModels;
   const unselectedSections = [
     {
-      key: 'first_party',
-      label: 'First-party models pool',
-      models: filteredUnselected.filter((model) => model.pool === 'first_party'),
+      key: 'cursor_models',
+      label: 'Cursor Models',
+      models: filteredUnselected.filter((model) => model.pool === 'cursor_models'),
     },
     {
-      key: 'api',
-      label: 'API pool',
-      models: filteredUnselected.filter((model) => model.pool === 'api'),
+      key: 'other_models',
+      label: 'Other Models',
+      models: filteredUnselected.filter((model) => model.pool === 'other_models'),
+    },
+    {
+      key: 'auto_router',
+      label: 'Auto / Cursor Router',
+      models: filteredUnselected.filter((model) => model.pool === 'auto_router'),
     },
   ].filter((section) => section.models.length > 0);
 
