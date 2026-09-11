@@ -306,8 +306,33 @@ describe('recommendation presentation', () => {
     expect(presentation.comparisonSections.every((section) => (
       !section.rows.some((row) => row.label.includes('Grok Bot'))
     ))).toBe(true);
-    expect(presentation.grokBot.cadenceLabel).toBe('Weekly grant');
-    expect(presentation.grokBot.grantSummary).toContain('unpublished');
+    expect(presentation.grokBot.cadenceLabel).toBe('Weekly');
+    expect(presentation.grokBot.grantSummary).toBe(
+      'You get Grok Bot usage on Pro, Pro Plus, and Ultra.',
+    );
+    expect(presentation.grokBot.notes.every((note) => !note.toLowerCase().includes('grant'))).toBe(true);
+    expect(presentation.grokBot.grantSummary).not.toMatch(/\$\d/);
+  });
+
+  it('states Teams Grok Bot access without weekly dollars', () => {
+    const best = createPlanResult({
+      plan: 'teams_standard',
+      subscription: 40,
+      apiPool: null,
+      otherModelsAllowanceStatus: 'unpublished',
+      otherModelsAllowanceLabel: 'Other Models dollars unpublished',
+    });
+    const presentation = buildRecommendationPresentation({
+      mode: 'tokens',
+      tokenSource: 'manual',
+      audience: 'teams_enterprise',
+      recommendation: createRecommendation(best),
+    });
+
+    expect(presentation.grokBot.grantSummary).toBe(
+      'You get Grok Bot usage on Teams. You do not need a Premium seat.',
+    );
+    expect(presentation.grokBot.grantSummary).not.toMatch(/\$\d/);
   });
 
   it('defaults to an empty included-pool list when none are provided', () => {

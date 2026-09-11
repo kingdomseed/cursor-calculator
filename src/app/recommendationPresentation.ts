@@ -541,35 +541,35 @@ export function buildGrokBotPresentation(audience: Audience, plan: PlanKey): Gro
   if (audience === 'teams_enterprise' && plan === 'enterprise') {
     return {
       heading: 'Grok Bot',
-      cadenceLabel: 'Weekly grant',
-      grantSummary: 'Consult the account executive. Weekly dollar amounts are unpublished.',
-      notes: [
-        'Grok Bot is a separate weekly grant, not one of the two monthly IDE pools.',
-        'A Cursor plan and a SuperGrok or X Premium+ link do not stack.',
-      ],
+      cadenceLabel: 'Weekly',
+      grantSummary: 'Ask your account executive about Grok Bot on Enterprise.',
+      notes: grokBotNotes(),
     };
   }
 
-  const planCopy = plan === 'ultra'
-    ? 'Ultra has the highest weekly usage. The exact weekly amount is unpublished.'
-    : plan === 'pro_plus'
-      ? 'Pro Plus has generous weekly usage, below Ultra. The exact weekly amount is unpublished.'
-      : plan === 'pro'
-        ? 'Pro weekly usage is below Pro Plus. The exact weekly amount is unpublished.'
-        : audience === 'teams_enterprise'
-          ? 'Included for every self-serve Teams member. No Premium seat required. The exact weekly amount is unpublished.'
-          : 'Included on paid personal plans. The exact weekly amount is unpublished.';
+  if (audience === 'teams_enterprise') {
+    return {
+      heading: 'Grok Bot',
+      cadenceLabel: 'Weekly',
+      grantSummary: 'You get Grok Bot usage on Teams. You do not need a Premium seat.',
+      notes: grokBotNotes(),
+    };
+  }
 
   return {
     heading: 'Grok Bot',
-    cadenceLabel: 'Weekly grant',
-    grantSummary: planCopy,
-    notes: [
-      'This is a weekly grant, not a monthly Cursor Models or Other Models column.',
-      'No weekly dollar amount is published. Extra usage can continue as Cursor on-demand if enabled.',
-      'A Cursor plan and a SuperGrok or X Premium+ link do not stack.',
-    ],
+    cadenceLabel: 'Weekly',
+    grantSummary: 'You get Grok Bot usage on Pro, Pro Plus, and Ultra.',
+    notes: grokBotNotes(),
   };
+}
+
+function grokBotNotes(): string[] {
+  return [
+    'Cursor does not publish how much you get each week.',
+    'If you run out and on-demand is on, extra usage bills as Cursor on-demand.',
+    'SuperGrok and X Premium+ do not add extra Grok Bot usage to your Cursor plan.',
+  ];
 }
 
 function formatTokens(value: number): string {
