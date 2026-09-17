@@ -54,10 +54,14 @@ const baseConfig: ModelConfig = {
   cacheHitRate: 0,
 };
 
+const lastPublishedFloor = {
+  other_models_allowance_status: 'last_published_official_floor' as const,
+};
+
 const testPlans: Partial<PricingData['plans']> = {
-  pro: { name: 'Pro', monthly_cost: 20, api_pool: 20, description: '' },
-  pro_plus: { name: 'Pro Plus', monthly_cost: 60, api_pool: 70, description: '' },
-  ultra: { name: 'Ultra', monthly_cost: 200, api_pool: 400, description: '' },
+  pro: { name: 'Pro', monthly_cost: 20, api_pool: 20, description: '', ...lastPublishedFloor },
+  pro_plus: { name: 'Pro Plus', monthly_cost: 60, api_pool: 70, description: '', ...lastPublishedFloor },
+  ultra: { name: 'Ultra', monthly_cost: 200, api_pool: 400, description: '', ...lastPublishedFloor },
 };
 
 describe('computeEffectiveRates', () => {
@@ -238,9 +242,9 @@ describe('computeRecommendation - budget mode', () => {
 
   it('does not pick a larger last published floor when budget-mode token yield ties', () => {
     const tiePlans: Partial<PricingData['plans']> = {
-      pro: { name: 'Pro', monthly_cost: 10, api_pool: 15, description: '' },
-      pro_plus: { name: 'Pro Plus', monthly_cost: 20, api_pool: 25, description: '' },
-      ultra: { name: 'Ultra', monthly_cost: 200, api_pool: 400, description: '' },
+      pro: { name: 'Pro', monthly_cost: 10, api_pool: 15, description: '', ...lastPublishedFloor },
+      pro_plus: { name: 'Pro Plus', monthly_cost: 20, api_pool: 25, description: '', ...lastPublishedFloor },
+      ultra: { name: 'Ultra', monthly_cost: 200, api_pool: 400, description: '', ...lastPublishedFloor },
     };
 
     const result = computeRecommendation('budget', 30, 0, [opusModel], [{ ...baseConfig }], tiePlans, 3);
@@ -276,9 +280,9 @@ describe('computeRecommendation - token mode', () => {
 
   it('does not pick a larger last published floor on a token-mode cost tie', () => {
     const tiePlans: Partial<PricingData['plans']> = {
-      pro: { name: 'Pro', monthly_cost: 20, api_pool: 10, description: '' },
-      pro_plus: { name: 'Pro Plus', monthly_cost: 30, api_pool: 20, description: '' },
-      ultra: { name: 'Ultra', monthly_cost: 200, api_pool: 400, description: '' },
+      pro: { name: 'Pro', monthly_cost: 20, api_pool: 10, description: '', ...lastPublishedFloor },
+      pro_plus: { name: 'Pro Plus', monthly_cost: 30, api_pool: 20, description: '', ...lastPublishedFloor },
+      ultra: { name: 'Ultra', monthly_cost: 200, api_pool: 400, description: '', ...lastPublishedFloor },
     };
 
     const result = computeRecommendation('tokens', 0, 5_000_000, [opusModel], [{ ...baseConfig }], tiePlans, 3);
@@ -286,12 +290,13 @@ describe('computeRecommendation - token mode', () => {
   });
 
   it('does not treat Ultra $400 as current guaranteed coverage', () => {
-    const result = computeRecommendation('tokens', 0, 10_000_000, [opusModel], [{ ...baseConfig }], testPlans, 3);
+    const result = computeRecommendation('tokens', 0, 50_000_000, [opusModel], [{ ...baseConfig }], testPlans, 3);
     const ultra = result.all.find((plan) => plan.plan === 'ultra');
 
-    expect(ultra?.apiUsage).toBeGreaterThan(0);
-    expect(ultra?.overage).toBe(0);
+    expect(ultra?.apiUsage).toBeGreaterThan(400);
+    expect(ultra?.overage).toBe((ultra?.apiUsage ?? 0) - 400);
     expect(ultra?.totalCost).toBe((ultra?.subscription ?? 0) + (ultra?.apiUsage ?? 0));
+    expect(ultra?.totalCost).toBeGreaterThan((ultra?.subscription ?? 0) + (ultra?.overage ?? 0));
     expect(result.best.plan).toBe('pro');
   });
 

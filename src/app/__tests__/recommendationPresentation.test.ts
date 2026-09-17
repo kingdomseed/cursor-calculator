@@ -307,8 +307,10 @@ describe('recommendation presentation', () => {
       .flatMap((section) => section.rows)
       .find((row) => row.key === 'additionalApiBilled');
 
-    expect(presentation.hero.context).toContain('Ultra last published $400 of Other Models on a $200 plan');
+    expect(presentation.hero.context).toContain('$400 on a $200 plan');
     expect(presentation.hero.context).toContain('You may not get that now');
+    expect(presentation.hero.context).toContain('If that floor still applies');
+    expect(presentation.hero.context).toContain('If it does not, Other Models usage bills in full');
     expect(presentation.hero.context).not.toContain('covers the first');
     expect(billedRow?.label).toBe('Billed beyond last published floor, if that floor still applies');
     expect(noFloorRow?.values[0]?.value).toBe(500);
@@ -320,7 +322,7 @@ describe('recommendation presentation', () => {
       subscription: 20,
       apiPool: 20,
       otherModelsAllowanceStatus: 'last_published_official_floor',
-      otherModelsAllowanceLabel: 'At least $20 (last published official floor)',
+      otherModelsAllowanceLabel: 'Last published official floor: at least $20. Live docs no longer publish that amount.',
     });
     const presentation = buildRecommendationPresentation({
       mode: 'tokens',
@@ -333,7 +335,9 @@ describe('recommendation presentation', () => {
       .find((row) => row.key === 'includedPool');
 
     expect(includedRow?.label).toBe('Last published Other Models floor');
-    expect(includedRow?.values[0]?.formattedValue).toBe('At least $20 (last published official floor)');
+    expect(includedRow?.values[0]?.formattedValue).toBe(
+      'Last published official floor: at least $20. Live docs no longer publish that amount.',
+    );
     expect(presentation.comparisonSections.every((section) => (
       !section.rows.some((row) => row.label.includes('Grok Bot'))
     ))).toBe(true);
@@ -364,6 +368,12 @@ describe('recommendation presentation', () => {
       'You get Grok Bot usage on Teams. You do not need a Premium seat.',
     );
     expect(presentation.grokBot.grantSummary).not.toMatch(/\$\d/);
+    expect(
+      presentation.comparisonSections
+        .flatMap((section) => section.rows)
+        .find((row) => row.key === 'otherModelsIfNoFloor')
+        ?.values[0]?.value,
+    ).toBeNull();
   });
 
   it('defaults to an empty included-pool list when none are provided', () => {

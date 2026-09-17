@@ -1,5 +1,5 @@
 import type { Audience, Model, Plan, PlanKey, PricingData } from '../catalog/types';
-import { filterPlanKeys, isCursorModelsPool, isOtherModelsPool, isPlanRecommendable } from '../catalog/pools';
+import { filterPlanKeys, isCursorModelsPool, isOtherModelsPool, isPlanRecommendable, treatsOtherModelsFloorAsUncertain } from '../catalog/pools';
 import { dollarsToExactTokens } from './budgetUsage';
 import { directBreakdownToDollars, exactTokensToDollars, tokensToDollars } from './conversions';
 import { computeBillableRates, computeEffectiveRates, effectiveRatesFromExactCost, effectiveRatesFromExactTokens, getPoolUsageAllowanceMultiplier } from './rates';
@@ -405,20 +405,6 @@ function buildPlanLineItem(
     apiCost,
     ...(estimatedIncludedPoolOverageTokens !== undefined ? { estimatedIncludedPoolOverageTokens } : {}),
   };
-}
-
-export function treatsOtherModelsFloorAsUncertain(plan: Plan): boolean {
-  if (plan.other_models_allowance_status === 'last_published_official_floor') {
-    return true;
-  }
-  if (
-    plan.other_models_allowance_status === 'not_included'
-    || plan.other_models_allowance_status === 'unpublished'
-  ) {
-    return false;
-  }
-
-  return plan.api_pool != null && plan.api_pool > 0;
 }
 
 function createConfigFromUsage(usage: UsageLineItemInput): ModelConfig {

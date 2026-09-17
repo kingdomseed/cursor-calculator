@@ -7,6 +7,7 @@ import {
   isCursorModelsPool,
   isOtherModelsPool,
   resolveCursorTokenRateUsdPerMillion,
+  treatsOtherModelsFloorAsUncertain,
 } from '../pools';
 
 describe('audience and pool splits', () => {
@@ -44,5 +45,9 @@ describe('audience and pool splits', () => {
     expect(plans.pro_plus.other_models_allowance_label).toContain('Last published official floor: $70');
     expect(plans.ultra.other_models_allowance_label).toContain('$400 on a $200 plan');
     expect(plans.ultra.other_models_allowance_label).toContain('You may not get that now');
+    expect(treatsOtherModelsFloorAsUncertain(plans.pro)).toBe(true);
+    expect(treatsOtherModelsFloorAsUncertain(plans.start)).toBe(false);
+    expect(treatsOtherModelsFloorAsUncertain(plans.teams_standard)).toBe(false);
+    expect(treatsOtherModelsFloorAsUncertain({ other_models_allowance_status: undefined })).toBe(false);
   });
 });
