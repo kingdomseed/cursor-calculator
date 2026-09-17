@@ -212,11 +212,14 @@ function buildHero(
     const budgetValue = budgetCeiling == null ? null : budgetCeiling;
     const headroom = plan.derived.budgetHeadroom;
     const poolPhrase = formatOtherModelsAllowance(plan);
+    const floorNote = treatsFloorAsUncertain(plan)
+      ? ' That floor is not a current guaranteed included amount.'
+      : '';
     const context = budgetValue == null || headroom == null
-      ? `${plan.planLabel} Other Models allowance: ${poolPhrase}.`
+      ? `${plan.planLabel} last published Other Models floor: ${poolPhrase}.${floorNote}`
       : headroom >= 0
-        ? `${plan.planLabel} stays ${formatCurrency(headroom)} under your ${formatCurrency(budgetValue)} budget. Other Models: ${poolPhrase}.`
-        : `${plan.planLabel} exceeds your ${formatCurrency(budgetValue)} budget by ${formatCurrency(Math.abs(headroom))}. Other Models: ${poolPhrase}.`;
+        ? `${plan.planLabel} stays ${formatCurrency(headroom)} under your ${formatCurrency(budgetValue)} budget. Last published Other Models floor: ${poolPhrase}.${floorNote}`
+        : `${plan.planLabel} exceeds your ${formatCurrency(budgetValue)} budget by ${formatCurrency(Math.abs(headroom))}. Last published Other Models floor: ${poolPhrase}.${floorNote}`;
 
     return {
       title: heading,
@@ -240,7 +243,7 @@ function buildHero(
   const estimatedIncludedPoolAllowance = plan.derived.estimatedIncludedPoolAllowanceTokens;
   const estimatedIncludedPoolOverage = plan.derived.estimatedIncludedPoolOverageCost;
   const context = buildTokenModeContext(
-    plan.planLabel,
+    plan,
     coveredByPlan,
     billedBeyondPool,
     estimatedIncludedPoolAllowance,
@@ -288,14 +291,14 @@ function buildComparisonSections(
     createLabeledRow(
       plans,
       'includedPool',
-      'Other Models allowance',
+      'Last published Other Models floor',
       (plan) => formatOtherModelsAllowance(plan),
       (plan) => plan.includedPool,
     ),
-    createRow(plans, 'includedPoolUsed', 'Other Models used', (plan) => (
+    createRow(plans, 'includedPoolUsed', 'Applied to last published floor, if it still applies', (plan) => (
       plan.includedPool == null ? null : plan.derived.includedPoolUsed
     ), formatCurrency),
-    createRow(plans, 'unusedPool', 'Unused Other Models floor', (plan) => (
+    createRow(plans, 'unusedPool', 'Unused if last published floor still applies', (plan) => (
       plan.includedPool == null ? null : plan.unusedPool
     ), formatCurrency),
   ];
@@ -307,8 +310,13 @@ function buildComparisonSections(
       (plan) => plan.subscriptionNote ?? formatCurrency(plan.subscription),
       (plan) => plan.subscription,
     ),
-    createRow(plans, 'additionalApiBilled', 'Billed beyond last published floor', (plan) => (
+    createRow(plans, 'additionalApiBilled', 'Billed beyond last published floor, if that floor still applies', (plan) => (
       plan.includedPool == null ? null : plan.derived.additionalApiBilled
+    ), formatCurrency),
+    createRow(plans, 'otherModelsIfNoFloor', 'Other Models billed if last published floor does not apply', (plan) => (
+      treatsFloorAsUncertain(plan)
+        ? plan.derived.includedPoolUsed + plan.derived.additionalApiBilled
+        : null
     ), formatCurrency),
   ];
 
@@ -464,7 +472,21 @@ function formatOtherModelsAllowance(plan: RecommendationPlanPresentation): strin
   if (plan.includedPool == null) {
     return 'Unpublished';
   }
-  return formatCurrency(plan.includedPool);
+  return `Last published ${formatCurrency(plan.includedPool)}. Live docs no longer publish that amount.`;
+}
+
+function treatsFloorAsUncertain(plan: RecommendationPlanPresentation): boolean {
+  if (plan.otherModelsAllowanceStatus === 'last_published_official_floor') {
+    return true;
+  }
+  if (
+    plan.otherModelsAllowanceStatus === 'not_included'
+    || plan.otherModelsAllowanceStatus === 'unpublished'
+  ) {
+    return false;
+  }
+
+  return plan.includedPool != null && plan.includedPool > 0;
 }
 
 function getHeading(mode: Mode, tokenSource: TokenSource): string {
@@ -478,7 +500,7 @@ function getHeading(mode: Mode, tokenSource: TokenSource): string {
 }
 
 function buildTokenModeContext(
-  planLabel: string,
+  plan: RecommendationPlanPresentation,
   coveredByPlan: number,
   billedBeyondPool: number,
   estimatedIncludedPoolAllowance: number | null,
@@ -492,15 +514,36 @@ function buildTokenModeContext(
     return `No API-priced usage is selected. The selected plan estimate covers this first-party usage.`;
   }
 
-  const officialContext = billedBeyondPool > 0
-    ? `${planLabel} covers the first ${formatCurrency(coveredByPlan)} with its last published Other Models floor, leaving ${formatCurrency(billedBeyondPool)} billed beyond that floor.`
-    : `${planLabel} covers the full ${formatCurrency(coveredByPlan)} usage value within its last published Other Models floor.`;
+  const usage = coveredByPlan + billedBeyondPool;
+  const officialContext = treatsFloorAsUncertain(plan)
+    ? buildUncertainFloorContext(plan, usage, billedBeyondPool)
+    : billedBeyondPool > 0
+      ? `${plan.planLabel} covers the first ${formatCurrency(coveredByPlan)} with its last published Other Models floor, leaving ${formatCurrency(billedBeyondPool)} billed beyond that floor.`
+      : `${plan.planLabel} covers the full ${formatCurrency(coveredByPlan)} usage value within its last published Other Models floor.`;
 
   if (estimatedIncludedPoolOverage <= 0) {
     return officialContext;
   }
 
   return `${officialContext} It also includes ${formatCurrency(estimatedIncludedPoolOverage)} of estimated first-party pool overage from the optional community preset.`;
+}
+
+function buildUncertainFloorContext(
+  plan: RecommendationPlanPresentation,
+  usage: number,
+  billedBeyondPool: number,
+): string {
+  const floorPhrase = formatOtherModelsAllowance(plan);
+  const ifApplies = billedBeyondPool > 0
+    ? `If that floor still applies, ${formatCurrency(billedBeyondPool)} would be billed beyond it.`
+    : `If that floor still applies, this usage stays within it.`;
+  const ifMissing = `If it does not, Other Models usage bills in full (${formatCurrency(usage)}).`;
+
+  if (plan.plan === 'ultra') {
+    return `Ultra last published $400 of Other Models on a $200 plan. Live docs no longer publish that amount. You may not get that now. ${ifApplies} ${ifMissing}`;
+  }
+
+  return `${floorPhrase} ${ifApplies} ${ifMissing}`;
 }
 
 export function formatPlanLabel(plan: PlanKey): string {

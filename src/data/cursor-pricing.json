@@ -33,9 +33,9 @@
       "monthly_cost": 20,
       "api_pool": 20,
       "other_models_allowance_status": "last_published_official_floor",
-      "other_models_allowance_label": "At least $20 (last published official floor)",
+      "other_models_allowance_label": "Last published official floor: at least $20. Live docs no longer publish that amount.",
       "recommendable": true,
-      "description": "Daily tab users and limited agent users. Other Models last published official floor: at least $20."
+      "description": "Daily tab users and limited agent users. Last published official Other Models floor was at least $20. Live docs no longer publish that amount."
     },
     "pro_plus": {
       "name": "Pro Plus",
@@ -43,9 +43,9 @@
       "monthly_cost": 60,
       "api_pool": 70,
       "other_models_allowance_status": "last_published_official_floor",
-      "other_models_allowance_label": "Last published $70",
+      "other_models_allowance_label": "Last published official floor: $70. Live docs no longer publish that amount.",
       "recommendable": true,
-      "description": "Daily agent users. Other Models last published official floor: $70. Agent limits 3× Pro."
+      "description": "Daily agent users. Last published official Other Models floor was $70. Live docs no longer publish that amount. Agent limits 3× Pro."
     },
     "ultra": {
       "name": "Ultra",
@@ -53,9 +53,9 @@
       "monthly_cost": 200,
       "api_pool": 400,
       "other_models_allowance_status": "last_published_official_floor",
-      "other_models_allowance_label": "Last published $400",
+      "other_models_allowance_label": "Last published official floor: $400 on a $200 plan. Live docs no longer publish that amount. You may not get that now.",
       "recommendable": true,
-      "description": "Power users. Other Models last published official floor: $400. Agent limits 20× Pro."
+      "description": "Power users. Last published official Other Models floor was $400 on a $200 plan. Live docs no longer publish that amount. You may not get that now. Agent limits 20× Pro."
     },
     "teams_standard": {
       "name": "Teams Standard",

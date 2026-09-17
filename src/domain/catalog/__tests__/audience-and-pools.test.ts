@@ -39,6 +39,10 @@ describe('audience and pool splits', () => {
       'enterprise',
     ]);
     expect(plans.teams_standard.api_pool).toBeNull();
-    expect(plans.pro.other_models_allowance_label).toContain('last published official floor');
+    expect(plans.pro.other_models_allowance_label).toContain('Last published official floor: at least $20');
+    expect(plans.pro.other_models_allowance_label).toContain('Live docs no longer publish that amount');
+    expect(plans.pro_plus.other_models_allowance_label).toContain('Last published official floor: $70');
+    expect(plans.ultra.other_models_allowance_label).toContain('$400 on a $200 plan');
+    expect(plans.ultra.other_models_allowance_label).toContain('You may not get that now');
   });
 });

@@ -26,6 +26,8 @@ describe('Sidebar', () => {
     );
     expect(html).toContain('Cursor Models');
     expect(html).toContain('Other Models');
+    expect(html).toContain('Ultra used to include $400 on a $200 plan; you may not get that now.');
+    expect(html).toContain('not current guaranteed included dollars');
     expect(html).toContain('Max Mode');
     expect(html).toContain('Disclaimer');
     expect(html).toContain('2026-03-12');

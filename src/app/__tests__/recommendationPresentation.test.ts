@@ -283,6 +283,37 @@ describe('recommendation presentation', () => {
     ]);
   });
 
+  it('does not present last published floors as current guaranteed coverage', () => {
+    const best = createPlanResult({
+      plan: 'ultra',
+      subscription: 200,
+      apiPool: 400,
+      apiUsage: 500,
+      overage: 100,
+      unusedPool: 0,
+      totalCost: 700,
+      otherModelsAllowanceStatus: 'last_published_official_floor',
+      otherModelsAllowanceLabel: 'Last published official floor: $400 on a $200 plan. Live docs no longer publish that amount. You may not get that now.',
+    });
+    const presentation = buildRecommendationPresentation({
+      mode: 'tokens',
+      tokenSource: 'manual',
+      recommendation: createRecommendation(best),
+    });
+    const noFloorRow = presentation.comparisonSections
+      .flatMap((section) => section.rows)
+      .find((row) => row.key === 'otherModelsIfNoFloor');
+    const billedRow = presentation.comparisonSections
+      .flatMap((section) => section.rows)
+      .find((row) => row.key === 'additionalApiBilled');
+
+    expect(presentation.hero.context).toContain('Ultra last published $400 of Other Models on a $200 plan');
+    expect(presentation.hero.context).toContain('You may not get that now');
+    expect(presentation.hero.context).not.toContain('covers the first');
+    expect(billedRow?.label).toBe('Billed beyond last published floor, if that floor still applies');
+    expect(noFloorRow?.values[0]?.value).toBe(500);
+  });
+
   it('labels last published Other Models floors and keeps Grok Bot off the IDE comparison rows', () => {
     const best = createPlanResult({
       plan: 'pro',
@@ -301,7 +332,7 @@ describe('recommendation presentation', () => {
       .flatMap((section) => section.rows)
       .find((row) => row.key === 'includedPool');
 
-    expect(includedRow?.label).toBe('Other Models allowance');
+    expect(includedRow?.label).toBe('Last published Other Models floor');
     expect(includedRow?.values[0]?.formattedValue).toBe('At least $20 (last published official floor)');
     expect(presentation.comparisonSections.every((section) => (
       !section.rows.some((row) => row.label.includes('Grok Bot'))
