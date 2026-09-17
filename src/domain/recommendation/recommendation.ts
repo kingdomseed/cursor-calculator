@@ -132,9 +132,12 @@ function computeBudgetPlanResult(
   audience?: Audience,
 ): PlanResult {
   const includedPool = plan.api_pool;
-  const apiBudget = treatsOtherModelsFloorAsUncertain(plan) || includedPool == null
-    ? budget
-    : Math.max(includedPool, budget);
+  const subscriptionCost = plan.monthly_cost ?? 0;
+  const apiBudget = treatsOtherModelsFloorAsUncertain(plan)
+    ? Math.max(0, budget - subscriptionCost)
+    : includedPool == null
+      ? budget
+      : Math.max(includedPool, budget);
 
   const perModel = configs
     .map((config) => {

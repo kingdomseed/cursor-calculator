@@ -174,12 +174,12 @@ describe('computeRecommendation - budget mode', () => {
     const proPlus = result.all.find((plan) => plan.plan === 'pro_plus');
 
     expect(result.best.plan).toBe('pro');
-    expect(pro?.apiUsage).toBe(60);
-    expect(proPlus?.apiUsage).toBe(60);
+    expect(pro?.apiUsage).toBe(40);
+    expect(proPlus?.apiUsage).toBe(0);
     expect(proPlus?.overage).toBe(0);
-    expect(pro?.overage).toBe(40);
-    expect(pro?.totalCost).toBe(80);
-    expect(proPlus?.totalCost).toBe(120);
+    expect(pro?.overage).toBe(20);
+    expect(pro?.totalCost).toBe(60);
+    expect(proPlus?.totalCost).toBe(60);
   });
 
   it('filters out plans the user cannot afford', () => {
@@ -252,9 +252,9 @@ describe('computeRecommendation - budget mode', () => {
     const result = computeRecommendation('budget', 500, 0, [opusModel], [{ ...baseConfig }], testPlans, 3);
     const ultra = result.all.find((plan) => plan.plan === 'ultra');
 
-    expect(ultra?.apiUsage).toBe(500);
-    expect(ultra?.overage).toBe(100);
-    expect(ultra?.totalCost).toBe(700);
+    expect(ultra?.apiUsage).toBe(300);
+    expect(ultra?.overage).toBe(0);
+    expect(ultra?.totalCost).toBe(500);
     expect(result.best.plan).toBe('pro');
   });
 });

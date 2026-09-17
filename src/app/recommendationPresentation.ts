@@ -213,13 +213,21 @@ function buildHero(
     const headroom = plan.derived.budgetHeadroom;
     const poolPhrase = formatOtherModelsAllowance(plan);
     const floorNote = treatsFloorAsUncertain(plan)
-      ? ' That floor is not a current guaranteed included amount.'
+      ? 'That floor is not a current guaranteed included amount.'
       : '';
     const context = budgetValue == null || headroom == null
-      ? `${plan.planLabel} last published Other Models floor: ${poolPhrase}.${floorNote}`
+      ? joinSentences(`${plan.planLabel}: ${poolPhrase}`, floorNote)
       : headroom >= 0
-        ? `${plan.planLabel} stays ${formatCurrency(headroom)} under your ${formatCurrency(budgetValue)} budget. Last published Other Models floor: ${poolPhrase}.${floorNote}`
-        : `${plan.planLabel} exceeds your ${formatCurrency(budgetValue)} budget by ${formatCurrency(Math.abs(headroom))}. Last published Other Models floor: ${poolPhrase}.${floorNote}`;
+        ? joinSentences(
+          `${plan.planLabel} stays ${formatCurrency(headroom)} under your ${formatCurrency(budgetValue)} budget.`,
+          poolPhrase,
+          floorNote,
+        )
+        : joinSentences(
+          `${plan.planLabel} exceeds your ${formatCurrency(budgetValue)} budget by ${formatCurrency(Math.abs(headroom))}.`,
+          poolPhrase,
+          floorNote,
+        );
 
     return {
       title: heading,
@@ -463,6 +471,14 @@ function createLabeledRow(
       formattedValue: getLabel(plan),
     })),
   };
+}
+
+function joinSentences(...parts: string[]): string {
+  return parts
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0)
+    .join(' ')
+    .replace(/\.\s+\./g, '.');
 }
 
 function formatOtherModelsAllowance(plan: RecommendationPlanPresentation): string {
