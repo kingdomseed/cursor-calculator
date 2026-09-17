@@ -1,3 +1,4 @@
+import { treatsOtherModelsFloorAsUncertain } from '../domain/catalog/pools';
 import type { Audience, OtherModelsAllowanceStatus, PlanKey } from '../domain/catalog/types';
 import { formatCurrency, formatNumber, formatRate } from '../domain/recommendation/formatters';
 import type { Mode, PlanLineItem, PlanResult, Recommendation } from '../domain/recommendation/types';
@@ -213,10 +214,16 @@ function buildHero(
     const headroom = plan.derived.budgetHeadroom;
     const poolPhrase = formatOtherModelsAllowance(plan);
     const context = budgetValue == null || headroom == null
-      ? `${plan.planLabel} Other Models allowance: ${poolPhrase}.`
+      ? `${plan.planLabel}: ${poolPhrase}`
       : headroom >= 0
-        ? `${plan.planLabel} stays ${formatCurrency(headroom)} under your ${formatCurrency(budgetValue)} budget. Other Models: ${poolPhrase}.`
-        : `${plan.planLabel} exceeds your ${formatCurrency(budgetValue)} budget by ${formatCurrency(Math.abs(headroom))}. Other Models: ${poolPhrase}.`;
+        ? joinSentences(
+          `${plan.planLabel} stays ${formatCurrency(headroom)} under your ${formatCurrency(budgetValue)} budget.`,
+          poolPhrase,
+        )
+        : joinSentences(
+          `${plan.planLabel} exceeds your ${formatCurrency(budgetValue)} budget by ${formatCurrency(Math.abs(headroom))}.`,
+          poolPhrase,
+        );
 
     return {
       title: heading,
@@ -240,7 +247,7 @@ function buildHero(
   const estimatedIncludedPoolAllowance = plan.derived.estimatedIncludedPoolAllowanceTokens;
   const estimatedIncludedPoolOverage = plan.derived.estimatedIncludedPoolOverageCost;
   const context = buildTokenModeContext(
-    plan.planLabel,
+    plan,
     coveredByPlan,
     billedBeyondPool,
     estimatedIncludedPoolAllowance,
@@ -288,14 +295,14 @@ function buildComparisonSections(
     createLabeledRow(
       plans,
       'includedPool',
-      'Other Models allowance',
+      'Last published Other Models floor',
       (plan) => formatOtherModelsAllowance(plan),
       (plan) => plan.includedPool,
     ),
-    createRow(plans, 'includedPoolUsed', 'Other Models used', (plan) => (
+    createRow(plans, 'includedPoolUsed', 'Applied to last published floor, if it still applies', (plan) => (
       plan.includedPool == null ? null : plan.derived.includedPoolUsed
     ), formatCurrency),
-    createRow(plans, 'unusedPool', 'Unused Other Models floor', (plan) => (
+    createRow(plans, 'unusedPool', 'Unused if last published floor still applies', (plan) => (
       plan.includedPool == null ? null : plan.unusedPool
     ), formatCurrency),
   ];
@@ -307,8 +314,13 @@ function buildComparisonSections(
       (plan) => plan.subscriptionNote ?? formatCurrency(plan.subscription),
       (plan) => plan.subscription,
     ),
-    createRow(plans, 'additionalApiBilled', 'Billed beyond last published floor', (plan) => (
+    createRow(plans, 'additionalApiBilled', 'Billed beyond last published floor, if that floor still applies', (plan) => (
       plan.includedPool == null ? null : plan.derived.additionalApiBilled
+    ), formatCurrency),
+    createRow(plans, 'otherModelsIfNoFloor', 'Other Models billed if last published floor does not apply', (plan) => (
+      planTreatsFloorAsUncertain(plan)
+        ? plan.derived.includedPoolUsed + plan.derived.additionalApiBilled
+        : null
     ), formatCurrency),
   ];
 
@@ -457,6 +469,13 @@ function createLabeledRow(
   };
 }
 
+function joinSentences(...parts: string[]): string {
+  return parts
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0)
+    .join(' ');
+}
+
 function formatOtherModelsAllowance(plan: RecommendationPlanPresentation): string {
   if (plan.otherModelsAllowanceLabel) {
     return plan.otherModelsAllowanceLabel;
@@ -465,6 +484,12 @@ function formatOtherModelsAllowance(plan: RecommendationPlanPresentation): strin
     return 'Unpublished';
   }
   return formatCurrency(plan.includedPool);
+}
+
+function planTreatsFloorAsUncertain(plan: RecommendationPlanPresentation): boolean {
+  return treatsOtherModelsFloorAsUncertain({
+    other_models_allowance_status: plan.otherModelsAllowanceStatus,
+  });
 }
 
 function getHeading(mode: Mode, tokenSource: TokenSource): string {
@@ -478,7 +503,7 @@ function getHeading(mode: Mode, tokenSource: TokenSource): string {
 }
 
 function buildTokenModeContext(
-  planLabel: string,
+  plan: RecommendationPlanPresentation,
   coveredByPlan: number,
   billedBeyondPool: number,
   estimatedIncludedPoolAllowance: number | null,
@@ -492,15 +517,31 @@ function buildTokenModeContext(
     return `No API-priced usage is selected. The selected plan estimate covers this first-party usage.`;
   }
 
-  const officialContext = billedBeyondPool > 0
-    ? `${planLabel} covers the first ${formatCurrency(coveredByPlan)} with its last published Other Models floor, leaving ${formatCurrency(billedBeyondPool)} billed beyond that floor.`
-    : `${planLabel} covers the full ${formatCurrency(coveredByPlan)} usage value within its last published Other Models floor.`;
+  const usage = coveredByPlan + billedBeyondPool;
+  const officialContext = planTreatsFloorAsUncertain(plan)
+    ? buildUncertainFloorContext(plan, usage, billedBeyondPool)
+    : billedBeyondPool > 0
+      ? `${plan.planLabel} bills ${formatCurrency(billedBeyondPool)} of Other Models usage beyond its included amount.`
+      : `${plan.planLabel} covers the full ${formatCurrency(coveredByPlan)} Other Models usage.`;
 
   if (estimatedIncludedPoolOverage <= 0) {
     return officialContext;
   }
 
   return `${officialContext} It also includes ${formatCurrency(estimatedIncludedPoolOverage)} of estimated first-party pool overage from the optional community preset.`;
+}
+
+function buildUncertainFloorContext(
+  plan: RecommendationPlanPresentation,
+  usage: number,
+  billedBeyondPool: number,
+): string {
+  const ifApplies = billedBeyondPool > 0
+    ? `If that floor still applies, ${formatCurrency(billedBeyondPool)} would be billed beyond it.`
+    : `If that floor still applies, this usage stays within it.`;
+  const ifMissing = `If it does not, Other Models usage bills in full (${formatCurrency(usage)}).`;
+
+  return `${formatOtherModelsAllowance(plan)} ${ifApplies} ${ifMissing}`;
 }
 
 export function formatPlanLabel(plan: PlanKey): string {

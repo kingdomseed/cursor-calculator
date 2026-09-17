@@ -1,5 +1,5 @@
 import type { Audience, Model, Plan, PlanKey, PricingData } from '../catalog/types';
-import { filterPlanKeys, isCursorModelsPool, isOtherModelsPool, isPlanRecommendable } from '../catalog/pools';
+import { filterPlanKeys, isCursorModelsPool, isOtherModelsPool, isPlanRecommendable, treatsOtherModelsFloorAsUncertain } from '../catalog/pools';
 import { dollarsToExactTokens } from './budgetUsage';
 import { directBreakdownToDollars, exactTokensToDollars, tokensToDollars } from './conversions';
 import { computeBillableRates, computeEffectiveRates, effectiveRatesFromExactCost, effectiveRatesFromExactTokens, getPoolUsageAllowanceMultiplier } from './rates';
@@ -102,20 +102,22 @@ function pickBestPlanResult(results: PlanResult[], mode: Mode): PlanResult {
       const rightTokens = right.perModel.reduce((sum, item) => sum + item.tokens.total, 0);
 
       if (leftTokens === rightTokens) {
-        return (left.apiPool ?? -1) > (right.apiPool ?? -1) ? left : right;
+        return pickLowerCertainCost(left, right);
       }
 
       return leftTokens > rightTokens ? left : right;
     });
   }
 
-  return fallbackResults.reduce((left, right) => {
-    if (left.totalCost === right.totalCost) {
-      return (left.apiPool ?? -1) > (right.apiPool ?? -1) ? left : right;
-    }
+  return fallbackResults.reduce((left, right) => pickLowerCertainCost(left, right));
+}
 
-    return left.totalCost < right.totalCost ? left : right;
-  });
+function pickLowerCertainCost(left: PlanResult, right: PlanResult): PlanResult {
+  if (left.totalCost === right.totalCost) {
+    return left.subscription <= right.subscription ? left : right;
+  }
+
+  return left.totalCost < right.totalCost ? left : right;
 }
 
 function computeBudgetPlanResult(
@@ -130,7 +132,12 @@ function computeBudgetPlanResult(
   audience?: Audience,
 ): PlanResult {
   const includedPool = plan.api_pool;
-  const apiBudget = includedPool == null ? budget : Math.max(includedPool, budget);
+  const subscriptionCost = plan.monthly_cost ?? 0;
+  const apiBudget = treatsOtherModelsFloorAsUncertain(plan)
+    ? Math.max(0, budget - subscriptionCost)
+    : includedPool == null
+      ? budget
+      : Math.max(includedPool, budget);
 
   const perModel = configs
     .map((config) => {
@@ -333,6 +340,9 @@ function finishPlanResult(
   const overage = includedPool == null ? 0 : Math.max(0, totalApiUsage - includedPool);
   const unusedPool = includedPool == null ? 0 : Math.max(0, includedPool - totalApiUsage);
   const subscription = plan.monthly_cost ?? 0;
+  const totalCost = treatsOtherModelsFloorAsUncertain(plan)
+    ? subscription + totalApiUsage
+    : subscription + overage;
 
   return {
     plan: key,
@@ -348,7 +358,7 @@ function finishPlanResult(
     estimatedIncludedPoolOverageCost: overrides.estimatedIncludedPoolOverageCost ?? 0,
     overage,
     unusedPool,
-    totalCost: subscription + overage,
+    totalCost,
     affordable,
     recommendable: isPlanRecommendable(plan),
     cursorTokenRateApplied: audience === 'teams_enterprise',

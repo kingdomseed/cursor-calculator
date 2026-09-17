@@ -85,8 +85,8 @@ All pricing facts should be verified against Cursor docs before changing the cat
 ### Usage pools
 
 - **Cursor Models** — Composer 2.5, Grok 4.6, and Grok 4.5. Generous included usage; no published dollar amount. Auto is a router, not a pool.
-- **Other Models** — third-party models at API rates. Last published official floors: Pro at least `$20`, Pro Plus `$70`, Ultra `$400`. Live docs now say only “Included.” Teams dollars unpublished.
-- Overage beyond the last published Other Models floor is billed at the same API rates. Teams/Enterprise add `$0.25/M` on third-party tokens.
+- **Other Models** — third-party models at API rates. Last published official floors: Pro at least `$20`, Pro Plus `$70`, Ultra `$400`. Live docs now say only “Included.” Those floors are not current guaranteed included dollars. Ultra used to include `$400` on a `$200` plan; you may not get that now. Teams dollars unpublished.
+- Do not treat `$20` / `$70` / `$400` as current guaranteed coverage in recommendation or overage math. Keep them as last-published historical floors. If a floor still applies, billed-beyond is usage minus that floor. If it does not, Other Models usage bills in full. Teams/Enterprise add `$0.25/M` on third-party tokens.
 
 ### Max Mode
 

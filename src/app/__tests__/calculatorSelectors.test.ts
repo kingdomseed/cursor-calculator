@@ -174,7 +174,7 @@ describe('selectRecommendation', () => {
       'pro_plus',
       'ultra',
     ]);
-    expect(personal?.best.plan).toBe('pro_plus');
+    expect(personal?.best.plan).toBe('pro');
     expect(teams?.all.map((result) => result.plan)).toEqual([
       'teams_standard',
       'teams_premium',

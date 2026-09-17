@@ -47,7 +47,7 @@ describe('calculator semantics copy', () => {
     const html = renderToStaticMarkup(<WelcomeModal />);
 
     expect(html).toContain('Budget mode estimates what a monthly spend ceiling gets you.');
-    expect(html).toContain('Usage mode estimates total usage cost and out-of-pocket spend after plan coverage.');
+    expect(html).toContain('Last published Other Models floors are not current guaranteed included dollars.');
     expect(html).toContain('Cloud, Bugbot, and automations have their own cost view.');
   });
 });

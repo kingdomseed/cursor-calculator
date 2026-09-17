@@ -54,10 +54,14 @@ const baseConfig: ModelConfig = {
   cacheHitRate: 0,
 };
 
+const lastPublishedFloor = {
+  other_models_allowance_status: 'last_published_official_floor' as const,
+};
+
 const testPlans: Partial<PricingData['plans']> = {
-  pro: { name: 'Pro', monthly_cost: 20, api_pool: 20, description: '' },
-  pro_plus: { name: 'Pro Plus', monthly_cost: 60, api_pool: 70, description: '' },
-  ultra: { name: 'Ultra', monthly_cost: 200, api_pool: 400, description: '' },
+  pro: { name: 'Pro', monthly_cost: 20, api_pool: 20, description: '', ...lastPublishedFloor },
+  pro_plus: { name: 'Pro Plus', monthly_cost: 60, api_pool: 70, description: '', ...lastPublishedFloor },
+  ultra: { name: 'Ultra', monthly_cost: 200, api_pool: 400, description: '', ...lastPublishedFloor },
 };
 
 describe('computeEffectiveRates', () => {
@@ -165,16 +169,21 @@ describe('computeEffectiveRates', () => {
 });
 
 describe('computeRecommendation - budget mode', () => {
-  it('recommends Pro Plus over Pro at a $60 budget', () => {
+  it('does not inflate a $60 budget with last published floors', () => {
     const models = [opusModel];
     const configs: ModelConfig[] = [{ ...baseConfig }];
 
     const result = computeRecommendation('budget', 60, 0, models, configs, testPlans, 3);
+    const pro = result.all.find((plan) => plan.plan === 'pro');
+    const proPlus = result.all.find((plan) => plan.plan === 'pro_plus');
 
-    expect(result.best.plan).toBe('pro_plus');
-    expect(result.best.apiUsage).toBe(70);
-    expect(result.best.overage).toBe(0);
-    expect(result.best.totalCost).toBe(60);
+    expect(result.best.plan).toBe('pro');
+    expect(pro?.apiUsage).toBe(40);
+    expect(proPlus?.apiUsage).toBe(0);
+    expect(proPlus?.overage).toBe(0);
+    expect(pro?.overage).toBe(20);
+    expect(pro?.totalCost).toBe(60);
+    expect(proPlus?.totalCost).toBe(60);
   });
 
   it('filters out plans the user cannot afford', () => {
@@ -231,52 +240,64 @@ describe('computeRecommendation - budget mode', () => {
     expect(result.best.perModel[0].apiCost).toBeCloseTo(result.best.perModel[1].apiCost, 1);
   });
 
-  it('prefers the plan with more API pool headroom on a budget-mode tie', () => {
+  it('does not pick a larger last published floor when budget-mode token yield ties', () => {
     const tiePlans: Partial<PricingData['plans']> = {
-      pro: { name: 'Pro', monthly_cost: 10, api_pool: 15, description: '' },
-      pro_plus: { name: 'Pro Plus', monthly_cost: 20, api_pool: 25, description: '' },
-      ultra: { name: 'Ultra', monthly_cost: 200, api_pool: 400, description: '' },
+      pro: { name: 'Pro', monthly_cost: 10, api_pool: 15, description: '', ...lastPublishedFloor },
+      pro_plus: { name: 'Pro Plus', monthly_cost: 20, api_pool: 25, description: '', ...lastPublishedFloor },
+      ultra: { name: 'Ultra', monthly_cost: 200, api_pool: 400, description: '', ...lastPublishedFloor },
     };
 
     const result = computeRecommendation('budget', 30, 0, [opusModel], [{ ...baseConfig }], tiePlans, 3);
 
-    expect(result.best.plan).toBe('pro_plus');
+    expect(result.best.plan).toBe('pro');
   });
 
-  it('charges only the amount above the included pool as additional API usage', () => {
+  it('keeps last published overage as a hypothetical and bills Other Models in full', () => {
     const result = computeRecommendation('budget', 500, 0, [opusModel], [{ ...baseConfig }], testPlans, 3);
     const ultra = result.all.find((plan) => plan.plan === 'ultra');
 
-    expect(ultra?.apiUsage).toBe(500);
-    expect(ultra?.overage).toBe(100);
-    expect(ultra?.totalCost).toBe(300);
-    expect(result.best.plan).toBe('ultra');
+    expect(ultra?.apiUsage).toBe(300);
+    expect(ultra?.overage).toBe(0);
+    expect(ultra?.totalCost).toBe(500);
+    expect(result.best.plan).toBe('pro');
   });
 });
 
 describe('computeRecommendation - token mode', () => {
-  it('recommends the cheapest plan that covers the usage', () => {
+  it('recommends the lowest certain-cost plan when last published floors are uncertain', () => {
     const result = computeRecommendation('tokens', 0, 500_000, [opusModel], [{ ...baseConfig }], testPlans, 3);
     expect(result.best.plan).toBe('pro');
   });
 
-  it('calculates overage correctly', () => {
+  it('calculates last published overage without using it as the certain bill', () => {
     const result = computeRecommendation('tokens', 0, 10_000_000, [opusModel], [{ ...baseConfig }], testPlans, 3);
     const proResult = result.all.find((plan) => plan.plan === 'pro');
 
     expect(proResult?.overage).toBeGreaterThan(0);
-    expect(proResult?.totalCost).toBe((proResult?.subscription ?? 0) + (proResult?.overage ?? 0));
+    expect(proResult?.totalCost).toBe((proResult?.subscription ?? 0) + (proResult?.apiUsage ?? 0));
+    expect(proResult?.totalCost).toBeGreaterThan((proResult?.subscription ?? 0) + (proResult?.overage ?? 0));
   });
 
-  it('prefers the plan with more API pool headroom on a token-mode tie', () => {
+  it('does not pick a larger last published floor on a token-mode cost tie', () => {
     const tiePlans: Partial<PricingData['plans']> = {
-      pro: { name: 'Pro', monthly_cost: 20, api_pool: 10, description: '' },
-      pro_plus: { name: 'Pro Plus', monthly_cost: 30, api_pool: 20, description: '' },
-      ultra: { name: 'Ultra', monthly_cost: 200, api_pool: 400, description: '' },
+      pro: { name: 'Pro', monthly_cost: 20, api_pool: 10, description: '', ...lastPublishedFloor },
+      pro_plus: { name: 'Pro Plus', monthly_cost: 30, api_pool: 20, description: '', ...lastPublishedFloor },
+      ultra: { name: 'Ultra', monthly_cost: 200, api_pool: 400, description: '', ...lastPublishedFloor },
     };
 
     const result = computeRecommendation('tokens', 0, 5_000_000, [opusModel], [{ ...baseConfig }], tiePlans, 3);
-    expect(result.best.plan).toBe('pro_plus');
+    expect(result.best.plan).toBe('pro');
+  });
+
+  it('does not treat Ultra $400 as current guaranteed coverage', () => {
+    const result = computeRecommendation('tokens', 0, 50_000_000, [opusModel], [{ ...baseConfig }], testPlans, 3);
+    const ultra = result.all.find((plan) => plan.plan === 'ultra');
+
+    expect(ultra?.apiUsage).toBeGreaterThan(400);
+    expect(ultra?.overage).toBe((ultra?.apiUsage ?? 0) - 400);
+    expect(ultra?.totalCost).toBe((ultra?.subscription ?? 0) + (ultra?.apiUsage ?? 0));
+    expect(ultra?.totalCost).toBeGreaterThan((ultra?.subscription ?? 0) + (ultra?.overage ?? 0));
+    expect(result.best.plan).toBe('pro');
   });
 
   it('handles zero-weight configs without crashing', () => {

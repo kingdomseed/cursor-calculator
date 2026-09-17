@@ -245,7 +245,7 @@ describe('BestPlanCard', () => {
     expect(html).toContain('Pro Plus');
     expect(html).toContain('Best Plan Model');
     expect(html).not.toContain('First Plan Model');
-    expect(html).toContain('Other Models allowance');
+    expect(html).toContain('Last published Other Models floor');
     expect(html).toContain('$77.00');
     expect(html).not.toContain('$21.00');
   });

@@ -52,8 +52,9 @@ export function Sidebar({ activeTarget, onNavigate, pricingDate }: SidebarProps)
         </p>
         <p className="text-xs text-white/45 mb-4">
           Budget mode estimates what a monthly spend ceiling gets you. Usage mode estimates total
-          usage cost and out-of-pocket spend after plan coverage. Import a Cursor CSV to replay
-          exact token columns from a real month. Cloud and automations are a separate cost family.
+          usage cost and out-of-pocket spend. Last published Other Models floors are not current
+          guaranteed included dollars. Import a Cursor CSV to replay exact token columns from a
+          real month. Cloud and automations are a separate cost family.
         </p>
 
         <p className="text-xs text-white/45 mb-2 font-medium uppercase tracking-wide">
@@ -62,9 +63,12 @@ export function Sidebar({ activeTarget, onNavigate, pricingDate }: SidebarProps)
         <p className="text-xs text-white/45 mb-3">
           Official monthly pools are Cursor Models and Other Models. Unused monthly usage does not
           roll over. Composer 2.5, Grok 4.6, and Grok 4.5 are Cursor Models. Auto is a router, not
-          a pool. Individual Other Models last published official floors: Pro at least $20, Pro Plus
-          $70, Ultra $400. Those are last published, not a current live scrape. Teams Other Models
-          dollars are unpublished. Teams and Enterprise add $0.25/M on third-party tokens.
+          a pool. Last published official Other Models floors were Pro at least $20, Pro Plus $70,
+          and Ultra $400. Live docs no longer publish those amounts. Ultra used to include $400 on
+          a $200 plan; you may not get that now. The same is true of Pro $20 and Pro Plus $70.
+          Those are last published historical floors, not current guaranteed included dollars.
+          Teams Other Models dollars are unpublished. Teams and Enterprise add $0.25/M on
+          third-party tokens.
         </p>
 
         <p className="text-xs text-white/45 mb-2 font-medium">Max Mode</p>
