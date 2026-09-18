@@ -47,7 +47,8 @@ describe('calculator semantics copy', () => {
     const html = renderToStaticMarkup(<WelcomeModal />);
 
     expect(html).toContain('Budget mode estimates what a monthly spend ceiling gets you.');
-    expect(html).toContain('Last published Other Models floors are not current guaranteed included dollars.');
+    expect(html).toContain('Cursor docs disagree on Other Models dollars: a billing page still lists $20 / $70 / $400; the live pricing table no longer publishes those amounts.');
+    expect(html).toContain('Last published floors are not current guaranteed included dollars.');
     expect(html).toContain('Cloud, Bugbot, and automations have their own cost view.');
   });
 });

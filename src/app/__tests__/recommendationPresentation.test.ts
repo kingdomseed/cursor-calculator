@@ -293,7 +293,7 @@ describe('recommendation presentation', () => {
       unusedPool: 0,
       totalCost: 700,
       otherModelsAllowanceStatus: 'last_published_official_floor',
-      otherModelsAllowanceLabel: 'Last published official floor: $400 on a $200 plan. Live docs no longer publish that amount. You may not get that now.',
+      otherModelsAllowanceLabel: 'Last published official floor: $400 on a $200 plan. A billing doc still lists $400; the live pricing table no longer publishes it. You may not get that now.',
     });
     const presentation = buildRecommendationPresentation({
       mode: 'tokens',
@@ -322,7 +322,7 @@ describe('recommendation presentation', () => {
       subscription: 20,
       apiPool: 20,
       otherModelsAllowanceStatus: 'last_published_official_floor',
-      otherModelsAllowanceLabel: 'Last published official floor: at least $20. Live docs no longer publish that amount.',
+      otherModelsAllowanceLabel: 'Last published official floor: at least $20. A billing doc still lists $20; the live pricing table no longer publishes it.',
     });
     const presentation = buildRecommendationPresentation({
       mode: 'tokens',
@@ -336,7 +336,7 @@ describe('recommendation presentation', () => {
 
     expect(includedRow?.label).toBe('Last published Other Models floor');
     expect(includedRow?.values[0]?.formattedValue).toBe(
-      'Last published official floor: at least $20. Live docs no longer publish that amount.',
+      'Last published official floor: at least $20. A billing doc still lists $20; the live pricing table no longer publishes it.',
     );
     expect(presentation.comparisonSections.every((section) => (
       !section.rows.some((row) => row.label.includes('Grok Bot'))
