@@ -27,7 +27,7 @@ export function WelcomeModal() {
           <h2 className="text-xl font-bold">Welcome to Cursor Cost Calculator</h2>
         </div>
         <p className="text-sm text-[#14120b]/70 mb-4">
-          Budget mode estimates what a monthly spend ceiling gets you. Usage mode estimates total usage cost and out-of-pocket spend. Cursor docs disagree on Other Models dollars: a billing page still lists $20 / $70 / $400; the live pricing table no longer publishes those amounts. Last published floors are not current guaranteed included dollars. Cloud, Bugbot, and automations have their own cost view.
+          Budget mode estimates what a monthly spend ceiling gets you. Usage mode estimates total usage cost and out-of-pocket spend. Cursor docs disagree on Other Models dollars: search and a 2026-08-23 Wayback capture of a billing page still show at least $20 / $70 / $400; the live billing page and pricing table no longer print those amounts. Last published floors are not current guaranteed included dollars. Cloud, Bugbot, and automations have their own cost view.
         </p>
         <p className="text-xs text-[#14120b]/50 mb-6">
           All rates come from Cursor's public docs, but this is an estimate — not a guarantee. Pricing can change at any time, and actual costs depend on your usage patterns. This tool is not affiliated with Cursor and is not responsible for any financial decisions.

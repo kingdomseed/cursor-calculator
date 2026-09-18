@@ -64,16 +64,18 @@ export function Sidebar({ activeTarget, onNavigate, pricingDate }: SidebarProps)
         <p className="text-xs text-white/45 mb-3">
           Official monthly pools are Cursor Models and Other Models. Unused monthly usage does not
           roll over. Composer 2.5, Grok 4.6, and Grok 4.5 are Cursor Models. Auto is a router, not
-          a pool. Official Cursor pages disagree on Other Models dollars.{' '}
+          a pool. Official Cursor pages disagree on Other Models dollars. Search indexes and a
+          2026-08-23 Wayback capture of{' '}
           <a
             href="https://cursor.com/help/account-and-billing/pricing"
             target="_blank"
             rel="noopener noreferrer"
             className="underline hover:text-white/70"
           >
-            A billing help page
+            a billing help page
           </a>{' '}
-          still lists included Other Models usage as Pro $20, Pro+ $70, and Ultra $400.{' '}
+          still show included Other Models usage as Pro at least $20, Pro+ $70, and Ultra $400.
+          The live billing HTML no longer prints those amounts.{' '}
           <a
             href="https://cursor.com/docs/models-and-pricing"
             target="_blank"
@@ -82,10 +84,10 @@ export function Sidebar({ activeTarget, onNavigate, pricingDate }: SidebarProps)
           >
             The live Models &amp; Pricing table
           </a>{' '}
-          no longer publishes those amounts and says only Included. This calculator does not pick
-          a winner. Ultra used to include $400 on a $200 plan; you may not get that now. Those are
-          last published historical floors, not current guaranteed included dollars. Teams Other
-          Models dollars are unpublished. Teams and Enterprise add $0.25/M on third-party tokens.
+          says only Included. This calculator does not pick a winner. Ultra used to include $400
+          on a $200 plan; you may not get that now. Those are last published historical floors,
+          not current guaranteed included dollars. Teams Other Models dollars are unpublished.
+          Teams and Enterprise add $0.25/M on third-party tokens.
         </p>
 
         <p className="text-xs text-white/45 mb-2 font-medium">Max Mode</p>
