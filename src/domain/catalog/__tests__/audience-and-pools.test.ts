@@ -41,9 +41,12 @@ describe('audience and pool splits', () => {
     ]);
     expect(plans.teams_standard.api_pool).toBeNull();
     expect(plans.pro.other_models_allowance_label).toContain('Last published official floor: at least $20');
-    expect(plans.pro.other_models_allowance_label).toContain('Live docs no longer publish that amount');
+    expect(plans.pro.other_models_allowance_label).toContain('Search and a 2026-08-23 Wayback capture still show that amount');
+    expect(plans.pro.other_models_allowance_label).toContain('the live billing page and pricing table no longer print it');
     expect(plans.pro_plus.other_models_allowance_label).toContain('Last published official floor: $70');
+    expect(plans.pro_plus.other_models_allowance_label).toContain('Search and a 2026-08-23 Wayback capture still show that amount');
     expect(plans.ultra.other_models_allowance_label).toContain('$400 on a $200 plan');
+    expect(plans.ultra.other_models_allowance_label).toContain('Search and a 2026-08-23 Wayback capture still show that amount');
     expect(plans.ultra.other_models_allowance_label).toContain('You may not get that now');
     expect(treatsOtherModelsFloorAsUncertain(plans.pro)).toBe(true);
     expect(treatsOtherModelsFloorAsUncertain(plans.start)).toBe(false);

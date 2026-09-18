@@ -33,9 +33,9 @@
       "monthly_cost": 20,
       "api_pool": 20,
       "other_models_allowance_status": "last_published_official_floor",
-      "other_models_allowance_label": "Last published official floor: at least $20. Live docs no longer publish that amount.",
+      "other_models_allowance_label": "Last published official floor: at least $20. Search and a 2026-08-23 Wayback capture still show that amount; the live billing page and pricing table no longer print it.",
       "recommendable": true,
-      "description": "Daily tab users and limited agent users. Last published official Other Models floor was at least $20. Live docs no longer publish that amount."
+      "description": "Daily tab users and limited agent users. Last published official Other Models floor was at least $20. Search and a 2026-08-23 Wayback capture still show that amount; the live billing page and pricing table no longer print it."
     },
     "pro_plus": {
       "name": "Pro Plus",
@@ -43,9 +43,9 @@
       "monthly_cost": 60,
       "api_pool": 70,
       "other_models_allowance_status": "last_published_official_floor",
-      "other_models_allowance_label": "Last published official floor: $70. Live docs no longer publish that amount.",
+      "other_models_allowance_label": "Last published official floor: $70. Search and a 2026-08-23 Wayback capture still show that amount; the live billing page and pricing table no longer print it.",
       "recommendable": true,
-      "description": "Daily agent users. Last published official Other Models floor was $70. Live docs no longer publish that amount. Agent limits 3× Pro."
+      "description": "Daily agent users. Last published official Other Models floor was $70. Search and a 2026-08-23 Wayback capture still show that amount; the live billing page and pricing table no longer print it. Agent limits 3× Pro."
     },
     "ultra": {
       "name": "Ultra",
@@ -53,9 +53,9 @@
       "monthly_cost": 200,
       "api_pool": 400,
       "other_models_allowance_status": "last_published_official_floor",
-      "other_models_allowance_label": "Last published official floor: $400 on a $200 plan. Live docs no longer publish that amount. You may not get that now.",
+      "other_models_allowance_label": "Last published official floor: $400 on a $200 plan. Search and a 2026-08-23 Wayback capture still show that amount; the live billing page and pricing table no longer print it. You may not get that now.",
       "recommendable": true,
-      "description": "Power users. Last published official Other Models floor was $400 on a $200 plan. Live docs no longer publish that amount. You may not get that now. Agent limits 20× Pro."
+      "description": "Power users. Last published official Other Models floor was $400 on a $200 plan. Search and a 2026-08-23 Wayback capture still show that amount; the live billing page and pricing table no longer print it. You may not get that now. Agent limits 20× Pro."
     },
     "teams_standard": {
       "name": "Teams Standard",

@@ -26,6 +26,13 @@ describe('Sidebar', () => {
     );
     expect(html).toContain('Cursor Models');
     expect(html).toContain('Other Models');
+    expect(html).toContain('Official Cursor pages disagree on Other Models dollars.');
+    expect(html).toContain('https://cursor.com/help/account-and-billing/pricing');
+    expect(html).toContain('https://cursor.com/docs/models-and-pricing');
+    expect(html).toContain('still show included Other Models usage as Pro at least $20, Pro+ $70, and Ultra $400.');
+    expect(html).toContain('The live billing HTML no longer prints those amounts.');
+    expect(html).toContain('says only Included.');
+    expect(html).toContain('This calculator does not pick a winner.');
     expect(html).toContain('Ultra used to include $400 on a $200 plan; you may not get that now.');
     expect(html).toContain('not current guaranteed included dollars');
     expect(html).toContain('Max Mode');
