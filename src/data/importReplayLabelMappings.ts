@@ -47,6 +47,13 @@ export const EXACT_IMPORT_REPLAY_LABEL_MAPPINGS: Record<string, ImportReplayLabe
     thinking: false,
     approximated: true,
   },
+  'grok-4.7-fast': {
+    modelId: 'grok-4.7',
+    fast: true,
+    maxMode: false,
+    thinking: false,
+    approximated: false,
+  },
 };
 
 export const APPROXIMATE_IMPORT_REPLAY_LABEL_MAPPINGS: Record<string, ImportReplayLabelMapping> = {

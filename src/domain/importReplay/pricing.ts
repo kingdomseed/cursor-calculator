@@ -26,6 +26,7 @@ export function priceImportedRow(
     && normalized.maxMode
     && model.variants?.fast
     && model.variants.max_mode?.rates
+    && !model.variants.max_mode.fast_rates
   );
   let rates = hasUndocumentedFastMaxRates
     ? approximateCombinedFastMaxRates(model)

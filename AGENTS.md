@@ -84,7 +84,7 @@ All pricing facts should be verified against Cursor docs before changing the cat
 
 ### Usage pools
 
-- **Cursor Models** — Composer 2.5, Grok 4.6, and Grok 4.5. Generous included usage; no published dollar amount. Auto is a router, not a pool.
+- **Cursor Models** — Composer 2.5, Grok 4.7, Grok 4.6, and Grok 4.5. Generous included usage; no published dollar amount. Auto is a router, not a pool.
 - **Other Models** — third-party models at API rates. Last published official floors: Pro at least `$20`, Pro Plus `$70`, Ultra `$400`. Search indexes and a 2026-08-23 Wayback capture of the billing help page still show those amounts (`https://cursor.com/help/account-and-billing/pricing`). Live billing HTML and Models & Pricing no longer print the dollar column; Models & Pricing says only “Included” (`https://cursor.com/docs/models-and-pricing`). The official pages disagree; do not pick a winner. Those floors are not current guaranteed included dollars. Ultra used to include `$400` on a `$200` plan; you may not get that now. Teams dollars unpublished.
 - Do not treat `$20` / `$70` / `$400` as current guaranteed coverage in recommendation or overage math. Keep them as last-published historical floors. If a floor still applies, billed-beyond is usage minus that floor. If it does not, Other Models usage bills in full. Teams/Enterprise add `$0.25/M` on third-party tokens.
 
@@ -108,6 +108,8 @@ Fast mode is a distinct model variant, not a toggle on the base model.
 - GPT-5.5 Fast: `$12.50/M` input and `$75/M` output
 - GPT-5.6 Sol, Terra, and Luna Fast: `2x` each model's standard rates
 - Composer 2.5 Fast: `$3/M` input and `$15/M` output
+- Grok 4.7 Fast: `$4/M` input and `$12/M` output
+- Grok 4.6 Fast: `$4/M` input and `$12/M` output
 - Grok 4.5 Fast: `$4/M` input and `$18/M` output
 
 Historical imported fast labels may still be replayed as best-effort estimates, but that approximation logic belongs only in the import layer.
@@ -125,7 +127,8 @@ Thinking mode exists for Claude models, current GPT models, Gemini models, and C
 - GPT-5.6 Sol: `272k` default, `1M` max; input `2x` and output `1.5x` above `272k`
 - GPT-5.6 Terra and Luna: `272k` default, no Max Mode extension
 - Composer 2.5: `200k` default, no Max Mode
-- Grok 4.5: `256k` default, no Max Mode extension
+- Grok 4.7: `256k` default, `500k` long context; input above `256k` bills at `2x` standard or `3x` standard in Fast
+- Grok 4.6 and Grok 4.5: `256k` default, no Max Mode extension
 - GLM 5.2: `200k` default, no Max Mode extension
 - Kimi K2.7 Code: `262k` default, no Max Mode extension
 

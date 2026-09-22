@@ -72,6 +72,58 @@ describe('variant pricing boundaries', () => {
       maxMode: true,
     })).toThrow('does not publish combined Fast + Max rates');
   });
+
+  it('uses published Fast + long-context rates for Grok 4.7', () => {
+    const grok47: Model = {
+      ...sonnet5,
+      id: 'grok-4.7',
+      name: 'Cursor Grok 4.7',
+      provider: 'cursor',
+      pool: 'cursor_models',
+      context: { default: 256000, max: 500000 },
+      rates: { input: 2, cache_write: null, cache_read: 0.5, output: 6 },
+      rate_promotion: undefined,
+      variants: {
+        max_mode: {
+          cursor_upcharge: 0,
+          rates: { input: 4, cache_write: null, cache_read: 1, output: 12 },
+          fast_rates: { input: 6, cache_write: null, cache_read: 1.5, output: 18 },
+        },
+        fast: {
+          model_id: 'grok-4.7-fast',
+          rates: { input: 4, cache_write: null, cache_read: 1, output: 12 },
+        },
+      },
+    };
+
+    expect(computeBillableRates(grok47, { ...config, modelId: grok47.id, fast: true })).toEqual({
+      input: 4,
+      cache_write: null,
+      cache_read: 1,
+      output: 12,
+    });
+    expect(computeBillableRates(grok47, {
+      ...config,
+      modelId: grok47.id,
+      maxMode: true,
+    })).toEqual({
+      input: 4,
+      cache_write: null,
+      cache_read: 1,
+      output: 12,
+    });
+    expect(computeBillableRates(grok47, {
+      ...config,
+      modelId: grok47.id,
+      fast: true,
+      maxMode: true,
+    })).toEqual({
+      input: 6,
+      cache_write: null,
+      cache_read: 1.5,
+      output: 18,
+    });
+  });
 });
 
 describe('first-party usage promotions', () => {

@@ -63,7 +63,7 @@ export function Sidebar({ activeTarget, onNavigate, pricingDate }: SidebarProps)
         </p>
         <p className="text-xs text-white/45 mb-3">
           Official monthly pools are Cursor Models and Other Models. Unused monthly usage does not
-          roll over. Composer 2.5, Grok 4.6, and Grok 4.5 are Cursor Models. Auto is a router, not
+          roll over. Composer 2.5, Grok 4.7, Grok 4.6, and Grok 4.5 are Cursor Models. Auto is a router, not
           a pool. Official Cursor pages disagree on Other Models dollars. Search indexes and a
           2026-08-23 Wayback capture of{' '}
           <a
