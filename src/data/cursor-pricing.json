@@ -1259,8 +1259,7 @@
         "output": 6
       },
       "variants": {
-        "max_mode": {
-          "cursor_upcharge": 0,
+        "long_context": {
           "rates": {
             "input": 4,
             "cache_write": null,

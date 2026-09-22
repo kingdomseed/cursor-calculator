@@ -2,7 +2,7 @@ import type { Audience, Model, Plan, PlanKey, PricingData } from '../catalog/typ
 import { filterPlanKeys, isCursorModelsPool, isOtherModelsPool, isPlanRecommendable, treatsOtherModelsFloorAsUncertain } from '../catalog/pools';
 import { dollarsToExactTokens } from './budgetUsage';
 import { directBreakdownToDollars, exactTokensToDollars, tokensToDollars } from './conversions';
-import { computeBillableRates, computeEffectiveRates, effectiveRatesFromExactCost, effectiveRatesFromExactTokens, getPoolUsageAllowanceMultiplier } from './rates';
+import { computeBillableRates, computeEffectiveRates, countLongContextInputTokens, effectiveRatesFromExactCost, effectiveRatesFromExactTokens, getPoolUsageAllowanceMultiplier } from './rates';
 import type {
   IncludedPoolEstimateConfig,
   Mode,
@@ -78,7 +78,10 @@ export function computeExactUsageRecommendation(
     if (!plan) {
       throw new Error(`Missing plan "${key}"`);
     }
-    return computeExactUsagePlanResult(key, plan, usageItems, models, includedPoolEstimate, audience);
+    return computeExactUsagePlanResult(key, plan, usageItems, models, includedPoolEstimate, {
+      ...options,
+      audience,
+    });
   });
 
   return {
@@ -120,6 +123,29 @@ function pickLowerCertainCost(left: PlanResult, right: PlanResult): PlanResult {
   return left.totalCost < right.totalCost ? left : right;
 }
 
+function grok47ConfigForPlan(planKey: PlanKey, model: Model, config: ModelConfig): ModelConfig {
+  if (model.id !== 'grok-4.7' || !config.fast) {
+    return config;
+  }
+
+  switch (planKey) {
+    case 'pro':
+    case 'pro_plus':
+    case 'ultra':
+    case 'teams_standard':
+    case 'teams_premium':
+    case 'enterprise':
+      return config;
+    case 'hobby':
+    case 'start':
+      return { ...config, fast: false };
+    default: {
+      const exhaustivePlan: never = planKey;
+      return exhaustivePlan;
+    }
+  }
+}
+
 function computeBudgetPlanResult(
   key: PlanKey,
   plan: Plan,
@@ -144,7 +170,8 @@ function computeBudgetPlanResult(
       const model = models.find((candidate) => candidate.id === config.modelId);
       if (!model) return null;
 
-      const billableRates = computeBillableRates(model, config, new Date(), audience);
+      const planConfig = grok47ConfigForPlan(key, model, config);
+      const billableRates = computeBillableRates(model, planConfig, new Date(), audience);
       const modelDollars = apiBudget * (config.weight / 100);
       const modelCacheShare = Math.min(100, Math.max(0, config.caching ? config.cacheHitRate : cacheReadShare));
       const exactTokens = dollarsToExactTokens(modelDollars, billableRates, modelCacheShare, ratio);
@@ -166,9 +193,9 @@ function computeBudgetPlanResult(
           pool: model.pool,
           tokens,
           exactTokens,
-          maxMode: config.maxMode,
-          fast: config.fast,
-          thinking: config.thinking,
+          maxMode: planConfig.maxMode,
+          fast: planConfig.fast,
+          thinking: planConfig.thinking,
           caching: modelCacheShare > 0,
           cacheHitRate: modelCacheShare,
           approximated: false,
@@ -196,7 +223,8 @@ function computeTokenPlanResult(
       const model = models.find((candidate) => candidate.id === config.modelId);
       if (!model) return null;
 
-      const effectiveRates = computeEffectiveRates(model, config, undefined, audience);
+      const planConfig = grok47ConfigForPlan(key, model, config);
+      const effectiveRates = computeEffectiveRates(model, planConfig, undefined, audience);
       const modelTokens = Math.floor(totalTokens * (config.weight / 100));
       const apiCost = tokensToDollars(modelTokens, effectiveRates, ratio);
       const weightInput = ratio / (ratio + 1);
@@ -211,11 +239,11 @@ function computeTokenPlanResult(
           provider: model.provider,
           pool: model.pool,
           tokens: { total: modelTokens, input: inputTokens, output: outputTokens },
-          maxMode: config.maxMode,
-          fast: config.fast,
-          thinking: config.thinking,
-          caching: config.caching,
-          cacheHitRate: config.cacheHitRate,
+          maxMode: planConfig.maxMode,
+          fast: planConfig.fast,
+          thinking: planConfig.thinking,
+          caching: planConfig.caching,
+          cacheHitRate: planConfig.cacheHitRate,
           approximated: false,
         },
         effectiveRates,
@@ -227,14 +255,28 @@ function computeTokenPlanResult(
   return finishPlanResult(key, plan, perModel, plan.api_pool ?? 0, true, audience);
 }
 
+function withGrok47PlanFast(
+  planKey: PlanKey,
+  model: Model,
+  usage: UsageLineItemInput,
+): UsageLineItemInput {
+  const adjusted = grok47ConfigForPlan(planKey, model, createConfigFromUsage(usage));
+  if (adjusted.fast === usage.fast) {
+    return usage;
+  }
+
+  return { ...usage, fast: adjusted.fast };
+}
+
 function computeExactUsagePlanResult(
   key: PlanKey,
   plan: Plan,
   usageItems: UsageLineItemInput[],
   models: Model[],
   includedPoolEstimate?: IncludedPoolEstimateConfig,
-  audience?: Audience,
+  options: RecommendationOptions = {},
 ): PlanResult {
+  const audience = options.audience;
   const referenceModel = includedPoolEstimate
     ? models.find((model) => model.id === includedPoolEstimate.referenceModelId)
     : undefined;
@@ -245,31 +287,41 @@ function computeExactUsagePlanResult(
     const model = models.find((candidate) => candidate.id === usage.modelId);
     if (!model) return [];
 
-    const pricing = priceUsageItem(usage, model, audience);
-    if (!isCursorModelsPool(usage.pool) || !referenceModel) {
-      return [{ usage, ...pricing, equivalentTokens: usage.tokens.total }];
+    const planUsage = options.applyPlanFastDefaults
+      ? withGrok47PlanFast(key, model, usage)
+      : usage;
+    const inputTokens = options.priceLongContextFromInput && planUsage.exactTokens
+      ? countLongContextInputTokens(planUsage.exactTokens)
+      : undefined;
+    const pricing = priceUsageItem(planUsage, model, audience, inputTokens);
+    if (!isCursorModelsPool(planUsage.pool) || !referenceModel) {
+      return [{ usage: planUsage, ...pricing, equivalentTokens: planUsage.tokens.total }];
     }
 
+    const referenceUsage = {
+      ...planUsage,
+      modelId: referenceModel.id,
+      fast: false,
+      maxMode: false,
+      exactCost: undefined,
+    };
     const referencePricing = priceUsageItem(
-      {
-        ...usage,
-        modelId: referenceModel.id,
-        fast: false,
-        maxMode: false,
-        exactCost: undefined,
-      },
+      referenceUsage,
       referenceModel,
       audience,
+      options.priceLongContextFromInput && referenceUsage.exactTokens
+        ? countLongContextInputTokens(referenceUsage.exactTokens)
+        : undefined,
     );
     const allowanceMultiplier = getPoolUsageAllowanceMultiplier(
       model,
       includedPoolEstimate?.asOf,
     );
     const equivalentTokens = referencePricing.apiCost > 0
-      ? usage.tokens.total * (pricing.apiCost / referencePricing.apiCost) / allowanceMultiplier
+      ? planUsage.tokens.total * (pricing.apiCost / referencePricing.apiCost) / allowanceMultiplier
       : 0;
 
-    return [{ usage, ...pricing, equivalentTokens }];
+    return [{ usage: planUsage, ...pricing, equivalentTokens }];
   });
   const includedPoolTokens = pricedUsageItems.reduce(
     (sum, item) => isCursorModelsPool(item.usage.pool) ? sum + item.equivalentTokens : sum,
@@ -370,6 +422,7 @@ function priceUsageItem(
   usage: UsageLineItemInput,
   model: Model,
   audience?: Audience,
+  inputTokens?: number,
 ): Pick<PlanLineItem, 'effectiveRates' | 'apiCost'> {
   if (usage.exactCost) {
     return {
@@ -379,7 +432,7 @@ function priceUsageItem(
   }
 
   const config = createConfigFromUsage(usage);
-  const billableRates = computeBillableRates(model, config, new Date(), audience);
+  const billableRates = computeBillableRates(model, config, new Date(), audience, inputTokens);
   const effectiveRates = usage.exactTokens
       ? effectiveRatesFromExactTokens(usage.exactTokens, billableRates)
       : {

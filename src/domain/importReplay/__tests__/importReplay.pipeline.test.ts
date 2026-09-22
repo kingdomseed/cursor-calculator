@@ -145,13 +145,13 @@ describe('priceImportedRow', () => {
     expect(priced.exactCost.total).toBe(76);
   });
 
-  it('uses published Grok 4.7 Fast + long-context rates instead of approximating', () => {
+  it('uses published Grok 4.7 Fast + long-context rates when input exceeds 256k', () => {
     const model = getImportReplayModelById('grok-4.7');
     const normalized: SupportedNormalization = {
       kind: 'supported',
       modelId: 'grok-4.7',
       fast: true,
-      maxMode: true,
+      maxMode: false,
       thinking: false,
       approximated: false,
     };
@@ -170,6 +170,34 @@ describe('priceImportedRow', () => {
       input: 6,
       output: 18,
       total: 24,
+    });
+  });
+
+  it('does not charge Grok 4.7 long-context rates when Max Mode is set and input is within 256k', () => {
+    const model = getImportReplayModelById('grok-4.7');
+    const normalized: SupportedNormalization = {
+      kind: 'supported',
+      modelId: 'grok-4.7',
+      fast: true,
+      maxMode: true,
+      thinking: false,
+      approximated: false,
+    };
+    const tokens: ExactTokenBreakdown = {
+      inputWithCacheWrite: 0,
+      inputWithoutCacheWrite: 256_000,
+      cacheRead: 0,
+      output: 1_000,
+      total: 257_000,
+    };
+
+    const priced = priceImportedRow(model!, normalized, tokens, IMPORT_REPLAY_MODEL_BY_ID);
+
+    expect(priced.approximated).toBe(false);
+    expect(priced.exactCost).toEqual({
+      input: 1.024,
+      output: 0.012,
+      total: 1.036,
     });
   });
 

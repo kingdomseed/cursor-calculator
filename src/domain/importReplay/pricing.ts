@@ -1,4 +1,4 @@
-import { computeBillableRates } from '../recommendation/rates';
+import { computeBillableRates, countLongContextInputTokens } from '../recommendation/rates';
 import type { ExactTokenBreakdown, ModelConfig } from '../recommendation/types';
 import { getLongContextCompanions } from './catalog';
 import type { ImportReplayModelsById, PricedImportedRow, SupportedNormalization } from './types';
@@ -26,11 +26,11 @@ export function priceImportedRow(
     && normalized.maxMode
     && model.variants?.fast
     && model.variants.max_mode?.rates
-    && !model.variants.max_mode.fast_rates
   );
+  const inputTokens = countLongContextInputTokens(tokens);
   let rates = hasUndocumentedFastMaxRates
     ? approximateCombinedFastMaxRates(model)
-    : computeBillableRates(model, config);
+    : computeBillableRates(model, config, new Date(), undefined, inputTokens);
   let approximated = hasUndocumentedFastMaxRates;
 
   if (normalized.maxMode) {

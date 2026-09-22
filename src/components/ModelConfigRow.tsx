@@ -1,4 +1,4 @@
-import { getActiveModelConfigBadges, getModelConfigCapabilities } from '../domain/modelConfig/capabilities';
+import { fastVariantRelationLabel, getActiveModelConfigBadges, getFastVariantRelation, getModelConfigCapabilities } from '../domain/modelConfig/capabilities';
 import { useMemo, useState } from 'react';
 import type { Audience } from '../domain/catalog/types';
 import type { Model, ModelConfig } from '../lib/types';
@@ -27,7 +27,8 @@ export function ModelConfigRow({ model, config, onChange, audience = 'personal' 
     hasCaching,
   } = getModelConfigCapabilities(model);
   const activeBadges = getActiveModelConfigBadges(config);
-  const fastAndMaxAreSeparate = !!model.variants?.max_mode?.rates;
+  const fastVariantRelation = getFastVariantRelation(model);
+  const fastRelationLabel = fastVariantRelationLabel(fastVariantRelation);
 
   return (
     <div className="bg-white rounded-xl border border-[#e0e0d8] p-4">
@@ -74,13 +75,13 @@ export function ModelConfigRow({ model, config, onChange, audience = 'personal' 
                 <input type="checkbox" checked={config.fast} onChange={(e) => onChange({
                   ...config,
                   fast: e.target.checked,
-                  maxMode: e.target.checked && fastAndMaxAreSeparate ? false : config.maxMode,
+                  maxMode: e.target.checked && fastVariantRelation === 'separate-from-max' ? false : config.maxMode,
                 })}
                   className="w-4 h-4 rounded border-[#e0e0d8] text-[#14120b] focus:ring-[#14120b]" />
                 <span>Fast</span>
-                <span className="text-xs text-[#14120b]/40">
-                  {fastAndMaxAreSeparate ? '(separate from Max)' : '(stacks with Max)'}
-                </span>
+                {fastRelationLabel ? (
+                  <span className="text-xs text-[#14120b]/40">{fastRelationLabel}</span>
+                ) : null}
               </label>
             </div>
           ) : null}

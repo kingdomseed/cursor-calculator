@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { getModelById } from '../../catalog/currentCatalog';
 import type { Model, ModelConfig } from '../../../lib/types';
 import {
   createDefaultModelConfig,
@@ -11,7 +12,9 @@ import {
   redistributeWeights,
 } from '../weights';
 import {
+  fastVariantRelationLabel,
   getActiveModelConfigBadges,
+  getFastVariantRelation,
   getModelConfigCapabilities,
 } from '../capabilities';
 
@@ -162,6 +165,14 @@ describe('weights', () => {
 });
 
 describe('capabilities', () => {
+  it('keeps published Fast + long-context rates out of the Max relation', () => {
+    const grok = getModelById('grok-4.7');
+    expect(getModelConfigCapabilities(grok!).hasMaxMode).toBe(false);
+    expect(getFastVariantRelation(grok!)).toBe('none');
+    expect(fastVariantRelationLabel('none')).toBeNull();
+    expect(fastVariantRelationLabel('separate-from-max')).toBe('(separate from Max)');
+  });
+
   it('derives per-model config capabilities from the catalog model', () => {
     expect(getModelConfigCapabilities(preferredModel)).toEqual({
       hasMaxMode: false,

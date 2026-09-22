@@ -70,6 +70,8 @@ export interface IncludedPoolEstimateConfig {
 
 export interface RecommendationOptions {
   audience?: Audience;
+  applyPlanFastDefaults?: boolean;
+  priceLongContextFromInput?: boolean;
 }
 
 export interface PlanResult {

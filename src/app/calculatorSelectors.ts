@@ -121,7 +121,10 @@ export function selectRecommendation(
         ? ANECDOTAL_INCLUDED_POOL_ESTIMATE
         : undefined,
       inputs.manualModels,
-      recommendationOptions,
+      {
+        ...recommendationOptions,
+        priceLongContextFromInput: state.manualTokenInputMode === 'advanced',
+      },
     );
   }
 
