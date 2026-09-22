@@ -20,7 +20,15 @@ function cloneVariants(variants?: ModelVariants): ModelVariants | undefined {
     cloned.max_mode = {
       cursor_upcharge: variants.max_mode.cursor_upcharge,
       ...(variants.max_mode.rates ? { rates: cloneRates(variants.max_mode.rates) } : {}),
-      ...(variants.max_mode.fast_rates ? { fast_rates: cloneRates(variants.max_mode.fast_rates) } : {}),
+    };
+  }
+
+  if (variants.long_context) {
+    cloned.long_context = {
+      rates: cloneRates(variants.long_context.rates),
+      ...(variants.long_context.fast_rates
+        ? { fast_rates: cloneRates(variants.long_context.fast_rates) }
+        : {}),
     };
   }
 

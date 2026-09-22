@@ -33,6 +33,10 @@ export interface ModelRates {
 export interface MaxModeVariant {
   cursor_upcharge: number;
   rates?: ModelRates;
+}
+
+export interface LongContextVariant {
+  rates: ModelRates;
   fast_rates?: ModelRates;
 }
 
@@ -45,6 +49,7 @@ export interface ModelVariants {
   max_mode?: MaxModeVariant;
   fast?: FastVariant;
   thinking?: boolean;
+  long_context?: LongContextVariant;
 }
 
 export interface ModelRatePromotion {

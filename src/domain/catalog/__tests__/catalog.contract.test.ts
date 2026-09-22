@@ -135,8 +135,8 @@ describe('current catalog contract', () => {
         output: 12,
       },
     });
-    expect(getModelById('grok-4.7')?.variants?.max_mode).toEqual({
-      cursor_upcharge: 0,
+    expect(getModelById('grok-4.7')?.variants?.max_mode).toBeUndefined();
+    expect(getModelById('grok-4.7')?.variants?.long_context).toEqual({
       rates: {
         input: 4,
         cache_write: null,

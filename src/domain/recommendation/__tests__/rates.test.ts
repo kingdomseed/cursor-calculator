@@ -73,7 +73,7 @@ describe('variant pricing boundaries', () => {
     })).toThrow('does not publish combined Fast + Max rates');
   });
 
-  it('uses published Fast + long-context rates for Grok 4.7', () => {
+  it('applies Grok 4.7 long-context rates only after input exceeds 256k', () => {
     const grok47: Model = {
       ...sonnet5,
       id: 'grok-4.7',
@@ -84,8 +84,7 @@ describe('variant pricing boundaries', () => {
       rates: { input: 2, cache_write: null, cache_read: 0.5, output: 6 },
       rate_promotion: undefined,
       variants: {
-        max_mode: {
-          cursor_upcharge: 0,
+        long_context: {
           rates: { input: 4, cache_write: null, cache_read: 1, output: 12 },
           fast_rates: { input: 6, cache_write: null, cache_read: 1.5, output: 18 },
         },
@@ -95,34 +94,34 @@ describe('variant pricing boundaries', () => {
         },
       },
     };
+    const standard = { input: 2, cache_write: null, cache_read: 0.5, output: 6 };
+    const fast = { input: 4, cache_write: null, cache_read: 1, output: 12 };
+    const longContext = { input: 4, cache_write: null, cache_read: 1, output: 12 };
+    const fastLongContext = { input: 6, cache_write: null, cache_read: 1.5, output: 18 };
 
-    expect(computeBillableRates(grok47, { ...config, modelId: grok47.id, fast: true })).toEqual({
-      input: 4,
-      cache_write: null,
-      cache_read: 1,
-      output: 12,
-    });
+    expect(computeBillableRates(grok47, { ...config, modelId: grok47.id, fast: true })).toEqual(fast);
     expect(computeBillableRates(grok47, {
       ...config,
       modelId: grok47.id,
       maxMode: true,
-    })).toEqual({
-      input: 4,
-      cache_write: null,
-      cache_read: 1,
-      output: 12,
-    });
+    })).toEqual(standard);
     expect(computeBillableRates(grok47, {
       ...config,
       modelId: grok47.id,
       fast: true,
       maxMode: true,
-    })).toEqual({
-      input: 6,
-      cache_write: null,
-      cache_read: 1.5,
-      output: 18,
-    });
+    }, new Date(), undefined, 256_000)).toEqual(fast);
+    expect(computeBillableRates(grok47, {
+      ...config,
+      modelId: grok47.id,
+      maxMode: true,
+    }, new Date(), undefined, 256_001)).toEqual(longContext);
+    expect(computeBillableRates(grok47, {
+      ...config,
+      modelId: grok47.id,
+      fast: true,
+      maxMode: false,
+    }, new Date(), undefined, 256_001)).toEqual(fastLongContext);
   });
 });
 

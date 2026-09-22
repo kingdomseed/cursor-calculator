@@ -1,6 +1,7 @@
 export type {
   Audience,
   FastVariant,
+  LongContextVariant,
   MaxModeVariant,
   Model,
   ModelRates,

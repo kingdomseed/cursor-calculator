@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
+import { getModelById, getPlans } from '../../catalog/currentCatalog';
 import type { Model, PricingData } from '../../catalog/types';
+import { createDefaultModelConfig } from '../../modelConfig/defaults';
 import type { ModelConfig } from '../../../lib/types';
 import type { ExactTokenBreakdown, UsageLineItemInput } from '../types';
 import { exactTokensToDollars, dollarsToTokens, tokensToDollars } from '../conversions';
 import { formatCurrency, formatNumber, formatRate } from '../formatters';
 import { computeEffectiveRates } from '../rates';
+import { computeManualUsageRecommendation } from '../manualUsage';
 import { computeExactUsageRecommendation, computeRecommendation } from '../recommendation';
 
 const opusModel: Model = {
@@ -385,6 +388,90 @@ describe('token conversions', () => {
     const cost = tokensToDollars(tokens.total, rates, 3);
 
     expect(cost).toBeCloseTo(20, 1);
+  });
+});
+
+describe('Grok 4.7 plan fast default', () => {
+  it('keeps Hobby and Start non-fast while Pro and higher use the fast default', () => {
+    const model = getModelById('grok-4.7');
+    expect(model?.variants?.max_mode).toBeUndefined();
+    const config = { ...createDefaultModelConfig(model!), weight: 100 };
+    expect(config.fast).toBe(true);
+
+    const result = computeRecommendation(
+      'tokens',
+      0,
+      1_000_000,
+      [model!],
+      [config],
+      getPlans(),
+      1,
+    );
+    const line = (plan: string) => result.all.find((item) => item.plan === plan)?.perModel[0];
+
+    expect(line('hobby')).toMatchObject({ fast: false, apiCost: 4 });
+    expect(line('start')).toMatchObject({ fast: false, apiCost: 4 });
+    expect(line('pro')).toMatchObject({ fast: true, apiCost: 8 });
+    expect(line('ultra')).toMatchObject({ fast: true, apiCost: 8 });
+  });
+
+  it('keeps manual Start usage non-fast when the shared config defaults to Fast', () => {
+    const model = getModelById('grok-4.7')!;
+    const composer = getModelById('composer-2.5')!;
+    const result = computeManualUsageRecommendation(
+      {
+        inputWithCacheWrite: 0,
+        inputWithoutCacheWrite: 1_000,
+        cacheRead: 0,
+        output: 1_000,
+        total: 2_000,
+      },
+      [model],
+      [{ ...createDefaultModelConfig(model), weight: 100 }],
+      getPlans(),
+      {
+        sourceLabel: 'test',
+        referenceModelId: composer.id,
+        equivalentTokenAllowances: { start: 1_000_000, pro: 1_000_000 },
+      },
+      [model, composer],
+    );
+
+    const line = (plan: string) => result.all.find((item) => item.plan === plan)?.perModel[0];
+    expect(line('start')?.fast).toBe(false);
+    expect(line('pro')?.fast).toBe(true);
+  });
+
+  it('prices advanced manual input above 256k with published long-context rates', () => {
+    const model = getModelById('grok-4.7')!;
+    const composer = getModelById('composer-2.5')!;
+    const exactTokens = {
+      inputWithCacheWrite: 0,
+      inputWithoutCacheWrite: 300_000,
+      cacheRead: 0,
+      output: 0,
+      total: 300_000,
+    };
+    const estimate = {
+      sourceLabel: 'test',
+      referenceModelId: composer.id,
+      equivalentTokenAllowances: { start: 0, pro: 0 },
+    };
+    const result = computeManualUsageRecommendation(
+      exactTokens,
+      [model],
+      [{ ...createDefaultModelConfig(model), weight: 100 }],
+      getPlans(),
+      estimate,
+      [model, composer],
+      { priceLongContextFromInput: true },
+    );
+    const line = (plan: string) => result.all.find((item) => item.plan === plan)?.perModel[0];
+
+    expect(line('start')?.fast).toBe(false);
+    expect(line('pro')?.fast).toBe(true);
+    expect(line('start')?.apiCost).toBeCloseTo(1.2, 6);
+    expect(line('pro')?.apiCost).toBeCloseTo(1.8, 6);
   });
 });
 

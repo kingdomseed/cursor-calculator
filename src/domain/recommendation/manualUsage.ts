@@ -158,7 +158,10 @@ export function computeManualUsageRecommendation(
     pricingModels,
     plans,
     includedPoolEstimate,
-    options,
+    {
+      ...options,
+      applyPlanFastDefaults: true,
+    },
   );
 }
 

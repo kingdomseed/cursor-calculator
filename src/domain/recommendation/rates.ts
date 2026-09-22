@@ -45,17 +45,45 @@ export function applyCursorTokenRate(rates: ModelRates, model: Model, audience?:
   };
 }
 
+export function countLongContextInputTokens(tokens: {
+  inputWithCacheWrite: number;
+  inputWithoutCacheWrite: number;
+  cacheRead: number;
+}): number {
+  return tokens.inputWithCacheWrite + tokens.inputWithoutCacheWrite + tokens.cacheRead;
+}
+
+function publishedLongContextRates(
+  model: Model,
+  config: ModelConfig,
+  inputTokens: number | undefined,
+): ModelRates | null {
+  const longContext = model.variants?.long_context;
+  if (!longContext || inputTokens === undefined || !Number.isFinite(inputTokens)) {
+    return null;
+  }
+  if (!(model.context.default > 0 && inputTokens > model.context.default)) {
+    return null;
+  }
+  if (config.fast && longContext.fast_rates) {
+    return { ...longContext.fast_rates };
+  }
+  return { ...longContext.rates };
+}
+
 export function computeBillableRates(
   model: Model,
   config: ModelConfig,
   at = new Date(),
   audience?: Audience,
+  inputTokens?: number,
 ): ModelRates {
-  if (config.fast && config.maxMode && model.variants?.fast && model.variants.max_mode?.rates) {
-    if (model.variants.max_mode.fast_rates) {
-      return applyCursorTokenRate({ ...model.variants.max_mode.fast_rates }, model, audience);
-    }
+  const longContextRates = publishedLongContextRates(model, config, inputTokens);
+  if (longContextRates) {
+    return applyCursorTokenRate(longContextRates, model, audience);
+  }
 
+  if (config.fast && config.maxMode && model.variants?.fast && model.variants.max_mode?.rates) {
     throw new Error(`Cursor does not publish combined Fast + Max rates for ${model.name}`);
   }
 
