@@ -41,6 +41,7 @@ describe('current catalog contract', () => {
       'composer-2.5',
       'grok-4.5',
       'grok-4.6',
+      'grok-4.7',
     ]);
     expect(included.every((model) => model.pool === 'cursor_models')).toBe(true);
     expect(getModelById('auto')?.pool).toBe('auto_router');
@@ -115,6 +116,39 @@ describe('current catalog contract', () => {
       cache_write: null,
       cache_read: 0.5,
       output: 6,
+    });
+    expect(getModelById('grok-4.7')?.pool).toBe('cursor_models');
+    expect(getModelById('grok-4.7')?.docs_url).toBe('https://cursor.com/docs/models/grok-4-7');
+    expect(getModelById('grok-4.7')?.context).toEqual({ default: 256000, max: 500000 });
+    expect(getModelById('grok-4.7')?.rates).toEqual({
+      input: 2,
+      cache_write: null,
+      cache_read: 0.5,
+      output: 6,
+    });
+    expect(getModelById('grok-4.7')?.variants?.fast).toEqual({
+      model_id: 'grok-4.7-fast',
+      rates: {
+        input: 4,
+        cache_write: null,
+        cache_read: 1,
+        output: 12,
+      },
+    });
+    expect(getModelById('grok-4.7')?.variants?.max_mode).toEqual({
+      cursor_upcharge: 0,
+      rates: {
+        input: 4,
+        cache_write: null,
+        cache_read: 1,
+        output: 12,
+      },
+      fast_rates: {
+        input: 6,
+        cache_write: null,
+        cache_read: 1.5,
+        output: 18,
+      },
     });
     expect(getModelById('claude-opus-5')?.rates).toEqual({
       input: 5,

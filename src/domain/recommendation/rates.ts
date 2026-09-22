@@ -52,6 +52,10 @@ export function computeBillableRates(
   audience?: Audience,
 ): ModelRates {
   if (config.fast && config.maxMode && model.variants?.fast && model.variants.max_mode?.rates) {
+    if (model.variants.max_mode.fast_rates) {
+      return applyCursorTokenRate({ ...model.variants.max_mode.fast_rates }, model, audience);
+    }
+
     throw new Error(`Cursor does not publish combined Fast + Max rates for ${model.name}`);
   }
 

@@ -100,6 +100,24 @@ describe('normalizeImportedModel', () => {
       kind: 'unsupported',
     });
   });
+
+  it('maps the documented Grok 4.7 Fast label without approximating', () => {
+    expect(
+      normalizeImportedModel(
+        'grok-4.7-fast',
+        false,
+        IMPORT_REPLAY_MODEL_BY_ID,
+        'strict',
+      ),
+    ).toMatchObject({
+      kind: 'supported',
+      modelId: 'grok-4.7',
+      fast: true,
+      maxMode: false,
+      thinking: false,
+      approximated: false,
+    });
+  });
 });
 
 describe('priceImportedRow', () => {
@@ -125,6 +143,34 @@ describe('priceImportedRow', () => {
 
     expect(priced.approximated).toBe(true);
     expect(priced.exactCost.total).toBe(76);
+  });
+
+  it('uses published Grok 4.7 Fast + long-context rates instead of approximating', () => {
+    const model = getImportReplayModelById('grok-4.7');
+    const normalized: SupportedNormalization = {
+      kind: 'supported',
+      modelId: 'grok-4.7',
+      fast: true,
+      maxMode: true,
+      thinking: false,
+      approximated: false,
+    };
+    const tokens: ExactTokenBreakdown = {
+      inputWithCacheWrite: 0,
+      inputWithoutCacheWrite: 1_000_000,
+      cacheRead: 0,
+      output: 1_000_000,
+      total: 2_000_000,
+    };
+
+    const priced = priceImportedRow(model!, normalized, tokens, IMPORT_REPLAY_MODEL_BY_ID);
+
+    expect(priced.approximated).toBe(false);
+    expect(priced.exactCost).toEqual({
+      input: 6,
+      output: 18,
+      total: 24,
+    });
   });
 
   it('carries approximate Fast + Max costs through plan recommendation', () => {
