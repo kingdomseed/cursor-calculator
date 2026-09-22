@@ -22,6 +22,7 @@ describe('audience and pool splits', () => {
     const composer = getModelById('composer-2.5');
     const composer1 = getModelById('composer-1');
     const grok = getModelById('grok-4.6');
+    const grok47 = getModelById('grok-4.7');
 
     expect(sonnet).toBeDefined();
     expect(resolveCursorTokenRateUsdPerMillion(sonnet!, 'personal')).toBe(0);
@@ -29,6 +30,8 @@ describe('audience and pool splits', () => {
     expect(resolveCursorTokenRateUsdPerMillion(composer!, 'teams_enterprise')).toBe(0);
     expect(resolveCursorTokenRateUsdPerMillion(composer1!, 'teams_enterprise')).toBe(0);
     expect(resolveCursorTokenRateUsdPerMillion(grok!, 'teams_enterprise')).toBe(0);
+    expect(resolveCursorTokenRateUsdPerMillion(grok47!, 'teams_enterprise')).toBe(0);
+    expect(resolveCursorTokenRateUsdPerMillion(grok47!, 'personal')).toBe(0);
   });
 
   it('filters plan keys by audience without inventing Teams Other Models dollars', () => {

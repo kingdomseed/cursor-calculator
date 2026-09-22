@@ -25,6 +25,7 @@ describe('Sidebar', () => {
       <Sidebar activeTarget="budget" onNavigate={vi.fn()} pricingDate="2026-03-12" />,
     );
     expect(html).toContain('Cursor Models');
+    expect(html).toContain('Grok 4.7, Grok 4.6, Grok 4.5, and Composer 2.5 are Cursor Models.');
     expect(html).toContain('Other Models');
     expect(html).toContain('Official Cursor pages disagree on Other Models dollars.');
     expect(html).toContain('https://cursor.com/help/account-and-billing/pricing');
